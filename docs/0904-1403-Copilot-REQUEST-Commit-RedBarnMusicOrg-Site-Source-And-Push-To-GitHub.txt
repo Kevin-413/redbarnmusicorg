@@ -1,0 +1,241 @@
+0904-1403-Copilot-REQUEST-Commit-RedBarnMusicOrg-Site-Source-And-Push-To-GitHub.txt
+
+PURPOSE
+
+Finish the initial redbarnmusic.org repository setup by adding the intended site source files to Git, preserving the existing governance commit, and pushing the repository to the configured GitHub remote.
+
+SCOPE
+
+Project root:
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/
+
+Current Git repository:
+https://github.com/Kevin-413/redbarnmusicorg.git
+
+Current task branch:
+0904-1359-governance-setup
+
+Current governance setup already completed:
+- .github/copilot-instructions.md
+- .gitignore
+- CHANGELOG.md
+- docs/ governance files
+- Git repository initialization
+- governance commit
+
+Current untracked site-source directories/files reported by the prior Reply:
+- docs/Thesis-web-pages/
+- index.php
+- mu-plugins/
+- plugins/
+- themes/
+- thesis/
+- updraft/
+- uploads/
+
+SOURCE OF TRUTH
+
+The current working Local site at:
+
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/
+
+is the source of truth for which source files belong in this repository.
+
+The prior completed governance Reply is also authoritative for the current Git state and intentionally excluded folders.
+
+CURRENT STATE / EVIDENCE
+
+The prior governance setup completed successfully, initialized the repository, created the governance branch, and committed the governance files. It intentionally left the active site source directories uncommitted to keep that Request narrow.
+
+The prior Reply states:
+- repository root and Git top-level are both wp-content
+- remote is https://github.com/Kevin-413/redbarnmusicorg.git
+- current branch is 0904-1359-governance-setup
+- uploads/ and updraft/ are intentionally excluded
+- index.php, mu-plugins/, plugins/, themes/, thesis/, and docs/Thesis-web-pages/ remain untracked
+- push was not attempted
+
+EXPECTED RESULT
+
+The Git repository contains the intended redbarnmusic.org source and documentation needed for safe future development, while excluding media, backup, generated, cache, log, secret, and other inappropriate files.
+
+The completed repository should include, subject to inspection:
+- .github/
+- .gitignore
+- CHANGELOG.md
+- docs/
+- docs/Thesis-web-pages/
+- index.php
+- relevant source under mu-plugins/
+- relevant source under plugins/
+- relevant source under themes/
+- relevant source under thesis/
+
+The repository should continue to exclude:
+- uploads/
+- updraft/
+- upgrade-temp-backup/
+- caches
+- logs
+- .DS_Store
+- backup archives
+- generated temporary files
+- credentials/secrets
+
+CONSTRAINTS / ASSUMPTIONS
+
+- This is redbarnmusic.org, not RBAdmin.
+- Work only on redbarnmusicorg.local.
+- LIVE DEPLOYMENT IS NOT AUTHORIZED.
+- Do not change site behavior.
+- Do not refactor code.
+- Do not modify files merely to make them more Git-friendly unless explicitly required.
+- Do not add media uploads or backup archives to Git.
+- Preserve the existing governance files and governance commit.
+- Minimize token use aggressively.
+- Inspect only what is necessary to determine which source directories/files are appropriate to track.
+- Reuse the prior Reply findings rather than re-auditing unrelated project history.
+
+DO NOT CHANGE
+
+Do not modify:
+- WordPress core
+- live redbarnmusic.org
+- database content
+- uploads/media
+- updraft backup contents
+- Thesis behavior
+- plugin behavior
+- theme behavior
+- existing governance documents except the new paired Reply and a concise CHANGELOG entry if appropriate
+- existing committed history
+
+Do not perform:
+- broad cleanup
+- refactoring
+- dependency upgrades
+- theme/plugin upgrades
+- destructive Git operations
+- force push
+- history rewriting
+
+MINIMAL-CHANGE REQUIREMENT
+
+This task is repository inclusion and push only.
+
+Do not alter runtime source unless an actual secret or generated artifact must be excluded from Git, in which case adjust .gitignore only as narrowly as necessary.
+
+RISK / FAILURE MODE
+
+Check specifically for:
+- accidentally committing uploads/
+- accidentally committing updraft/
+- committing backup archives
+- committing caches/logs/temp files
+- committing passwords, API keys, tokens, private keys, database exports, or other secrets
+- committing third-party/generated bulk that is unnecessary for preserving the working site
+- excluding custom Thesis/site-specific files that are required to reproduce the site
+- modifying source while preparing the commit
+- losing or rewriting the existing governance commit
+- pushing from the wrong branch or to the wrong remote
+- treating Git push as live deployment
+
+GIT AIRLOCK
+
+Use the Git Airlock Contract before any project-file change.
+
+Before staging or committing, confirm:
+1. exact repository path
+2. exact Git top-level
+3. exact remote
+4. current branch
+5. current HEAD SHA
+6. pre-change git status
+7. existing governance commit is present
+8. no unexpected unrelated modifications exist
+
+If the Git state differs materially from the prior Reply, STOP and report HOLD.
+
+IMPLEMENTATION
+
+1. Inspect the current untracked source at the project root.
+2. Review the existing .gitignore before staging anything.
+3. Confirm uploads/, updraft/, backups, caches, logs, .DS_Store, temporary/generated files, and secrets remain excluded.
+4. Inspect the following only enough to determine whether they contain intended site source:
+   - docs/Thesis-web-pages/
+   - index.php
+   - mu-plugins/
+   - plugins/
+   - themes/
+   - thesis/
+5. Do not broad-scan unrelated files after the intended source set is known.
+6. Stage the intended site source and documentation only.
+7. Review the staged set for obvious secrets, backups, uploads, caches, logs, generated files, or inappropriate large binaries.
+8. If a secret or inappropriate artifact is found, unstage it and add the narrowest necessary .gitignore rule. Do not delete the working file.
+9. Create a clear commit for the initial redbarnmusic.org site source.
+10. If CHANGELOG.md is part of the repository workflow, add a concise entry documenting that the initial site source was committed. Do not rewrite earlier entries.
+11. Push the branch to:
+    https://github.com/Kevin-413/redbarnmusicorg.git
+12. Verify the push succeeded.
+13. If appropriate and safe for this initial repository setup, ensure the intended branch is available on GitHub for future work. Do not merge to main unless explicitly required by the repository's current state and safe workflow; report the branch state instead of improvising.
+
+VERIFICATION
+
+Verify:
+- uploads/ is not tracked
+- updraft/ is not tracked
+- backup/temp/cache/log files are not tracked
+- no obvious secrets are staged
+- intended Thesis/site-specific source is tracked
+- intended plugin/theme source is tracked
+- governance files remain tracked
+- existing governance commit remains in history
+- new source commit succeeds
+- remote is exactly https://github.com/Kevin-413/redbarnmusicorg.git
+- push succeeds
+- final git status is reported accurately
+
+DECISION LOG
+
+Record any material decision about:
+- excluding a plugin/theme because it is generated or inappropriate for Git
+- including custom/site-specific Thesis files
+- adjusting .gitignore
+- branch/push behavior
+- any secret or large-file issue
+
+Do not silently make a broad inclusion/exclusion decision.
+
+DOCUMENTATION
+
+Create the paired Reply at:
+
+docs/0904-1403-Copilot-REPLY-Commit-RedBarnMusicOrg-Site-Source-And-Push-To-GitHub.txt
+
+The Reply must include:
+- STATUS
+- repository root
+- remote
+- starting commit
+- current/task branch
+- pre-change git status
+- files/directories added
+- files/directories intentionally excluded
+- .gitignore changes, if any
+- secret/staged-file review result
+- git diff --stat or equivalent commit summary
+- source commit SHA
+- push result
+- final git status
+- any blocker or HOLD reason
+- whether the repository is now ready for normal future task branches
+
+HANDOFF NOTES
+
+State clearly whether the redbarnmusicorg GitHub repository now contains the intended working site source and is ready for future Copilot Requests under the new governance contracts.
+
+STATUS
+
+Implement
+
+Use the Git Airlock Contract before any project-file change. Work only on redbarnmusicorg.local unless the Request explicitly states LIVE DEPLOYMENT AUTHORIZED. Stay strictly within the Request scope. Minimize token use aggressively: inspect only files/functions directly required by the Request; do not scan the whole repository, review unrelated files, restate project history, generate broad audits, or continue exploring after the answer is known; reuse existing documented findings where possible. If the Request duplicates or materially overlaps completed or active work, STOP and report the duplicate before making changes. Stop immediately when the requested implementation/inspection and verification are complete. Use the Request’s exact MMDD-HHMM timestamp and topic for the Reply filename, changing only REQUEST to REPLY. Create the Reply in docs/. Put the Reply filename alone as the final line of your response. Thank you, Copilot!

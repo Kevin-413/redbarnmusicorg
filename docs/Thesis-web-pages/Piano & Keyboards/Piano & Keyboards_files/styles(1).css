@@ -1,0 +1,367 @@
+/****************************************************************
+	Enquiry Popup Form Styles 
+****************************************************************/
+div#splite_curtain {
+  background: none repeat scroll 0 0 rgba(0, 0, 0, 0.75);
+  border-radius: 0;
+  bottom: 0;
+  display: none;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10002;
+}
+#splite_popupBoxClose {
+  background: rgba(255,255,255,0.1);
+  font-family: Open Sans; 
+  color: #000;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 0 10px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: all 0.15s ease-in; 
+}
+#splite_popupBoxClose:hover {
+  background: rgba(255,255,255,0.85);
+  color: #333; 
+  font-weight: bold; 
+}
+#splite_popup_box.manage {
+	display:none;
+}
+.sppro-showpopup, .sppro-closepopup {
+	cursor: pointer; 
+}
+#splite_popup_box {
+  bottom: 0;  
+  left: calc(50% - 300px);
+  margin-left: 0px;
+  position: fixed;
+  top: 0;
+  width: 600px;
+  max-width: 90%; 
+  z-index: 100000;  
+  overflow: hidden; 
+}
+#splite_popup_box  a:hover {
+	text-decoration: none; 
+}
+#splite_form_container {
+  max-height: 100%; 
+	overflow: hidden;
+}
+#splite_popup_title {
+  margin-bottom: 0px;
+  padding: 10px 20px;
+  text-align: center;
+}
+#splite_popup_description {  
+  margin: 20px auto 40px;
+  text-align:center;
+  width: 90%;
+}
+#splite_popup_description img {
+    height: 220px;
+}
+.no-form {
+  text-align: center;
+  margin: 60px 0;
+  padding: 40px 0;
+  font-weight: bold;
+  color: slategrey;
+}
+
+
+/****************************************************************
+	Side Button
+****************************************************************/
+a.splite_sideEnquiry {
+  cursor: pointer;
+  height: auto;
+  padding: 5px 10px;
+  position: fixed;
+  text-align: center;
+  text-decoration: none;
+  z-index: 1001;
+}
+a.splite_sideEnquiry.pos_right {  
+  right: -52px;
+  top: 47.5%;
+  height: auto;
+  transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  border-radius: 5px 5px 0 0;
+}
+a.splite_sideEnquiry.pos_left {  
+  left: -50px;
+  top: 45%;
+  height: auto;
+  transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  border-radius: 5px 5px 0 0;
+}
+a.splite_sideEnquiry:hover {
+	color: #efefef; 	
+	text-decoration: none; 
+}
+
+/****************************************************************
+	Popup Layouts
+****************************************************************/
+#splite_popup_box.layout_full {  
+  max-height: 100%;
+}
+#splite_popup_box.layout_centered {  
+  max-height: 76%;
+  top: 12%;
+}
+
+
+/****************************************************************
+	Form Styles
+****************************************************************/
+#splite_popup_box .wpcf7 {	
+	width: 90%;
+	margin: 0 auto 
+}
+#splite_popup_box .wpcf7 ul {
+  list-style: none outside none;
+  margin: 0;
+}
+#splite_popup_box form{
+	
+}
+#splite_popup_box form p {
+	margin-bottom: 5px; 
+}
+#splite_popup_box li > span{
+	width: 100%;
+}
+
+#splite_popup_box .wpcf7-form-control-wrap {
+	display: block; 
+	position: relative; 
+}
+#splite_popup_box .wpcf7-form-control-wrap + .wpcf7-checkbox, 
+#splite_popup_box .wpcf7-form-control-wrap + .wpcf7-radio {
+	display: inherit; 
+}
+
+/* #wpcf7-f251-p24-o2 input, #wpcf7-f251-p24-o2 textarea { */
+/*#splite_popup_box input, #splite_popup_box input[type="text"], #splite_popup_box textarea, #splite_popup_box  select  { */
+#splite_popup_box input[type="*"], #splite_popup_box input[type="text"], 
+#splite_popup_box input[type="password"], #splite_popup_box input[type="url"], 
+#splite_popup_box input[type="email"], #splite_popup_box input[type="tel"], 
+#splite_popup_box input[type="date"], #splite_popup_box input[type="number"],  
+#splite_popup_box input[type="hidden"], #splite_popup_box textarea, #splite_popup_box select {
+  padding: 8px 6px;  
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  max-width:none;  
+  width: calc(100% - 12px); 
+  margin-bottom: 0;  
+  transition: all 0.4s ease-in; 
+  height: 36px; 
+}
+#splite_popup_box input:focus span.wpcf7-not-valid-tip, 
+#splite_popup_box input[type="*"]:focus span.wpcf7-not-valid-tip, 
+#splite_popup_box input[type="text"]:focus span.wpcf7-not-valid-tip, 
+#splite_popup_box input[type="email"]:focus span.wpcf7-not-valid-tip, 
+#splite_popup_box input[type="tel"]:focus span.wpcf7-not-valid-tip, 
+#splite_popup_box input[type="date"]:focus span.wpcf7-not-valid-tip, 
+#splite_popup_box input[type="hidden"]:focus span.wpcf7-not-valid-tip, #splite_popup_box textarea:focus span.wpcf7-not-valid-tip, #splite_popup_box select:focus span.wpcf7-not-valid-tip {
+	display: none !important;
+}
+#splite_popup_box input[type=checkbox], #splite_popup_box input[type=radio] {
+	height: auto; 
+	padding: 0; 
+	width: auto; 
+}
+#splite_popup_box input[type="submit"] {
+	height: auto; 
+}
+#splite_popup_box textarea {
+	height: 80px;
+}
+#splite_popup_box  select  {
+}
+#splite_popup_box .wpcf7-quiz-label {
+  color: #484848;
+  display: inline;
+  margin-top: 20px;
+}
+#splite_popup_box input.wpcf7-form-control.wpcf7-quiz {
+  margin: 0 0 0 20px;
+  text-align: center;
+  width: 40px;
+}
+#splite_popup_box input.wpcf7-form-control.wpcf7-submit {  
+	width: auto;
+	margin: 20px auto 10px;
+	float: none;
+	display: block;	
+}
+#splite_popup_box  div.wpcf7 img.ajax-loader {
+    border: none;
+    vertical-align: middle;
+    margin: 3px auto 5px;
+	background: #f1f1f1 none repeat scroll 0 0;
+	border-radius: 50%;
+	box-shadow: 0 0 5px 3px #333333;
+	height: 40px;
+	left: calc(50% - 22.5px);
+	padding: 5px;
+	position: fixed;
+	top: calc(50% - 22.5px);
+	visibility: visible;
+	width: 40px;
+}
+/* Ajax Loader for Contact Form 7 - Version 4.6 */
+#splite_popup_box  div.wpcf7 span.ajax-loader {
+	border-radius: 50%;
+	left: calc(50% - 22.5px);
+	position: absolute;
+	top: calc(50% - 22.5px);
+}
+#splite_popup_box.layout_widgetized div.wpcf7 span.ajax-loader {
+	position: absolute;
+}
+#splite_popup_box div.wpcf7 span.ajax-loader.is-active {
+	background-color: #f1f1f1;
+	padding: 20px; 
+	height: 25px;
+	width: 25px;
+	background-size: 50%;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+#splite_popup_box .widget_widget_text {
+    display: none;
+}
+#splite_popup_box div.wpcf7-response-output {
+	font-size: 0.85em;
+    line-height: 1.3em;
+    margin: 0;
+    padding: 5px 10px 0px 10px;
+    border-radius: 0;
+    border: 0;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+	left: 0; 
+	text-align: center; 
+	font-family: Open Sans; 
+}
+#splite_popup_box div.wpcf7-mail-sent-ok {
+	border: 0px solid #efefef;
+	border-bottom:0;
+	color: #074C97;
+}
+#splite_popup_box .wpcf7-not-valid {
+	border-color: #ff0033 !important; 
+}
+#splite_popup_box span.wpcf7-not-valid-tip {
+	font-size: 0.85em;
+	text-align: left;   
+}
+#splite_popup_box span.wpcf7-not-valid-tip {
+    background: #ff0033;
+    color: #fff;
+    line-height: 18px;
+    right: 0;
+    text-align: center;
+    top: 1px;
+    width: auto;
+    height: auto;
+    padding: 8px 8px;
+    transition: all 0.3s ease-in;
+    font-family: Open Sans;
+    position: absolute;
+}
+#splite_popup_box textarea + span.wpcf7-not-valid-tip {
+	
+}
+#splite_popup_box select + span.wpcf7-not-valid-tip {
+	
+}
+#splite_popup_box .wpcf7-checkbox + span.wpcf7-not-valid-tip, 
+#splite_popup_box .wpcf7-radio + span.wpcf7-not-valid-tip {
+	
+}
+#splite_popup_box .spam-quiz .wpcf7-not-valid-tip {
+  position: relative;
+  top: 0;
+  left: 0;
+  color: #A31B1F;
+}
+#splite_popup_box .wpcf7-form > p {
+  letter-spacing: 1px;
+}
+
+/****************************************************************
+	Column Classes
+****************************************************************/
+.spp-row {
+  overflow: hidden;
+}
+.spp-left-col {
+	float: left;
+  width: 50%;
+  padding-right: 5px;
+  padding-bottom: 10px;
+}
+.spp-right-col {
+  float: left;
+  width: 50%;
+  padding-left: 5px;
+  padding-bottom: 10px;
+}
+.spp-full-col {
+	float: none; 
+	width: 100%; 
+	display: block;
+  padding-bottom: 10px;
+}
+.spp-clear {
+	clear: both;
+	display: block; 
+}
+
+#sppro-ad {
+  margin: 5px !important;
+}
+
+.redux-info-field {
+  padding: 5px !important;
+}
+
+@media (max-width: 767px) {
+	
+	a.splite_sideEnquiry.on_mobile {
+		font-size: 13px;
+		padding: 3px 10px; 
+	}
+	a.splite_sideEnquiry.disabled_on_mobile {
+		display: none; 
+	}
+	
+	#splite_popup_box input.wpcf7-form-control.wpcf7-submit {
+		width: 60%;
+		width: auto;
+	}
+	
+	#form_container {
+		overflow-x: scroll;
+	}
+}
+
+@media (max-width: 480px) {
+	
+}

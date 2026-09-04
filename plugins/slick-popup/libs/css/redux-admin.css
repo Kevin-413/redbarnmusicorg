@@ -1,0 +1,24 @@
+#splite_opts-choose-color-scheme li span,
+#splite_opts-choose-layout li span {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+#info-notice-activation-mode p {
+	margin: 0; 
+}
+
+
+#import-result {
+	font-weight: bold; 
+}
+#import-result.success {
+	color: green; 
+}
+#import-result.error {
+	color: red; 
+}
+#last-import {
+	font-weight: bold; 
+}

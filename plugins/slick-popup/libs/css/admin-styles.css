@@ -1,0 +1,267 @@
+/**************************************************************/
+/********************* IMPORT PAGE STYLES *********************/
+/**************************************************************/
+/****************** SPPRO IMPORT PAGE STYLES ***************/
+div.try-gutenberg-panel, div.welcome-panel {
+	line-height: 1.5em;
+}
+p.notice {
+	padding: 10px;
+}
+div.section {
+	overflow: hidden;
+	margin-bottom: 30px;
+}
+span.sp-btn {
+
+}
+span.sp-btn:hover {
+}
+.import-result {
+	width: auto;
+	height: 30px;
+	padding: 10px 2px 5px 10px;
+	display: block;
+	font-family: sans-serif;
+	font-size: 20px;
+	font-weight: bold;
+	border-radius: 5px;
+	background: red;
+	color: white;
+	margin-top: 10px;
+	display: none;
+}
+.import-box {
+	overflow: hidden;
+	float: left;
+	margin: 0 29px 30px 0;
+	position: relative;
+	width: 30.6%;
+	border: 1px solid #ddd;
+	box-shadow: 0 1px 1px -1px rgba(0,0,0,.1);
+	box-sizing: border-box;
+	text-align: center;
+	padding: 10px;
+}
+div.import-box:last-child {
+	margin-right: 0;
+}
+.import-box img {
+	/*max-height: 280px;*/
+	/*width: 100%;*/
+	height: 320px;
+}
+.import-box img:hover {
+	transform: scale(0.99);
+}
+div.import-box-title {
+	padding: .25rem 1rem;
+}
+span.sp-label {
+	font-weight: bold;
+}
+span.sp-btn-importer {
+
+}
+span.sp-import-handle {
+	/*float: right; */
+}
+div.import-box-result {
+	text-align: center;
+	padding: 3px 10px;
+	color: #efefef;
+	position: absolute;
+	width: 100%;
+	bottom: 27px;
+	line-height: 1.3em;
+}
+div.import-box-result a {
+	color: #efefef;
+}
+div.import-box-result.success {
+	background: green;
+	color: #efefef;
+}
+div.import-box-result.error {
+	background: red;
+	color: #efefef;
+	margin: 0 !important;
+}
+@media only screen and (max-width: 769px) {
+	.section-inline {
+		display: block;
+		width: auto;
+		margin-right: 0;
+	}
+}
+span.fs-15 {
+	font-size: 1.5rem;
+}
+span.fs-2 {
+	font-size: 2rem;
+}
+div.display-none {
+	display: none;
+}
+span.v-hidden {
+	visibility: hidden;
+}
+i.loader-fa-styles {
+	font-size: 14px;
+	color: #f56e28;
+	position: relative;
+	left: -8px;
+}
+/****************** SPPRO IMPORT PAGE STYLES ***************/
+/**************************************************************/
+/********************* IMPORT PAGE STYLES *********************/
+/**************************************************************/
+
+/**************************************************************/
+/********************* SUPPORT PAGE STYLES ********************/
+/**************************************************************/
+.wp-admin select {
+	height: 38px;
+}
+div.result-area {
+	line-height: 1.5em;
+	padding: 10px 15px;
+}
+span.fs-175 {
+	font-size: 1.75rem;
+}
+span.m-40 {
+	margin-bottom: 40px;
+}
+div.master-red {
+  background: #ED1C24;
+  height: 20px;
+  width: 100px;
+  display: inline-block;
+  margin: -4px 0px;
+}
+div.cool-green {
+  background: #00A560;
+  height: 20px;
+  width: 100px;
+  display: inline-block;
+  margin: -4px 0px;
+}
+div.creamy-orange {
+  background: #EE5921;
+  height: 20px;
+  width: 100px;
+  display: inline-block;
+  margin: -4px 0px;
+}
+div.light-blue {
+  background: #08ADDC;
+  height: 20px;
+  width: 100px;
+  display: inline-block;
+  margin: -4px 0px;
+}
+div.classic-grey {
+  background: #484848;
+  height: 20px;
+  width: 100px;
+  display: inline-block;
+  margin: -4px 0px;
+}
+div.custom-color {
+  background: #1e73be;
+  height: 20px;
+  width: 100px;
+  display: inline-block;
+  margin: -4px 0px;
+}
+span.splite-loader-styles {
+  margin-left: 10px;
+  visibility: hidden;
+}
+i.splite-loader-fa-styles {
+  font-size: 22px;
+  color: #f56e28;
+  position: relative;
+}
+/**************************************************************/
+/********************* SUPPORT PAGE STYLES ********************/
+/**************************************************************/
+.splite-page #wpcontent{
+	 padding: 0;
+	 overflow-x: hidden!important;
+	 min-height: calc(100vh - 32px);
+	 background: #f0f0f1;
+	 color: #3c434a;
+ }
+.splite-page #wpbody {
+	margin-top: 70px;
+}
+.splite-layout__header {
+	background: #fff;
+	box-sizing: border-box;
+	padding: 0;
+	position: fixed;
+	width: calc(100% - 160px);
+	top: 32px;
+	z-index: 1001;
+}
+@media (min-width: 783px) and (max-width: 960px) {
+	.splite-layout__header {
+		width: calc(100% - 36px);
+	}
+}
+@media (max-width: 782px) {
+	.splite-layout__header {
+		flex-flow: row wrap;
+		top: 46px;
+		width: 100%;
+	}
+}
+.splite-layout__header-wrapper{
+	display: flex;
+	padding: 0 30px;
+	align-items: center
+}
+.splite-layout__header-wrapper h6{
+	height: 70px;
+	display: flex;
+	flex: 1 auto;
+	align-items: center;
+	margin: 0;
+}
+.splite-layout__header.is-scrolled {
+	box-shadow: 0 8px 16px 0 rgb(85 93 102 / 30%);
+}
+.splite-layout__body{
+}
+.wrap .splite-layout__body {
+	margin: 0!important;
+	padding: 20px !important;
+}
+/**************************************************************/
+/************************* NOTICE STYLES **********************/
+/**************************************************************/
+span.color {
+	color: #0073aa;
+}
+div.splite-notice-left {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0.5rem;
+    border: 1px solid #f1f1f1;
+}
+div.splite-notice-right {
+  max-width: calc(100% - 120px);
+  display: inline-block; 
+  vertical-align: middle; 
+ }
+ span.admin-links {
+ 	display: block;
+ 	margin: 0.5em 0.5em 0 0;
+ 	clear: both;
+ 	font-weight: bold;
+ }
+/**************************************************************/
+/************************ NOTICE STYLES ***********************/
+/**************************************************************/
