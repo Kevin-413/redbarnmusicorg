@@ -1,0 +1,243 @@
+0904-1413-Copilot-REQUEST-Finalize-Initial-RedBarnMusicOrg-Main-Branch.txt
+
+PURPOSE
+
+Finalize the initial redbarnmusic.org GitHub repository setup by verifying the current pushed governance/source branch and, only if safe and appropriate, establishing the verified site-source state on the repository’s main branch without rewriting history or losing the current working state.
+
+SCOPE
+
+Project root:
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/
+
+Remote:
+https://github.com/Kevin-413/redbarnmusicorg.git
+
+Current verified branch from the prior Reply:
+0904-1359-governance-setup
+
+Verified source commit from the prior Reply:
+65f1e2c5a19b01e361703fbf1476464e6c6bf888
+
+Prior starting/governance commit:
+55768165ba098f8878df1e93fa14b590ab531f46
+
+SOURCE OF TRUTH
+
+The current clean local Git repository and the already-pushed branch:
+
+origin/0904-1359-governance-setup
+
+are the source of truth for this task.
+
+The attached prior Reply confirms:
+- the site source and governance files were committed;
+- the source commit is 65f1e2c5a19b01e361703fbf1476464e6c6bf888;
+- the branch push succeeded;
+- the working tree was clean;
+- the repository is ready for future task branches.
+
+CURRENT STATE / EVIDENCE
+
+The prior Reply reports:
+
+- Repository root:
+  /Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content
+
+- Remote:
+  https://github.com/Kevin-413/redbarnmusicorg.git
+
+- Current branch:
+  0904-1359-governance-setup
+
+- Source commit:
+  65f1e2c5a19b01e361703fbf1476464e6c6bf888
+
+- Push:
+  succeeded to origin/0904-1359-governance-setup
+
+- Final git status:
+  clean
+
+The GitHub repository was originally created new/empty. Determine the actual current state of main before making any change.
+
+EXPECTED RESULT
+
+The repository has one clear verified baseline branch for future work.
+
+Preferred result, if the remote main branch is empty or not yet established:
+- safely establish main from the verified commit history already present on 0904-1359-governance-setup;
+- preserve the full governance/source commit history;
+- do not force-push or rewrite history;
+- verify local and remote main point to the intended verified baseline;
+- leave the working tree clean.
+
+If main already contains unrelated or conflicting history:
+- STOP;
+- do not merge, overwrite, reset, or force anything;
+- report HOLD with the exact branch/commit relationship.
+
+CONSTRAINTS / ASSUMPTIONS
+
+- This is redbarnmusic.org, not RBAdmin.
+- Work only on redbarnmusicorg.local.
+- LIVE DEPLOYMENT IS NOT AUTHORIZED.
+- This is a Git/repository-state task only.
+- Do not modify WordPress runtime files.
+- Do not change site behavior.
+- Do not change uploads, themes, plugins, Thesis files, database content, or site configuration.
+- Do not force push.
+- Do not rewrite history.
+- Minimize token use aggressively.
+- Inspect only Git state and the minimum project files required for the paired Reply.
+
+DO NOT CHANGE
+
+Do not modify:
+- WordPress runtime source
+- Thesis files
+- plugins
+- themes
+- mu-plugins
+- uploads
+- database content
+- live redbarnmusic.org
+- existing committed governance/source files
+- prior Request/Reply documents
+
+Do not perform:
+- git reset --hard
+- git clean -fd
+- git clean -fdx
+- force push
+- history rewriting
+- broad git restore
+- destructive branch deletion
+- source-tree replacement
+- live deployment
+
+MINIMAL-CHANGE REQUIREMENT
+
+Make only the Git changes required to establish or verify the initial main branch baseline.
+
+No cleanup.
+No refactor.
+No repository reorganization.
+No unrelated branch work.
+No source edits.
+
+RISK / FAILURE MODE
+
+Check specifically for:
+- main already containing unrelated history;
+- local main and remote main pointing to different unrelated commits;
+- accidentally overwriting an existing main branch;
+- using force push;
+- losing the verified governance/source branch;
+- changing runtime files while switching branches;
+- leaving the working tree dirty;
+- deleting the setup branch before the baseline is verified.
+
+GIT AIRLOCK
+
+Use the Git Airlock Contract before any project-file change.
+
+This task should require no runtime project-file modification, but all Git state-changing operations must still be performed conservatively.
+
+Before changing branch state, verify:
+1. exact repository path;
+2. Git top-level;
+3. remote.origin.url;
+4. current branch;
+5. current HEAD SHA;
+6. git status;
+7. local branch list;
+8. remote branch list;
+9. whether main exists locally;
+10. whether origin/main exists;
+11. commit relationship between main/origin/main and 65f1e2c5a19b01e361703fbf1476464e6c6bf888.
+
+If any unexpected conflict or unrelated history exists, STOP and report HOLD.
+
+IMPLEMENTATION
+
+1. Inspect the current Git state only.
+2. Confirm the working tree is clean.
+3. Fetch remote refs without modifying working files.
+4. Determine whether local main exists.
+5. Determine whether origin/main exists.
+6. Determine whether main is empty/unborn, absent, already equivalent to the verified setup branch, or contains different history.
+7. If main is absent or safely establishable from the verified branch:
+   - create/update main only by normal fast-forward-safe Git operations;
+   - preserve the existing commit history;
+   - push main normally to origin;
+   - do not force push.
+8. If main already equals the verified baseline:
+   - make no unnecessary change;
+   - simply verify and report.
+9. If main contains different/unrelated history:
+   - STOP;
+   - do not merge or overwrite;
+   - report HOLD with the exact commits involved.
+10. Do not delete 0904-1359-governance-setup in this Request unless it is clearly redundant and explicit deletion is separately authorized. Leave it intact by default.
+11. After main is established or verified, confirm:
+   - local main HEAD;
+   - origin/main HEAD;
+   - relationship to source commit 65f1e2c5a19b01e361703fbf1476464e6c6bf888;
+   - final git status.
+
+VERIFICATION
+
+Verify:
+- repository path is correct;
+- remote is exactly https://github.com/Kevin-413/redbarnmusicorg.git;
+- working tree is clean before and after;
+- no runtime files changed;
+- no history was rewritten;
+- no force push was used;
+- main is either safely established at the verified baseline or HOLD is returned;
+- origin/main, if established, contains the governance and site-source commits;
+- the prior setup branch remains preserved;
+- final branch and HEAD are reported accurately.
+
+DECISION LOG
+
+Record only material branch-state decisions:
+- whether main existed;
+- whether origin/main existed;
+- whether main was absent, equivalent, ahead/behind, or conflicting;
+- exactly what normal Git operation was used, if any.
+
+Do not create a broad Git audit.
+
+DOCUMENTATION
+
+Create the paired Reply at:
+
+docs/0904-1413-Copilot-REPLY-Finalize-Initial-RedBarnMusicOrg-Main-Branch.txt
+
+The Reply must include:
+- STATUS
+- repository root
+- remote
+- starting branch
+- starting HEAD
+- pre-change git status
+- local main state
+- origin/main state
+- action taken
+- final main HEAD
+- origin/main HEAD
+- setup branch preservation status
+- final git status
+- verification result
+- any HOLD/blocker
+
+HANDOFF NOTES
+
+State clearly whether the repository now has a verified main baseline and is ready for all future work to begin from dedicated task branches off main.
+
+STATUS
+
+Implement
+
+Use the Git Airlock Contract before any project-file change. Work only on redbarnmusicorg.local unless the Request explicitly states LIVE DEPLOYMENT AUTHORIZED. Stay strictly within the Request scope. Minimize token use aggressively: inspect only files/functions directly required by the Request; do not scan the whole repository, review unrelated files, restate project history, generate broad audits, or continue exploring after the answer is known; reuse existing documented findings where possible. If the Request duplicates or materially overlaps completed or active work, STOP and report the duplicate before making changes. Stop immediately when the requested implementation/inspection and verification are complete. Use the Request’s exact MMDD-HHMM timestamp and topic for the Reply filename, changing only REQUEST to REPLY. Create the Reply in docs/. Put the Reply filename alone as the final line of your response. Thank you, Copilot!
