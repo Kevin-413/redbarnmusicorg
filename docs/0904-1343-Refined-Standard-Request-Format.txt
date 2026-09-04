@@ -1,0 +1,280 @@
+0904-1343-Refined-Standard-Request-Format.txt
+
+REFINED STANDARD REQUEST FORMAT
+
+Project:
+redbarnmusicorg
+
+Workspace root:
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/
+
+Purpose:
+Use this as the standard operating format for Copilot Requests and Replies unless a specific Request explicitly overrides it.
+
+1. FILENAME FORMAT
+
+Use the current America/New_York timestamp.
+
+Request:
+MMDD-HHMM-Copilot-REQUEST-<Concise-Kebab-Case-Topic>.txt
+
+Reply:
+MMDD-HHMM-Copilot-REPLY-<Concise-Kebab-Case-Topic>.txt
+
+The Reply must reuse the exact MMDD-HHMM timestamp and topic from the originating Request. The only filename change is REQUEST -> REPLY.
+
+The first line of every Request or Reply document must be the filename exactly.
+
+Use concise Kebab-Case for the topic.
+
+Example:
+0904-1400-Copilot-REQUEST-Adjust-Thesis-Header.txt
+0904-1400-Copilot-REPLY-Adjust-Thesis-Header.txt
+
+2. CANONICAL DOCUMENTATION DIRECTORY
+
+Save project Requests, Replies, contracts, plans, and handoff documentation in:
+
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/docs/
+
+Within repository-relative instructions, refer to this as:
+
+docs/
+
+3. ALWAYS CREATE A REPLY DOCUMENT
+
+Every completed Request gets a Reply document, including small fixes.
+
+The audit trail is important.
+
+Do not skip the Reply because the change is small.
+
+Place the Reply document name at the end of the visible Copilot response so completion is obvious.
+
+4. BRIEF COMPLETION SUMMARY
+
+Keep the visible completion summary concise, generally no more than about 10 lines when practical.
+
+Use:
+
+STATUS: COMPLETE / NEEDS ATTENTION / HOLD
+
+Changed:
+- concise items
+
+Verified:
+- concise items
+
+Files:
+- exact file paths
+
+Issues:
+- real issues only, when applicable
+
+Avoid repeating the same information in multiple sections.
+
+5. PROPORTIONATE VERIFICATION
+
+Verify only what is appropriate to the work actually performed.
+
+Examples:
+
+PHP changes:
+- run php -l on changed PHP files where practical.
+
+JavaScript changes:
+- run an appropriate syntax check where practical.
+
+CSS/theme changes:
+- inspect the relevant rendered browser behavior.
+
+UI/content changes:
+- inspect the actual affected page in the Local WordPress site when possible.
+
+Data/storage changes:
+- verify the affected saved/read behavior.
+
+Documentation-only changes:
+- inspect the resulting document.
+
+Do not perform unrelated or excessive testing merely to fill a verification section.
+
+Do not claim a test was performed unless it actually occurred.
+
+6. EVIDENCE
+
+For implementation, inspection, or debugging Requests, provide enough evidence to distinguish:
+
+- VERIFIED
+- INFERRED
+- NOT VERIFIED
+
+Include exact file paths, functions, templates, settings, test results, browser observations, or concise code snippets when they materially support the conclusion.
+
+Do not include large code excerpts unless necessary.
+
+7. REAL ISSUES ONLY
+
+Report an issue only when it is:
+- observed;
+- reproducible;
+- blocking or degrading current functionality; or
+- requires a real decision.
+
+Do not list speculative concerns, hypothetical future migrations, optional enhancements, or unrelated opportunities as unresolved issues.
+
+8. TOKEN CONSERVATION
+
+Use the minimum tokens necessary while maintaining correctness.
+
+- Inspect only files needed for the Request.
+- Prefer targeted search over broad workspace scanning.
+- Avoid re-reading large folders when exact files are already known.
+- Avoid repeating code or architecture already established.
+- Include code snippets only when they are important evidence or necessary to explain a change.
+- Avoid duplicate information between the visible summary and Reply document.
+- Do not generate long test plans unless requested.
+- Do not create another planning or handoff cycle when the existing Request is clear enough to proceed.
+- Do not inspect uploads/media unless the Request actually concerns media files.
+- Do not inspect WordPress core unless the Request explicitly requires it.
+
+9. NO IMPORTED RBADMIN ASSUMPTIONS
+
+This project is redbarnmusic.org, not the RBAdmin plugin project.
+
+Do not assume:
+- RBAdmin file structure;
+- RBAdmin REST routes;
+- RBAdmin data models;
+- RBAdmin prefixes;
+- RBAdmin menus;
+- RBAdmin Forminator behavior;
+- RBAdmin calendar behavior;
+- RBAdmin database conventions.
+
+Inspect the actual redbarnmusic.org workspace and current site behavior first.
+
+10. NO SCOPE CREEP
+
+Make only changes required by the Request.
+
+Do not add:
+- optional enhancements;
+- broad refactors;
+- new architecture;
+- unrelated cleanup;
+- speculative future features;
+- new process infrastructure
+
+unless specifically requested.
+
+If an unrelated issue is discovered, report it briefly rather than expanding the current scope.
+
+11. PRESERVE EXISTING WORK — NO REDO
+
+Do not redo completed work unless:
+- the scope has changed; or
+- the existing implementation is demonstrably broken; or
+- the user explicitly authorizes a redo.
+
+Inspect the current implementation before replacing or rewriting it.
+
+Prefer the smallest safe change.
+
+12. DUPLICATE REQUEST HARD STOP
+
+Before implementation, determine whether the same or substantially equivalent Request has already been completed or is currently active.
+
+If it appears to be a duplicate:
+- STOP before making changes;
+- identify the overlapping Request/Reply, branch, commit, or existing behavior;
+- report whether prior work is complete, partial, unresolved, or superseded;
+- wait for explicit direction before redoing anything.
+
+13. CHANGELOG
+
+If this repository has an active CHANGELOG.md, update it for implementation work when appropriate.
+
+Do not create a CHANGELOG merely because the RBAdmin project used one.
+
+Do not rewrite historical entries.
+
+For documentation-only or inspection-only work, update CHANGELOG.md only when appropriate or explicitly requested.
+
+14. STANDARD WORKFLOW
+
+For implementation Requests, use this order:
+
+1. Read the Request.
+2. Read .github/copilot-instructions.md.
+3. Read the relevant project contracts under docs/.
+4. Satisfy the Git Airlock before any project-file modification.
+5. Inspect only the relevant current source.
+6. Confirm the actual current implementation before changing it.
+7. Make only the required change.
+8. Perform proportionate verification.
+9. Commit verified work as required by the Git Airlock.
+10. Update project documentation when appropriate.
+11. As the final documentation action, create the paired Copilot Reply under docs/.
+
+15. REPLY DOCUMENT CONTENT
+
+Keep the Reply concise and audit-friendly.
+
+Include only what is relevant:
+- status;
+- concise outline or executive summary;
+- implementation/inspection summary;
+- exact files changed and paths;
+- key code details only when useful;
+- relevant inspection evidence;
+- verification/test results;
+- real unresolved issues or blockers, if any;
+- deployment/readiness conclusion when requested;
+- exact actions intentionally not taken when important to scope or safety;
+- Git Airlock evidence for file-modifying work.
+
+Do not repeat the same information across multiple sections.
+
+16. SAFETY
+
+Do not perform destructive actions unless explicitly authorized and a verified recovery path exists.
+
+Do not run or recommend as an automatic action:
+- git reset --hard
+- git clean -fd
+- git clean -fdx
+- git push --force
+- git push -f
+- rm -rf against the project
+- destructive database operations
+- broad file replacement over the working site
+
+Do not delete documentation, Requests, Replies, screenshots, recovery records, theme customizations, or working-site files as cleanup.
+
+17. BACKUPS AND PACKAGING
+
+Backups are recovery sources and evidence.
+
+Do not extract a backup archive directly over the active working site unless the user explicitly authorizes that exact action and a verified recovery point exists.
+
+If a deployment or package is requested, create it separately from the active development source.
+
+The development source must remain intact.
+
+18. DEFAULT EXPECTATION
+
+Unless a specific Request overrides this standard:
+- inspect first;
+- do not guess;
+- do not broaden scope;
+- do not redo working functionality;
+- use current canonical paths and actual site behavior;
+- test only what is relevant;
+- document actual evidence;
+- create the paired Reply;
+- preserve the project record;
+- conserve tokens;
+- obey the Git Airlock.
+
+Thank you.

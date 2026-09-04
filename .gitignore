@@ -1,0 +1,45 @@
+# Local project and generated artifacts
+.DS_Store
+**/.DS_Store
+
+# WordPress/media generated content
+uploads/
+**/uploads/
+wp-content/uploads/
+
+# Cache and temp files
+cache/
+**/cache/
+**/tmp/
+**/temp/
+**/*.tmp
+**/*.temp
+**/*.swp
+**/*.swo
+
+# Backups and restore artifacts
+updraft/
+upgrade-temp-backup/
+**/*.bak
+**/*.orig
+**/*.old
+**/*.zip
+**/*.tar
+**/*.gz
+**/*.tgz
+**/*.sql
+**/*.backup
+**/*.log
+**/*.log.*
+
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Local machine noise
+Thumbs.db

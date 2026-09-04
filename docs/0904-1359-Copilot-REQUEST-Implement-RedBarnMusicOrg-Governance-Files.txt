@@ -1,0 +1,222 @@
+0904-1359-Copilot-REQUEST-Implement-RedBarnMusicOrg-Governance-Files.txt
+
+PURPOSE
+
+Implement the new redbarnmusic.org project-governance files in the current redbarnmusicorg wp-content workspace, place each file in its canonical location, normalize the Copilot instructions filename, and prepare the repository so future Copilot work automatically follows these rules.
+
+SCOPE
+
+Current project root:
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/
+
+Current documentation folder:
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/docs/
+
+GitHub repository:
+https://github.com/Kevin-413/redbarnmusicorg.git
+
+Files currently supplied in/for this workspace:
+- 0904-1337-Copilot-REQUEST-Add-RedBarnMusicOrg-WP-Content-To-GitHub.txt
+- 0904-1343-CONTRACT-RedBarnMusicOrg-Copilot-Request-Standard.txt
+- 0904-1343-GIT-AIRLOCK-CONTRACT.txt
+- 0904-1343-Refined-Standard-Request-Format.txt
+- copilot-instructions(20260904-174451).md
+- Thesis-web-pages/ folder
+
+SOURCE OF TRUTH
+
+The supplied files listed above are the source of truth for this implementation.
+
+Canonical locations:
+- Request/Reply/contracts/docs -> wp-content/docs/
+- Copilot repository instructions -> wp-content/.github/copilot-instructions.md
+- Thesis-web-pages/ -> preserve in its current intended project location unless inspection proves it belongs elsewhere; do not reorganize its contents without explicit authorization.
+
+CURRENT STATE / EVIDENCE
+
+The files have been prepared but are not yet fully installed into the canonical redbarnmusicorg project structure.
+
+The Copilot instructions file currently has a download-generated filename:
+copilot-instructions(20260904-174451).md
+
+It must be installed canonically as:
+.github/copilot-instructions.md
+
+EXPECTED RESULT
+
+The redbarnmusicorg project contains the governance files in the correct canonical locations, Copilot can automatically read the repository instructions, the existing Request is preserved in docs/, and the project is ready for safe Git-controlled work under the new governance rules.
+
+CONSTRAINTS / ASSUMPTIONS
+
+- This is the redbarnmusic.org project, not RBAdmin.
+- Project root is the wp-content folder stated above.
+- Do not import RBAdmin-specific runtime assumptions.
+- Preserve the exact content of the supplied governance documents unless a path/name adjustment is strictly necessary for this project.
+- Use America/New_York timestamps for Request/Reply documentation.
+- Minimize token use aggressively.
+- Inspect only what is necessary to complete this setup.
+
+DO NOT CHANGE
+
+Do not modify:
+- WordPress core
+- live redbarnmusic.org
+- Thesis theme behavior
+- plugin behavior
+- database content
+- uploads/media
+- unrelated themes or plugins
+- Thesis-web-pages contents unless required solely to place/preserve the folder correctly
+- the substantive governance rules in the supplied files
+- historical files unrelated to this Request
+
+Do not deploy anything live.
+
+MINIMAL-CHANGE REQUIREMENT
+
+Make only the changes required to install these governance files correctly.
+
+No refactor.
+No broad repository scan.
+No unrelated cleanup.
+No theme/plugin code changes.
+No restructuring of the site.
+No duplicate governance system.
+
+RISK / FAILURE MODE
+
+Check specifically for:
+- placing copilot-instructions.md in docs/ instead of .github/
+- leaving the timestamped/download-generated Copilot filename as the active instruction file
+- creating duplicate Copilot instruction files
+- moving or rewriting Thesis-web-pages unnecessarily
+- overwriting an existing .github/copilot-instructions.md without inspecting it first
+- overwriting existing docs with different content
+- performing Git operations before confirming the actual repository state
+- treating this project as RBAdmin
+- pushing secrets, backups, uploads, caches, or generated files
+
+GIT AIRLOCK / INITIAL REPOSITORY SETUP
+
+The supplied Git Airlock Contract is intended to govern all future project-file changes.
+
+Because this Request itself establishes the governance files and may also be the first repository setup task, first inspect the actual Git state.
+
+Confirm:
+1. exact project path
+2. Git top-level path, if already initialized
+3. remote.origin.url, if present
+4. current branch
+5. current HEAD SHA, if present
+6. git status
+
+If the repository is already initialized, obey the Git Airlock before modifying files.
+
+If Git is not yet initialized and this Request is the authorized initial repository setup, establish the minimum safe Git state needed to place these governance files and connect to:
+https://github.com/Kevin-413/redbarnmusicorg.git
+
+Do not use destructive Git commands.
+
+If an unexpected repository, remote, uncommitted work, conflict, or existing history is found, STOP and report HOLD before changing files.
+
+IMPLEMENTATION
+
+1. Inspect the current wp-content project root and confirm the listed supplied files are present.
+2. Ensure this directory exists:
+   docs/
+3. Place/preserve these files in docs/:
+   - 0904-1337-Copilot-REQUEST-Add-RedBarnMusicOrg-WP-Content-To-GitHub.txt
+   - 0904-1343-CONTRACT-RedBarnMusicOrg-Copilot-Request-Standard.txt
+   - 0904-1343-GIT-AIRLOCK-CONTRACT.txt
+   - 0904-1343-Refined-Standard-Request-Format.txt
+4. Ensure this directory exists:
+   .github/
+5. Install:
+   copilot-instructions(20260904-174451).md
+   as:
+   .github/copilot-instructions.md
+6. If another .github/copilot-instructions.md already exists, inspect both first and STOP if merging would require a substantive decision.
+7. Preserve Thesis-web-pages/ without changing its contents.
+8. Create a suitable .gitignore for this wp-content repository if one does not already exist. At minimum inspect and consider excluding:
+   - uploads/
+   - cache directories
+   - backup archives
+   - Updraft/restore artifacts
+   - logs
+   - temporary/generated files
+   - .DS_Store
+   - credentials/secrets
+   Do not exclude the custom/site-specific source that must be preserved.
+9. Create CHANGELOG.md at the wp-content project root if one does not already exist. Add a concise initial entry documenting this governance/repository setup.
+10. Do not create duplicate copies of any governance file.
+11. Stage only intended project files after reviewing the staged set for secrets, backups, uploads, or generated junk.
+12. Commit the verified governance setup with a clear initial/setup commit message.
+13. Push to:
+    https://github.com/Kevin-413/redbarnmusicorg.git
+    only if repository/remote state is verified and push is safe.
+14. Verify the expected files are present in the local repo and, if pushed, in GitHub.
+
+VERIFICATION
+
+Verify:
+- docs/ contains the four supplied Request/contract/standard files
+- .github/copilot-instructions.md exists with the supplied redbarnmusicorg instructions
+- no duplicate active Copilot instruction file remains
+- Thesis-web-pages/ remains intact
+- .gitignore exists and excludes inappropriate generated/private material without excluding required source
+- CHANGELOG.md exists with the initial setup entry
+- Git status and staged files contain no obvious secrets, uploads, backups, caches, logs, or generated junk
+- repository remote is exactly:
+  https://github.com/Kevin-413/redbarnmusicorg.git
+- commit succeeds
+- push succeeds if authorized and technically available
+- final working tree state is reported accurately
+
+DECISION LOG
+
+Record any material decision required because of:
+- an existing Git repository
+- an existing remote
+- an existing .gitignore
+- an existing CHANGELOG.md
+- an existing .github/copilot-instructions.md
+- unexpected Thesis-web-pages placement
+- unexpected uncommitted work
+
+Do not silently resolve conflicts.
+
+DOCUMENTATION
+
+Create the paired Reply at:
+
+docs/0904-1359-Copilot-REPLY-Implement-RedBarnMusicOrg-Governance-Files.txt
+
+The Reply must include:
+- STATUS
+- files placed/created
+- exact canonical paths
+- Git repository root
+- remote
+- starting commit
+- branch
+- pre-change git status
+- files changed
+- git diff --stat
+- post-change git status
+- verification result
+- final commit SHA
+- push result
+- any HOLD/blocker
+- any intentionally excluded files/folders
+
+HANDOFF NOTES
+
+State whether the redbarnmusicorg workspace is now ready for future Copilot Requests under the new contracts and repository instructions.
+
+STATUS
+
+Implement
+
+Git Airlock Contract applies. Do not modify files until the required repository safety checks are satisfied. If this setup reveals an unexpected or unsafe repository state, STOP and return HOLD.
+
+Thank you.

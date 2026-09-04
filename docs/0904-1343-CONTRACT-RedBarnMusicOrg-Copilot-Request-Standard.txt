@@ -1,0 +1,112 @@
+0904-1343-CONTRACT-RedBarnMusicOrg-Copilot-Request-Standard.txt
+
+CONTRACT — REDBARNMUSIC.ORG COPILOT REQUEST STANDARD
+
+Purpose
+
+Establish the authoritative standard structure for all future Copilot Requests for the redbarnmusic.org WordPress wp-content project.
+
+This contract is intended to reduce scope drift, prevent accidental refactoring, preserve source-of-truth decisions, improve verification, conserve tokens, and make handoffs between Copilot, ChatGPT, Claude, Gemini, and future project sessions reliable.
+
+PROJECT ROOT
+
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/
+
+CANONICAL DOCUMENTATION DIRECTORY
+
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/docs/
+
+Authoritative Request Template
+
+PURPOSE
+One sentence describing the exact task and keeping it narrow.
+
+SCOPE
+Exact page, theme file, plugin file, function, template, setting, content area, or workflow to inspect.
+
+SOURCE OF TRUTH
+The authoritative current file, WordPress setting, database state, rendered browser behavior, user instruction, or other named source that must drive the work.
+
+CURRENT STATE / EVIDENCE
+Last known-good behavior, current error, screenshot, log, browser evidence, current file, or other relevant evidence.
+
+EXPECTED RESULT
+What should happen when the work is complete.
+
+CONSTRAINTS / ASSUMPTIONS
+What is assumed to be true about the environment and workflow.
+
+DO NOT CHANGE
+Explicit no-go areas.
+
+MINIMAL-CHANGE REQUIREMENT
+No refactor, no unrelated cleanup, no broad restoration, no speculative modernization, and no unrelated site changes.
+
+RISK / FAILURE MODE
+The principal ways the task could go wrong or the likely failure modes that must be checked.
+
+VERIFICATION
+Exact browser behavior, file result, syntax result, setting, or data state that proves success.
+
+DECISION LOG
+Optional. Record material scope changes discovered during investigation.
+
+DOCUMENTATION
+Required Request/Reply file, CHANGELOG entry if the project uses one, handoff notes, and any relevant test documentation.
+
+HANDOFF NOTES
+Last verified state, remaining unknowns, and exact file/function/template where work ended.
+
+STATUS
+Implement / Inspect Only / Hold
+
+Mandatory Section Rule
+
+If a section is not applicable, write:
+
+N/A
+
+rather than silently omitting it.
+
+Usage Rules
+
+1. All redbarnmusic.org Copilot Requests should use this structure unless an explicitly approved exception applies.
+2. Keep PURPOSE narrow and specific.
+3. SCOPE should identify exact files, pages, functions, templates, settings, workflows, or UI areas whenever known.
+4. SOURCE OF TRUTH must distinguish authoritative state from stale UI, cached values, temporary browser state, backups, or inferred behavior.
+5. DO NOT CHANGE and MINIMAL-CHANGE REQUIREMENT are hard constraints.
+6. VERIFICATION must describe objective evidence that proves success.
+7. DECISION LOG is optional, but when investigation materially changes the understood problem or implementation scope, record the change.
+8. DOCUMENTATION and HANDOFF NOTES must preserve enough context for another session or developer to continue safely.
+9. STATUS must be explicitly set to one of:
+   - Implement
+   - Inspect Only
+   - Hold
+10. Missing sections must be marked N/A rather than omitted.
+11. Before implementation, inspect the current working site/code. Do not assume this site follows RBAdmin architecture or conventions.
+12. Do not import RBAdmin-specific implementation assumptions into this project.
+13. If a Request duplicates or materially overlaps completed or active work, STOP and report the duplicate before changing files.
+14. Git Airlock rules apply to every project-file modification.
+
+Contract Intent
+
+This standard is designed to ensure that Copilot receives:
+- clear scope
+- explicit constraints
+- authoritative source-of-truth guidance
+- current evidence
+- exact expected results
+- known risks
+- minimal-change boundaries
+- objective verification criteria
+- durable documentation and handoff context
+- explicit token-conservation expectations
+- safe Git discipline
+
+This contract governs the structure of redbarnmusic.org Copilot Requests. It does not override feature-specific contracts, WordPress security requirements, theme/plugin requirements, testing requirements, or other project-specific authoritative documents.
+
+Status
+
+AUTHORITATIVE PROJECT CONTRACT
+
+Thank you.

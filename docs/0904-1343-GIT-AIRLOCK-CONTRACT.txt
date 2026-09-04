@@ -1,0 +1,286 @@
+0904-1343-GIT-AIRLOCK-CONTRACT.txt
+
+GIT AIRLOCK CONTRACT
+
+PROJECT
+redbarnmusicorg
+
+REPOSITORY
+https://github.com/Kevin-413/redbarnmusicorg.git
+
+EXPECTED PROJECT ROOT
+/Users/macbookpro/Local Sites/redbarnmusicorg/app/public/wp-content/
+
+PURPOSE
+
+This contract governs all future AI-assisted project-file changes for redbarnmusic.org.
+
+Its purpose is to protect verified working states, preserve development history, prevent silent destructive changes, and make every implementation recoverable.
+
+CORE PRINCIPLE
+
+A working state outranks a cleaner state.
+
+Never replace, reconstruct, clean up, overwrite, broadly restore, or modernize a verified working state unless the replacement has independently passed the required verification.
+
+Preservation of the last verified working state has priority over completing the current task.
+
+AIRLOCK APPLIES TO EVERY PROJECT-FILE MODIFICATION
+
+Before an AI creates, edits, moves, renames, or deletes ANY file in the project tree, all of the following must be true:
+
+1. Exact repository path confirmed.
+2. Exact Git top-level path confirmed.
+3. Exact Git remote confirmed.
+4. Current branch confirmed.
+5. Current HEAD SHA recorded.
+6. git status checked.
+7. Working tree is clean, unless the current Request explicitly authorizes beginning from identified uncommitted work.
+8. A recoverable checkpoint commit exists for the current verified state.
+9. A dedicated task branch has been created or explicitly identified for the Request.
+10. The starting commit SHA has been recorded.
+
+If any required condition fails:
+
+STOP.
+Do not improvise.
+Do not modify project files.
+Return HOLD and report the failed condition.
+
+AIRLOCK SELF-CHECK
+
+Before claiming a task is exempt from the Airlock, ask:
+
+“Will this task create, edit, move, rename, or delete any file in the project tree?”
+
+If YES:
+Airlock required.
+
+If NO:
+Read-only exemption allowed.
+
+No other exemption exists unless the user explicitly authorizes it.
+
+READ-ONLY EXCEPTION
+
+Read-only work may proceed without creating a task branch when no project file is changed.
+
+Examples:
+- inspecting files;
+- searching;
+- git log;
+- git show;
+- read-only git diff;
+- history recovery;
+- browser observation;
+- archive inspection in a separate temporary location;
+- documentation review;
+- reporting findings in the AI conversation.
+
+If a task begins read-only and later requires a project-file change, satisfy the Airlock before making that change.
+
+TASK BRANCH RULE
+
+Every project-file-modifying AI task must occur on a dedicated task branch unless the user explicitly authorizes another workflow.
+
+Never modify main directly.
+
+ONE REQUEST — ONE BRANCH — ONE SCOPE
+
+The task branch must begin from the verified starting commit.
+
+Do not combine unrelated Requests on the same implementation branch unless explicitly authorized.
+
+CLEAN WORKING TREE RULE
+
+Before implementation, determine whether the working tree is clean.
+
+If unrelated uncommitted changes exist:
+
+STOP.
+
+Do not overwrite, discard, stash, reset, or absorb those changes automatically.
+
+Report the files and wait for explicit direction.
+
+If the current Request intentionally begins from approved uncommitted work, state that clearly in the Airlock evidence before editing.
+
+CHECKPOINT RULE
+
+Before implementation, confirm that the current working state is recoverable.
+
+A valid checkpoint may include:
+- a verified Git commit;
+- a verified task-start commit;
+- another user-approved recovery point.
+
+Do not claim a checkpoint exists unless it has actually been verified.
+
+SOURCE OF TRUTH RULE
+
+The source of truth named in the current Request is authoritative.
+
+Do not silently replace it with:
+- another backup;
+- another branch;
+- another Local site;
+- a production copy;
+- a reconstructed version;
+- remembered behavior;
+- an RBAdmin implementation
+
+unless the user explicitly changes the source of truth.
+
+DUPLICATE REQUEST SAFETY RULE
+
+Before implementing any Request, check whether the same or substantially equivalent Request has already been completed or is already represented by:
+- an earlier Request/Reply pair;
+- a contract;
+- a documented implementation;
+- a changelog entry;
+- an existing branch or commit;
+- current project behavior.
+
+If the Request appears to be a duplicate:
+
+STOP before making changes.
+
+Tell the user:
+- which earlier Request appears to duplicate it;
+- the relevant filename(s), commit(s), or project evidence;
+- whether the earlier work was completed, partial, unresolved, or superseded;
+- what, if anything, is materially different in the new Request.
+
+Do not re-implement, overwrite, refactor, restore, or redo completed work unless the user explicitly approves a correction, replacement, changed scope, or intentional redo.
+
+MINIMAL-CHANGE RULE
+
+Make the smallest change required to satisfy the approved Request.
+
+Do not perform unrelated:
+- refactoring;
+- cleanup;
+- renaming;
+- architecture changes;
+- formatting sweeps;
+- dependency changes;
+- migration work;
+- compatibility work;
+- feature additions
+
+unless explicitly authorized.
+
+DO NOT REDO RULE
+
+Do not rewrite a working implementation merely because another implementation style appears cleaner.
+
+Do not replace known-working code with a speculative redesign.
+
+Repair the exact fault whenever practical.
+
+VERIFICATION RULE
+
+Source-level evidence alone is not completion.
+
+Lint success, callable functions, hooks, settings, templates, or database state are not substitutes for actual functional verification when the task concerns visible behavior.
+
+When browser behavior is part of the task, the actual browser result is the acceptance test whenever practical.
+
+VERIFIED MILESTONE RULE
+
+As soon as a meaningful milestone is verified working:
+
+1. Stop unrelated further development.
+2. Commit the verified state.
+3. Record the final commit SHA.
+4. Preserve the verified state before beginning a materially different task.
+5. Never overwrite an earlier recovery point.
+
+A separate production/export package is not a substitute for Git history.
+
+AIRLOCK EVIDENCE
+
+Every file-modifying Reply must report:
+
+Repo:
+Git top-level:
+Remote:
+Starting commit:
+Task branch:
+Pre-change git status:
+Files changed:
+git diff --stat:
+Post-change git status:
+Verification result:
+Final commit:
+Recovery/checkpoint note:
+
+If a field is not applicable, the Reply must state why.
+
+FALSE-EVIDENCE RULE
+
+Never claim:
+- repository confirmed;
+- remote confirmed;
+- clean working tree;
+- checkpoint exists;
+- branch created;
+- commit created;
+- push completed;
+- verification passed
+
+unless that claim was actually checked.
+
+A separate clone or repository does not protect a different active working directory.
+
+The Git repository must actually contain the files being modified.
+
+PROHIBITED WITHOUT EXPLICIT USER AUTHORIZATION
+
+- git reset --hard
+- git clean -fd
+- git clean -fdx
+- force checkout
+- force push
+- broad git restore
+- destructive branch deletion
+- history rewriting
+- wholesale source-tree replacement
+- archive extraction over the active site
+- broad deletion of docs/history
+- live deployment
+- production overwrite
+- automatic rollback that destroys uncommitted work
+
+Do not use destructive commands as a convenience.
+
+ARCHIVE SAFETY RULE
+
+Backups and archives are evidence and recovery sources.
+
+Do not extract an archive directly over the active development workspace without explicit authorization and a verified recovery point.
+
+If archive comparison is required, inspect or extract it into a separate temporary location.
+
+CONSEQUENCE RULE
+
+This site is a working reference state that may contain long-lived customizations.
+
+Bypassing the Git Airlock is a process failure.
+
+If the Airlock cannot be satisfied, preserve the current state and return HOLD.
+
+HANDOFF CITATION RULE
+
+Future handoff Requests may cite this document as:
+
+GIT AIRLOCK CONTRACT:
+docs/0904-1343-GIT-AIRLOCK-CONTRACT.txt
+
+Any handoff that authorizes project-file modification should state:
+
+"Git Airlock Contract applies. Do not modify files until the Pre-Implementation Gate in docs/0904-1343-GIT-AIRLOCK-CONTRACT.txt is satisfied."
+
+This contract remains in force unless the user explicitly supersedes it with a newer dated contract.
+
+Thank you.

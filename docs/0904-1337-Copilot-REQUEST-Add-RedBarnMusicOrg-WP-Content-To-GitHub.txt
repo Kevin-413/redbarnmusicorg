@@ -1,0 +1,70 @@
+0904-1337-Copilot-REQUEST-Add-RedBarnMusicOrg-WP-Content-To-GitHub.txt
+
+PURPOSE
+Add the current redbarnmusic.org wp-content workspace to the new GitHub repository safely and establish the repository conventions for this separate website workspace.
+
+SCOPE
+Current VS Code workspace root: the redbarnmusic.org WordPress wp-content folder.
+GitHub repository:
+https://github.com/Kevin-413/redbarnmusicorg.git
+
+This is a separate website workspace. Do not assume the RBAdmin plugin project is part of this repository or workspace.
+
+SOURCE OF TRUTH
+The files currently present in this redbarnmusic.org wp-content workspace are the source of truth for this task.
+
+REQUIREMENTS
+1. Inspect the current workspace before changing anything.
+2. Confirm the workspace root and identify:
+   - active/custom theme files, including the Thesis theme
+   - custom plugins, if any
+   - uploads/media
+   - caches
+   - backups
+   - logs
+   - temporary/generated files
+   - any files that may contain credentials or secrets
+3. Initialize Git in the current workspace only if it is not already initialized.
+4. Add the remote repository:
+   https://github.com/Kevin-413/redbarnmusicorg.git
+5. Create an appropriate .gitignore before staging files.
+6. Include the site code and customizations needed to preserve the redbarnmusic.org wp-content work, including the Thesis theme and its site-specific/custom files.
+7. Do NOT commit credentials, secrets, cache files, backup archives, restore folders, logs, temporary files, or generated junk.
+8. Do NOT add wp-content/uploads to Git unless there is a specific reason to version those media files. Report how large it is and leave it excluded by default.
+9. Do not modify WordPress, theme, or plugin behavior as part of this task.
+10. Do not delete or reorganize site files.
+11. Before the first commit, show the proposed tracked/excluded scope and verify that no obviously sensitive files are staged.
+12. Create the initial commit with a clear message.
+13. Push the initial branch to:
+    https://github.com/Kevin-413/redbarnmusicorg.git
+14. Verify the push succeeded and that the GitHub repository contains the expected files.
+
+PROJECT CONVENTIONS FOR THIS NEW WORKSPACE
+This is a new Copilot context. Do not assume conventions from the separate RBAdmin repository are already available here.
+
+For this task:
+- Inspect first; do not guess.
+- Keep scope narrow.
+- No unrelated cleanup or refactoring.
+- Do not overwrite or delete working site files.
+- If an unexpected existing Git repository, remote, large-file problem, secret, or conflict is found, STOP and report it before proceeding.
+- If this exact request appears to have already been completed, STOP and report the duplicate rather than doing it again.
+- Document what was inspected, changed, committed, excluded, and verified.
+
+REPLY
+At completion, provide:
+1. Workspace/repository root used.
+2. .gitignore rules added.
+3. Summary of files/folders tracked.
+4. Summary of files/folders excluded.
+5. Commit hash and commit message.
+6. Remote and branch pushed.
+7. Verification that the GitHub repository now contains the intended redbarnmusic.org wp-content source.
+8. Any items intentionally left out for later.
+
+Also create a reply document in this workspace using:
+MMDD-HHMM-Copilot-REPLY-Add-RedBarnMusicOrg-WP-Content-To-GitHub.txt
+
+Place the Reply document name at the end of your response so I know you are finished.
+
+Thank you.
