@@ -10,7 +10,10 @@ if (!defined('ABSPATH')) {
 
 add_action('wp_enqueue_scripts', 'rbm_test_monitor_enqueue_frontend');
 function rbm_test_monitor_enqueue_frontend() {
-    if (!rbm_test_monitor_is_enabled() || is_admin() || !is_user_logged_in()) {
+    if (!rbm_test_monitor_is_enabled() || is_admin()) {
+        return;
+    }
+    if (!is_user_logged_in() && !rbm_test_monitor_public_feedback_enabled()) {
         return;
     }
 

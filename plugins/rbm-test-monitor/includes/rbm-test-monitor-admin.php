@@ -56,6 +56,13 @@ function rbm_test_monitor_render_activity_page() {
     $rows = $params ? $wpdb->get_results($wpdb->prepare($sql, $params)) : $wpdb->get_results($sql);
 
     echo '<div class="wrap"><h1>Testing Activity</h1>';
+    $public_feedback_on = rbm_test_monitor_public_feedback_enabled();
+    echo '<p>';
+    echo 'Suggestions button: <strong>' . ($public_feedback_on ? 'Open to everyone' : 'Logged-in testers only') . '</strong> &mdash; ';
+    echo '<a class="button" href="' . esc_url(wp_nonce_url(admin_url('admin-post.php?action=rbm_test_monitor_toggle_public_feedback'), 'rbm_test_monitor_toggle_public_feedback')) . '">';
+    echo $public_feedback_on ? 'Turn Off (logged-in testers only)' : 'Turn On (open to everyone)';
+    echo '</a>';
+    echo '</p>';
     echo '<form method="get" style="margin:12px 0;">';
     echo '<input type="hidden" name="page" value="rbm-test-monitor-activity">';
     echo '<input type="text" name="module" placeholder="Module" value="' . esc_attr($module) . '"> ';
@@ -332,6 +339,17 @@ function rbm_test_monitor_handle_export_feedback() {
 }
 
 // --- Retention actions ---
+
+add_action('admin_post_rbm_test_monitor_toggle_public_feedback', 'rbm_test_monitor_handle_toggle_public_feedback');
+function rbm_test_monitor_handle_toggle_public_feedback() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Insufficient permissions.');
+    }
+    check_admin_referer('rbm_test_monitor_toggle_public_feedback');
+    update_option('rbm_test_monitor_public_feedback', rbm_test_monitor_public_feedback_enabled() ? '0' : '1', false);
+    wp_safe_redirect(admin_url('admin.php?page=rbm-test-monitor-activity'));
+    exit;
+}
 
 add_action('admin_post_rbm_test_monitor_clear_activity', 'rbm_test_monitor_handle_clear_activity');
 function rbm_test_monitor_handle_clear_activity() {

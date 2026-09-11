@@ -113,14 +113,14 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'rbm-test-monitor-btn';
-    btn.textContent = 'Report a Problem';
+    btn.textContent = 'Suggestions';
 
     var overlay = document.createElement('div');
     overlay.id = 'rbm-test-monitor-overlay';
     overlay.hidden = true;
     overlay.innerHTML =
-      '<div id="rbm-test-monitor-modal" role="dialog" aria-modal="true" aria-label="Report a Problem">' +
-      '  <h2>Report a Problem</h2>' +
+      '<div id="rbm-test-monitor-modal" role="dialog" aria-modal="true" aria-label="Suggestions">' +
+      '  <h2>Suggestions</h2>' +
       '  <p id="rbm-test-monitor-context"></p>' +
       '  <label for="rbm-tm-comment">What happened?</label>' +
       '  <textarea id="rbm-tm-comment" rows="4"></textarea>' +

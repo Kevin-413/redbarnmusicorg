@@ -28,6 +28,13 @@ function rbm_test_monitor_feedback_table() {
     return $wpdb->prefix . 'rbm_test_feedback';
 }
 
+// Whether the "Suggestions" feedback button shows for anonymous/public visitors too, not just
+// logged-in testers. Defaults to open (site is in an early public-testing period); flip off from
+// the Testing Monitor > Activity admin page once testing narrows back down to logged-in testers.
+function rbm_test_monitor_public_feedback_enabled() {
+    return get_option('rbm_test_monitor_public_feedback', '1') === '1';
+}
+
 function rbm_test_monitor_create_tables() {
     global $wpdb;
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';

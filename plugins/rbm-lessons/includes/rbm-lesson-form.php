@@ -113,19 +113,29 @@ function rbm_render_lesson_form_page() {
                         <option value="<?php echo esc_attr($file); ?>"<?php selected($image_filename, $file); ?>><?php echo esc_html($file); ?></option>
                     <?php endforeach; ?>
                 </select>
-                <div id="rbm_lesson_image_preview" style="margin-top:8px;">
-                    <?php $preview_url = rbm_msch_lesson_catalog_image_url($image_filename); if ($preview_url !== '') : ?>
-                        <img src="<?php echo esc_url($preview_url); ?>" style="max-width:150px;height:auto;display:block;">
-                    <?php endif; ?>
+                <?php $preview_url = rbm_msch_lesson_catalog_image_url($image_filename); ?>
+                <div style="margin-top:8px;">
+                    <strong style="display:block;margin-bottom:4px;">Tile Preview</strong>
+                    <div style="display:inline-flex;flex-direction:column;width:220px;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff;">
+                        <span id="rbm_lesson_image_preview" style="display:block;width:100%;aspect-ratio:1/1;overflow:hidden;background:#f0f0f0;">
+                            <?php if ($preview_url !== '') : ?>
+                                <img src="<?php echo esc_url($preview_url); ?>" style="display:block;width:100%;height:100%;object-fit:cover;">
+                            <?php endif; ?>
+                        </span>
+                        <span id="rbm_lesson_title_preview" style="display:block;padding:12px 16px;font-size:16px;"><?php echo esc_html($title); ?></span>
+                    </div>
                 </div>
-                <span class="description">Populated from <code>wp-content/plugins/rbm-lessons/assets/images/</code> — add files there to expand this list.</span>
+                <span class="description">Populated from <code>wp-content/plugins/rbm-lessons/assets/images/</code> — add files there to expand this list. The preview above crops the same way the tile does on the live Lessons page, so you can catch images that get cut off before saving.</span>
                 <script>
                 (function(){
                     var urls = <?php echo wp_json_encode(array_combine($catalog_images, array_map('rbm_msch_lesson_catalog_image_url', $catalog_images))); ?>;
                     document.getElementById('rbm_lesson_image_filename').addEventListener('change', function (e) {
                         var preview = document.getElementById('rbm_lesson_image_preview');
                         var url = urls[e.target.value];
-                        preview.innerHTML = url ? '<img src="' + url + '" style="max-width:150px;height:auto;display:block;">' : '';
+                        preview.innerHTML = url ? '<img src="' + url + '" style="display:block;width:100%;height:100%;object-fit:cover;">' : '';
+                    });
+                    document.getElementById('post_title').addEventListener('input', function (e) {
+                        document.getElementById('rbm_lesson_title_preview').textContent = e.target.value;
                     });
                 })();
                 </script>

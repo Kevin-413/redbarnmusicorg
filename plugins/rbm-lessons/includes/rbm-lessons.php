@@ -66,6 +66,54 @@ function rbm_lessons_cleanup_admin_menu() {
     unset($item);
 }
 
+// The submenu text above is only the sidebar link label — the page you actually land on still
+// showed its real registered label ("Instruments" for the taxonomy, "Lessons" for the CPT list),
+// which didn't match. Align both page headings/titles with what the sidebar link says, scoped to
+// the Lessons post_type context only so Faculty's own "Instruments" taxonomy screen is unaffected.
+add_action('load-edit-tags.php', 'rbm_lessons_align_taxonomy_page_heading');
+function rbm_lessons_align_taxonomy_page_heading() {
+    if (($_GET['taxonomy'] ?? '') !== 'msch_instrument' || ($_GET['post_type'] ?? '') !== 'msch_lesson') {
+        return;
+    }
+    global $wp_taxonomies;
+    if (isset($wp_taxonomies['msch_instrument'])) {
+        $wp_taxonomies['msch_instrument']->labels->name = 'Categories';
+    }
+}
+
+add_action('load-edit.php', 'rbm_lessons_align_list_page_heading');
+function rbm_lessons_align_list_page_heading() {
+    if (($_GET['post_type'] ?? '') !== 'msch_lesson') {
+        return;
+    }
+    global $wp_post_types;
+    if (isset($wp_post_types['msch_lesson'])) {
+        $wp_post_types['msch_lesson']->labels->name = 'Instruments';
+    }
+}
+
+// Some shared msch_instrument terms are Faculty-only (e.g. "Keyboards" — a teacher instrument, not
+// yet a Lesson category) and shouldn't clutter the Lessons > Categories list. Flag those terms with
+// _msch_instrument_hide_from_categories term meta; they still show normally under Faculty > Instruments.
+add_filter('get_terms_args', 'rbm_lessons_hide_faculty_only_categories', 10, 2);
+function rbm_lessons_hide_faculty_only_categories($args, $taxonomies) {
+    if (($GLOBALS['pagenow'] ?? '') !== 'edit-tags.php' || ($_GET['post_type'] ?? '') !== 'msch_lesson' || !in_array('msch_instrument', $taxonomies, true)) {
+        return $args;
+    }
+    global $wpdb;
+    // Direct query (not get_terms()) to avoid re-triggering this same get_terms_args filter.
+    $hidden = $wpdb->get_col($wpdb->prepare(
+        "SELECT tm.term_id FROM {$wpdb->termmeta} tm
+         INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = tm.term_id AND tt.taxonomy = %s
+         WHERE tm.meta_key = '_msch_instrument_hide_from_categories' AND tm.meta_value = '1'",
+        'msch_instrument'
+    ));
+    if (!empty($hidden)) {
+        $args['exclude'] = array_merge((array) ($args['exclude'] ?? []), array_map('intval', $hidden));
+    }
+    return $args;
+}
+
 // Lessons list: remove the Bulk Actions/Filter bar entirely — bulk edit doesn't apply to this
 // simplified admin flow (Lessons are managed one at a time via the dedicated Add/Edit Lesson form).
 add_filter('bulk_actions-edit-msch_lesson', '__return_empty_array');
@@ -503,7 +551,12 @@ function rbm_msch_category_icon_add_form_field($taxonomy) {
         <input type="text" name="rbm_category_icon_alt" id="rbm_category_icon_alt" value="">
         <p>Leave blank to use "{Category} music lessons at Red Barn Music School".</p>
     </div>
+    <div class="form-field">
+        <label>Tile Preview</label>
+        <?php rbm_msch_category_tile_preview_markup('', ''); ?>
+    </div>
     <?php
+    rbm_msch_category_tile_preview_script($catalog, 'tag-name');
 }
 
 add_action('msch_instrument_edit_form_fields', 'rbm_msch_category_icon_edit_form_field');
@@ -531,6 +584,53 @@ function rbm_msch_category_icon_edit_form_field($term) {
             <p class="description">Leave blank to use "{Category} music lessons at Red Barn Music School".</p>
         </td>
     </tr>
+    <tr class="form-field">
+        <th scope="row"><label>Tile Preview</label></th>
+        <td>
+            <?php rbm_msch_category_tile_preview_markup(rbm_msch_category_icon_url($current_icon), $term->name); ?>
+        </td>
+    </tr>
+    <?php
+    rbm_msch_category_tile_preview_script($catalog, 'name');
+}
+
+// Shared markup/JS for the Category-tile live preview on both the Add and Edit Category screens —
+// mirrors the real .msch-lesson-category-card/-icon/-name markup+CSS from the public Lessons page
+// (rbm_msch_lessons_shortcode()) so what the admin sees here matches what visitors actually see.
+function rbm_msch_category_tile_preview_markup($icon_url, $name) {
+    ?>
+    <div id="rbm_category_tile_preview" style="display:inline-flex;flex-direction:column;align-items:center;gap:6px;padding:16px;border:1px solid #ddd;border-radius:8px;background:#fff;width:180px;text-align:center;">
+        <span id="rbm_category_tile_preview_icon" style="display:flex;align-items:center;justify-content:center;min-height:80px;">
+            <?php if ($icon_url !== '') : ?>
+                <img src="<?php echo esc_url($icon_url); ?>" alt="" style="max-width:120px;height:auto;display:block;">
+            <?php endif; ?>
+        </span>
+        <span id="rbm_category_tile_preview_name" style="font-size:15px;font-weight:600;"><?php echo esc_html($name); ?></span>
+    </div>
+    <?php
+}
+
+function rbm_msch_category_tile_preview_script($catalog, $name_field_id) {
+    ?>
+    <script>
+    (function(){
+        var urls = <?php echo wp_json_encode(array_combine($catalog, array_map('rbm_msch_category_icon_url', $catalog))); ?>;
+        var select = document.getElementById('rbm_category_icon_filename');
+        var nameField = document.getElementById('<?php echo esc_js($name_field_id); ?>');
+        if (select) {
+            select.addEventListener('change', function (e) {
+                var icon = document.getElementById('rbm_category_tile_preview_icon');
+                var url = urls[e.target.value];
+                icon.innerHTML = url ? '<img src="' + url + '" alt="" style="max-width:120px;height:auto;display:block;">' : '';
+            });
+        }
+        if (nameField) {
+            nameField.addEventListener('input', function (e) {
+                document.getElementById('rbm_category_tile_preview_name').textContent = e.target.value;
+            });
+        }
+    })();
+    </script>
     <?php
 }
 
@@ -651,7 +751,8 @@ function rbm_msch_lessons_shortcode($atts) {
         $rbm_lessons_css_printed = true;
         ?>
         <style>
-        .msch-lesson-filter{margin:0 0 1.5em;}
+        /* Hidden: category icon grid is now the only visible way to choose a category; select stays in the DOM to drive Previous/Next and deep-link JS. */
+        .msch-lesson-filter{display:none;margin:0 0 1.5em;}
         .msch-lesson-filter-select{
             font-size:18px;
             font-weight:600;
@@ -674,16 +775,16 @@ function rbm_msch_lessons_shortcode($atts) {
         }
         .msch-lesson-category-grid{
             display:grid;
-            grid-template-columns:repeat(5, 1fr);
-            gap:16px;
+            grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+            gap:4px;
             margin:0 0 1.5em;
         }
         .msch-lesson-category-card{
             display:flex;
             flex-direction:column;
             align-items:center;
-            gap:8px;
-            padding:16px 8px;
+            gap:6px;
+            padding:6px;
             border:1px solid #ddd;
             border-radius:8px;
             background:#fff;
@@ -706,31 +807,25 @@ function rbm_msch_lessons_shortcode($atts) {
             text-decoration:underline;
         }
         .msch-lesson-category-icon img{
-            max-width:64px;
+            max-width:220px;
             height:auto;
             display:block;
         }
         .msch-lesson-category-icon--placeholder{
-            width:64px;
-            height:64px;
+            width:220px;
+            height:220px;
             border-radius:50%;
             background:#f0f0f0;
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:20px;
+            font-size:56px;
             font-weight:700;
             color:#888;
         }
         .msch-lesson-category-name{
-            font-size:15px;
+            font-size:20px;
             font-weight:600;
-        }
-        @media (max-width:900px){
-            .msch-lesson-category-grid{ grid-template-columns:repeat(3, 1fr); }
-        }
-        @media (max-width:600px){
-            .msch-lesson-category-grid{ grid-template-columns:repeat(2, 1fr); }
         }
         .msch-lesson-tiles-wrap[hidden]{
             display:none;
@@ -1056,7 +1151,7 @@ function rbm_msch_lessons_shortcode($atts) {
                             RBM_LESSONS_URL . 'assets/category-icons/',
                             $icon_file,
                             $icon_alt,
-                            '64px'
+                            '220px'
                         ); ?></span>
                     <?php else : ?>
                         <span class="msch-lesson-category-icon msch-lesson-category-icon--placeholder" aria-hidden="true"><?php echo esc_html(mb_substr($name, 0, 1)); ?></span>
@@ -1089,7 +1184,7 @@ function rbm_msch_lessons_shortcode($atts) {
                 <span class="thesis-lesson-card-image"><?php echo $tile_image; ?></span>
                 <span class="thesis-lesson-card-title"><?php echo esc_html(get_the_title($lesson)); ?></span>
                 <?php if (!empty($signup_url)) : ?>
-                    <span style="display:block;padding:8px 16px 16px;">
+                    <span style="display:block;padding:4px 16px 16px;">
                         <a class="thesis-cta-button" href="<?php echo esc_url($signup_url); ?>" target="_blank" rel="noopener noreferrer">Sign Up</a>
                     </span>
                 <?php endif; ?>
