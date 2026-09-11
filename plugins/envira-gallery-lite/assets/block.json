@@ -1,0 +1,91 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "envira/envira-gallery",
+	"title": "Envira Gallery",
+	"category": "common",
+	"description": "Select a gallery below to add it to your page.",
+	"keywords": [
+		"Envira Gallery",
+		"Photo",
+		"Image"
+	],
+	"textdomain": "envira-gallery-lite",
+	"attributes": {
+		"galleryId": {
+			"type": "integer",
+			"default": null
+		},
+		"title": {
+			"type": "string",
+			"default": ""
+		},
+		"columns": {
+			"type": "string",
+			"default": "0"
+		},
+		"row_height": {
+			"type": "string",
+			"default": "100"
+		},
+		"margins": {
+			"type": "string",
+			"default": "1"
+		},
+		"custom_margins": {
+			"type": "string",
+			"default": "1"
+		},
+		"lightbox_enabled": {
+			"type": "boolean",
+			"default": true
+		},
+		"lazyload_enabled": {
+			"type": "boolean",
+			"default": true
+		},
+		"titles_enabled": {
+			"type": "boolean",
+			"default": true
+		},
+		"captions_enabled": {
+			"type": "boolean",
+			"default": true
+		},
+		"isotope": {
+			"type": "boolean",
+			"default": true
+		},
+		"sort_order": {
+			"type": "string",
+			"default": ""
+		},
+		"lightbox_theme": {
+			"type": "string",
+			"default": "base_dark"
+		},
+		"editMode": {
+			"type": "boolean",
+			"default": false
+		},
+		"isLoading": {
+			"type": "boolean",
+			"default": false
+		},
+		"selectedImage": {
+			"type": "string",
+			"default": null
+		},
+		"images": {
+			"type": "array",
+			"default": []
+		}
+	},
+	"supports": {
+		"align": [
+			"wide",
+			"full"
+		]
+	},
+	"editorStyle": "file:./css/envira-gutenberg-editor.css"
+}
