@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Faculty Plugin Demo</title>
+<style>
+    :root {
+        --border: #ddd;
+        --muted: #666;
+        --active: #1a7e1a;
+        --inactive: #a00;
+        --bg: #f7f7f7;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 24px 16px 64px;
+        background: var(--bg);
+        color: #222;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+    }
+    .wrap {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    h2 {
+        font-size: 19px;
+        margin: 40px 0 12px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #333;
+    }
+    h2:first-of-type { margin-top: 24px; }
+    p { margin: 0 0 12px; }
+    .notice {
+        background: #fff8c4;
+        border: 1px solid #e0d060;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 24px;
+    }
+    .notice strong { display: block; margin-bottom: 4px; }
+    nav.toc {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 24px;
+    }
+    nav.toc a { color: #1a4d99; text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    nav.toc ul { margin: 6px 0 0; padding-left: 20px; }
+    section { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+    th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; font-size: 14px; }
+    th { background: #f0f0f0; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .dot-active { background: var(--active); }
+    .dot-inactive { background: var(--inactive); }
+    .status-active { color: var(--active); font-weight: 600; }
+    .status-inactive { color: var(--inactive); font-weight: 600; }
+    .thumb { width: 32px; height: 32px; border-radius: 4px; background: #cfd8e3; display: inline-block; vertical-align: middle; }
+    .form-demo { max-width: 520px; }
+    .form-demo label { display: block; font-weight: 600; margin: 12px 0 4px; }
+    .form-demo input[type=text], .form-demo textarea {
+        width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 14px;
+    }
+    .form-demo .desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .checkbox-row label { display: inline-block; font-weight: normal; margin: 2px 12px 2px 0; }
+    .field-callout {
+        background: #eef4ff; border: 1px solid #b9d0f2; border-radius: 6px; padding: 10px 14px; margin: 10px 0; font-size: 14px;
+    }
+    .btn {
+        display: inline-block; background: #f6f7f7; border: 1px solid #8c8f94; border-radius: 3px;
+        padding: 6px 12px; font-size: 13px; cursor: pointer; color: #2c3338; margin-right: 8px;
+    }
+    .btn-primary { background: #2271b1; border-color: #2271b1; color: #fff; }
+    textarea.export-list {
+        width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px;
+        border: 1px solid var(--border); border-radius: 4px; padding: 8px; white-space: pre;
+    }
+    .copy-status { margin-left: 8px; font-size: 13px; color: var(--active); }
+    .cards { display: flex; flex-wrap: wrap; gap: 16px; }
+    .card {
+        width: 180px; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;
+    }
+    .card .photo { width: 72px; height: 72px; border-radius: 50%; background: #cfd8e3; margin: 0 auto 10px; }
+    .card .name { font-weight: 700; }
+    .card .teaches { color: var(--muted); font-size: 13px; margin: 4px 0 10px; }
+    .card a { font-size: 13px; color: #1a4d99; text-decoration: none; }
+    .fine-print { color: var(--muted); font-size: 12px; margin-top: 20px; }
+    @media (max-width: 420px) {
+        section { padding: 12px; }
+        th, td { padding: 4px 6px; font-size: 12px; }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="notice">
+        <strong>DEMO FILE</strong>
+        This static HTML file demonstrates the plugin's current features.
+        It does not connect to WordPress or modify site data.
+    </div>
+
+    <h1>Faculty Plugin Demo</h1>
+    <p>Representative, static walkthrough of the current working rbm-faculty plugin (Red Barn Music School).</p>
+
+    <nav class="toc">
+        <strong>Faculty Demo</strong>
+        <ul>
+            <li><a href="#faculty-list">Faculty List</a></li>
+            <li><a href="#edit-teacher">Edit Teacher</a></li>
+            <li><a href="#instruments-we-teach">Instruments We Teach</a></li>
+            <li><a href="#lessons-we-teach">Lessons We Teach</a></li>
+            <li><a href="#public-view">Public Faculty View</a></li>
+        </ul>
+    </nav>
+
+    <section id="overview">
+        <h2 style="margin-top:0;border:0;padding:0;">Faculty Overview</h2>
+        <p>The Faculty plugin manages teachers: their public Active/Inactive status, short and long bios,
+        photos (Portrait, Card, and an optional Second Profile Image), Instrument Category assignments
+        (a taxonomy), a separate free-text "Instruments Taught" display string, and the public
+        Faculty output (cards and profile pages).</p>
+    </section>
+
+    <section id="faculty-list">
+        <h2>Faculty List</h2>
+        <p>Representative native Faculty admin list. Columns shown: Photo, Teacher Name, Instruments
+        (Instrument Category taxonomy terms &mdash; this column is <strong>not</strong> the free-text
+        "Instruments Taught" field), Active/Inactive Status, and numeric Order.</p>
+        <table>
+            <thead>
+                <tr><th>Photo</th><th>Teacher Name</th><th>Instruments</th><th>Status</th><th>Order</th><th></th></tr>
+            </thead>
+            <tbody>
+                <tr><td><span class="thumb"></span></td><td>Carol Hutter</td><td>Strings</td><td><span class="dot dot-active"></span><span class="status-active">Active</span></td><td>10</td><td><a href="#edit-teacher">Edit</a></td></tr>
+                <tr><td><span class="thumb"></span></td><td>Jim Snedeker</td><td>Woodwinds</td><td><span class="dot dot-active"></span><span class="status-active">Active</span></td><td>20</td><td><a href="#edit-teacher">Edit</a></td></tr>
+                <tr><td><span class="thumb"></span></td><td>Tom Williams</td><td>Guitar, Piano</td><td><span class="dot dot-active"></span><span class="status-active">Active</span></td><td>30</td><td><a href="#edit-teacher">Edit</a></td></tr>
+                <tr><td><span class="thumb"></span></td><td>Catherine Bell</td><td>Voice</td><td><span class="dot dot-active"></span><span class="status-active">Active</span></td><td>40</td><td><a href="#edit-teacher">Edit</a></td></tr>
+                <tr><td><span class="thumb"></span></td><td>Sample Inactive Teacher</td><td>Piano</td><td><span class="dot dot-inactive"></span><span class="status-inactive">Inactive</span></td><td>50</td><td><a href="#edit-teacher">Edit</a></td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="edit-teacher">
+        <h2>Add / Edit Teacher</h2>
+        <p>Simplified representation of the standalone Add/Edit Teacher form. The real form has a
+        <strong>Save button at both the top and bottom</strong> of the page.</p>
+        <div class="form-demo">
+            <p><button class="btn btn-primary" type="button">Save Teacher</button></p>
+
+            <label>Teacher Name</label>
+            <input type="text" value="Carol Hutter" readonly>
+
+            <label>Status</label>
+            <div class="checkbox-row">
+                <label><input type="radio" checked disabled> Active</label>
+                <label><input type="radio" disabled> Inactive</label>
+            </div>
+
+            <div class="field-callout">
+                <strong>Instrument Category</strong> (taxonomy / structured assignment &mdash; shown in the
+                Faculty List "Instruments" column above)
+                <div class="checkbox-row" style="margin-top:6px;">
+                    <label><input type="checkbox" checked disabled> Strings</label>
+                    <label><input type="checkbox" disabled> Piano</label>
+                    <label><input type="checkbox" disabled> Guitar</label>
+                    <label><input type="checkbox" disabled> Voice</label>
+                    <label><input type="checkbox" disabled> Woodwinds</label>
+                </div>
+            </div>
+
+            <div class="field-callout">
+                <strong>Instruments Taught</strong> (separate free-text display string &mdash; independent
+                from Instrument Category; used on the Teacher Profile page and in the Lessons We Teach
+                export below)
+                <input type="text" value="Violin &amp; Viola" readonly style="margin-top:6px;">
+            </div>
+
+            <label>Photo (Portrait / Card / optional Second Profile Image)</label>
+            <div class="thumb" style="width:64px;height:64px;"></div>
+
+            <label>Short Bio</label>
+            <textarea rows="2" readonly>Carol has taught strings at Red Barn Music School for over a decade.</textarea>
+
+            <label>Long Bio</label>
+            <textarea rows="3" readonly>Full biography text appears on the Teacher Profile page...</textarea>
+
+            <p style="margin-top:16px;"><button class="btn btn-primary" type="button">Save Teacher</button></p>
+        </div>
+    </section>
+
+    <section id="instruments-we-teach">
+        <h2>Instruments We Teach</h2>
+        <p>Existing first export/audit section on the Teacher Placeholder admin page: a deduplicated,
+        alphabetical list of Instrument Category names taught by any active Faculty member.</p>
+        <textarea class="export-list" id="iwt-list" readonly rows="5">Flute
+Guitar
+Piano
+Saxophone
+Voice</textarea>
+        <p>
+            <button class="btn" type="button" onclick="rbmDemoCopy('iwt-list','iwt-status')">Copy List</button>
+            <button class="btn" type="button" onclick="rbmDemoDownload('iwt-list','instruments-we-teach.txt')">Download instruments-we-teach.txt</button>
+            <span class="copy-status" id="iwt-status"></span>
+        </p>
+    </section>
+
+    <section id="lessons-we-teach">
+        <h2>Faculty &mdash; Lessons We Teach</h2>
+        <p>Existing second export/audit section: one row per active teacher, tab-separated
+        plaintext, sorted by Instruments Taught, Teacher as a tie-breaker. Reads the exact stored
+        "Instruments Taught" value &mdash; no splitting, parsing, or deduplication.</p>
+        <textarea class="export-list" id="lwt-list" readonly rows="6">Teacher	Instruments Taught
+Carol Hutter	Piano
+Jim Snedeker	Saxophone, Flute
+Tom Williams	Guitar, Piano
+Catherine Bell	Voice</textarea>
+        <p>
+            <button class="btn" type="button" onclick="rbmDemoCopy('lwt-list','lwt-status')">Copy List</button>
+            <button class="btn" type="button" onclick="rbmDemoDownload('lwt-list','faculty-lessons-we-teach.txt')">Download .txt</button>
+            <span class="copy-status" id="lwt-status"></span>
+        </p>
+    </section>
+
+    <section id="public-view">
+        <h2>Public Faculty Output</h2>
+        <p>Simplified representative example of how Faculty cards and profile links appear publicly.
+        Not an exact reproduction of the live Avada theme.</p>
+        <div class="cards">
+            <div class="card">
+                <div class="photo"></div>
+                <div class="name">Carol Hutter</div>
+                <div class="teaches">Violin &amp; Viola</div>
+                <a href="#">View Profile &rarr;</a>
+            </div>
+            <div class="card">
+                <div class="photo"></div>
+                <div class="name">Jim Snedeker</div>
+                <div class="teaches">Saxophone, Flute</div>
+                <a href="#">View Profile &rarr;</a>
+            </div>
+            <div class="card">
+                <div class="photo"></div>
+                <div class="name">Tom Williams</div>
+                <div class="teaches">Guitar, Piano</div>
+                <a href="#">View Profile &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <p class="fine-print">Faculty Plugin Demo &mdash; representative content only. No student data,
+    credentials, or private information is included.</p>
+</div>
+
+<script>
+function rbmDemoCopy(textareaId, statusId) {
+    var ta = document.getElementById(textareaId);
+    var status = document.getElementById(statusId);
+    ta.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta.value).then(function () {
+            status.textContent = 'Copied';
+            setTimeout(function () { status.textContent = ''; }, 2000);
+        });
+    } else {
+        document.execCommand('copy');
+        status.textContent = 'Copied';
+        setTimeout(function () { status.textContent = ''; }, 2000);
+    }
+}
+function rbmDemoDownload(textareaId, filename) {
+    var text = document.getElementById(textareaId).value;
+    var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

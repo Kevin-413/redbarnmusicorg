@@ -95,7 +95,7 @@ function rbm_msch_teacher_profile_title($title, $post_id) {
         return $title;
     }
     $teaches = trim((string) get_post_meta($post_id, '_msch_teaches', true));
-    return ($teaches !== '') ? $title . ', ' . $teaches : $title;
+    return ($teaches !== '') ? $title . ' - ' . $teaches : $title;
 }
 
 add_filter('previous_post_link', 'rbm_msch_teacher_post_nav_arrow');
@@ -359,6 +359,92 @@ function rbm_teacher_media_picker_assets($hook) {
     );
 }
 
+// --- Faculty Instruments We Teach (docs/0912-1838-Copilot-REQUEST-Add-Faculty-Instruments-We-Teach-List-And-Download.txt) ---
+// Self-contained within this plugin: source of truth is this plugin's own msch_teacher posts and
+// their own msch_instrument term assignments. No rbm-lessons function, taxonomy, or option is read.
+// Active/public rule reused as-is from the existing Status meta box: post_status === 'publish'
+// (see rbm_render_teacher_status_box() / rbm_save_teacher_meta() above - Active maps to 'publish').
+function rbm_faculty_get_instruments_we_teach_titles() {
+    $teacher_ids = get_posts([
+        'post_type'      => 'msch_teacher',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+    ]);
+    $names = [];
+    foreach ($teacher_ids as $teacher_id) {
+        $terms = get_the_terms($teacher_id, 'msch_instrument');
+        if (is_array($terms)) {
+            foreach ($terms as $term) {
+                $names[$term->name] = true; // keyed by name to de-duplicate
+            }
+        }
+    }
+    $names = array_keys($names);
+    sort($names, SORT_STRING | SORT_FLAG_CASE);
+    return $names;
+}
+
+add_action('admin_post_rbm_download_faculty_instruments_we_teach', 'rbm_faculty_download_instruments_we_teach');
+function rbm_faculty_download_instruments_we_teach() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Insufficient permissions.');
+    }
+    check_admin_referer('rbm_download_faculty_instruments_we_teach');
+    $titles = rbm_faculty_get_instruments_we_teach_titles();
+    nocache_headers();
+    header('Content-Type: text/plain; charset=utf-8');
+    header('Content-Disposition: attachment; filename="instruments-we-teach.txt"');
+    echo implode("\n", $titles) . (empty($titles) ? '' : "\n");
+    exit;
+}
+
+// --- Faculty Instruments Taught Plaintext Export (docs/0912-1851-Copilot-REQUEST-Faculty-Instruments-Taught-Plaintext-Export.txt) ---
+// Literal, unparsed export: Teacher Name (post_title) plus the exact stored '_msch_teaches' value
+// (the free-text "Instruments Taught" field on the Add/Edit Teacher form). No splitting,
+// normalizing, or deduplication. Independent from rbm-lessons (no cross-plugin calls).
+function rbm_faculty_get_lessons_we_teach_rows() {
+    $teacher_ids = get_posts([
+        'post_type'      => 'msch_teacher',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+    ]);
+    $rows = [];
+    foreach ($teacher_ids as $teacher_id) {
+        $rows[] = [
+            'name'    => get_the_title($teacher_id),
+            'teaches' => trim((string) get_post_meta($teacher_id, '_msch_teaches', true)),
+        ];
+    }
+    usort($rows, function ($a, $b) {
+        $cmp = strcasecmp($a['teaches'], $b['teaches']);
+        return $cmp !== 0 ? $cmp : strcasecmp($a['name'], $b['name']);
+    });
+    return $rows;
+}
+
+function rbm_faculty_get_lessons_we_teach_plaintext() {
+    $lines = ["Teacher\tInstruments Taught"];
+    foreach (rbm_faculty_get_lessons_we_teach_rows() as $row) {
+        $lines[] = $row['name'] . "\t" . $row['teaches'];
+    }
+    return implode("\n", $lines);
+}
+
+add_action('admin_post_rbm_download_faculty_lessons_we_teach', 'rbm_faculty_download_lessons_we_teach');
+function rbm_faculty_download_lessons_we_teach() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Insufficient permissions.');
+    }
+    check_admin_referer('rbm_download_faculty_lessons_we_teach');
+    nocache_headers();
+    header('Content-Type: text/plain; charset=utf-8');
+    header('Content-Disposition: attachment; filename="faculty-lessons-we-teach.txt"');
+    echo rbm_faculty_get_lessons_we_teach_plaintext() . "\n";
+    exit;
+}
+
 // --- Shared Teacher Placeholder (site-level fallback, not copied into teacher records) ---
 
 add_action('admin_menu', 'rbm_add_teacher_placeholder_menu');
@@ -392,7 +478,8 @@ function rbm_render_teacher_placeholder_page() {
     <div class="wrap">
         <h1>Teacher Placeholder</h1>
         <p>Shared fallback image used site-wide whenever a teacher's Card Photo (compact) or Portrait Photo (full) is empty. Not stored on individual teacher records.</p>
-        <form method="post">
+        <p><button type="submit" form="rbm-teacher-placeholder-form" class="button button-primary">Save Placeholder</button></p>
+        <form method="post" id="rbm-teacher-placeholder-form">
             <?php wp_nonce_field('rbm_save_teacher_placeholder', 'rbm_placeholder_nonce'); ?>
             <div id="rbm_placeholder_preview"><?php echo $image_html; ?></div>
             <input type="hidden" id="rbm_msch_placeholder_id" name="rbm_msch_placeholder_id" value="<?php echo esc_attr($placeholder_id); ?>">
@@ -409,6 +496,83 @@ function rbm_render_teacher_placeholder_page() {
         <?php if (!$placeholder_id) : ?>
             <p><em>No image selected. A built-in neutral silhouette is used automatically until one is set here.</em></p>
         <?php endif; ?>
+
+        <h2>INSTRUMENTS WE TEACH</h2>
+        <?php
+        $instrument_titles = rbm_faculty_get_instruments_we_teach_titles();
+        if (empty($instrument_titles)) :
+        ?>
+            <p>No instruments are currently assigned to active Faculty.</p>
+        <?php else : ?>
+            <p>
+                <textarea id="rbm-faculty-iwt-list" readonly rows="<?php echo (int) max(3, count($instrument_titles)); ?>" style="width:320px;max-width:100%;font-family:monospace;"><?php echo esc_textarea(implode("\n", $instrument_titles)); ?></textarea>
+            </p>
+            <p>
+                <button type="button" class="button" id="rbm-faculty-iwt-copy">Copy List</button>
+                <a class="button" href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=rbm_download_faculty_instruments_we_teach'), 'rbm_download_faculty_instruments_we_teach')); ?>">Download .txt</a>
+                <span id="rbm-faculty-iwt-copy-status" style="margin-left:8px;"></span>
+            </p>
+            <script>
+            (function () {
+                var btn = document.getElementById('rbm-faculty-iwt-copy');
+                var status = document.getElementById('rbm-faculty-iwt-copy-status');
+                if (!btn) {
+                    return;
+                }
+                btn.addEventListener('click', function () {
+                    var ta = document.getElementById('rbm-faculty-iwt-list');
+                    ta.select();
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(ta.value).then(function () {
+                            status.textContent = 'Copied';
+                            setTimeout(function () { status.textContent = ''; }, 2000);
+                        });
+                    } else {
+                        document.execCommand('copy');
+                        status.textContent = 'Copied';
+                        setTimeout(function () { status.textContent = ''; }, 2000);
+                    }
+                });
+            })();
+            </script>
+        <?php endif; ?>
+
+        <h2>FACULTY &mdash; LESSONS WE TEACH</h2>
+        <?php
+        $lwt_rows = rbm_faculty_get_lessons_we_teach_rows();
+        $lwt_text = rbm_faculty_get_lessons_we_teach_plaintext();
+        ?>
+        <p>
+            <textarea id="rbm-faculty-lwt-list" readonly rows="<?php echo (int) max(3, count($lwt_rows) + 1); ?>" style="width:480px;max-width:100%;font-family:monospace;white-space:pre;"><?php echo esc_textarea($lwt_text); ?></textarea>
+        </p>
+        <p>
+            <button type="button" class="button" id="rbm-faculty-lwt-copy">Copy List</button>
+            <a class="button" href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=rbm_download_faculty_lessons_we_teach'), 'rbm_download_faculty_lessons_we_teach')); ?>">Download .txt</a>
+            <span id="rbm-faculty-lwt-copy-status" style="margin-left:8px;"></span>
+        </p>
+        <script>
+        (function () {
+            var btn = document.getElementById('rbm-faculty-lwt-copy');
+            var status = document.getElementById('rbm-faculty-lwt-copy-status');
+            if (!btn) {
+                return;
+            }
+            btn.addEventListener('click', function () {
+                var ta = document.getElementById('rbm-faculty-lwt-list');
+                ta.select();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(ta.value).then(function () {
+                        status.textContent = 'Copied';
+                        setTimeout(function () { status.textContent = ''; }, 2000);
+                    });
+                } else {
+                    document.execCommand('copy');
+                    status.textContent = 'Copied';
+                    setTimeout(function () { status.textContent = ''; }, 2000);
+                }
+            });
+        })();
+        </script>
     </div>
     <?php
 }
@@ -490,6 +654,146 @@ function rbm_teacher_admin_column_content($column, $post_id) {
     }
 }
 
+// Status filter (docs/0913-1544-Copilot-REQUEST-Add-Faculty-Status-Controls-And-List-State-
+// Persistence.txt): read-only list filter reusing the existing publish/draft rule already used by
+// the Status meta box (rbm_render_teacher_status_box()) — no new status field. Default is 'all'
+// (WP's own current default, showing every status) rather than 'active', since forcing a narrower
+// default would silently hide existing Draft teachers from admins used to seeing them by default.
+function rbm_msch_teacher_current_status_filter() {
+    $status = isset($_GET['rbm_status']) ? sanitize_key(wp_unslash($_GET['rbm_status'])) : 'all';
+    return in_array($status, ['active', 'inactive', 'all'], true) ? $status : 'all';
+}
+
+add_action('pre_get_posts', 'rbm_msch_teacher_filter_by_status');
+function rbm_msch_teacher_filter_by_status($query) {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'msch_teacher') {
+        return;
+    }
+    $status_filter = rbm_msch_teacher_current_status_filter();
+    if ($status_filter === 'active') {
+        $query->set('post_status', 'publish');
+    } elseif ($status_filter === 'inactive') {
+        $query->set('post_status', 'draft');
+    }
+    // 'all' intentionally leaves WP's own default post_status handling untouched.
+}
+
+add_action('admin_notices', 'rbm_msch_teacher_status_filter_control');
+function rbm_msch_teacher_status_filter_control() {
+    $screen = get_current_screen();
+    if (!$screen || $screen->id !== 'edit-msch_teacher') {
+        return;
+    }
+    $status_filter = rbm_msch_teacher_current_status_filter();
+    $base_url = remove_query_arg(['rbm_status', 'paged']);
+    ?>
+    <div class="rbm-teacher-status-filter" style="display:flex; align-items:center; gap:6px; margin:10px 0;">
+        <strong>Status:</strong>
+        <a href="<?php echo esc_url(add_query_arg('rbm_status', 'active', $base_url)); ?>" class="button<?php echo $status_filter === 'active' ? ' button-primary' : ''; ?>">Active</a>
+        <a href="<?php echo esc_url(add_query_arg('rbm_status', 'inactive', $base_url)); ?>" class="button<?php echo $status_filter === 'inactive' ? ' button-primary' : ''; ?>">Inactive</a>
+        <a href="<?php echo esc_url(add_query_arg('rbm_status', 'all', $base_url)); ?>" class="button<?php echo $status_filter === 'all' ? ' button-primary' : ''; ?>">All</a>
+    </div>
+    <?php
+}
+
+// Persist the selected status through the list's own search form submission (pagination/column
+// sort links already carry it via the current URL, since they're generated with add_query_arg()).
+add_action('restrict_manage_posts', 'rbm_msch_teacher_status_hidden_field');
+function rbm_msch_teacher_status_hidden_field($post_type) {
+    if ($post_type !== 'msch_teacher') {
+        return;
+    }
+    echo '<input type="hidden" name="rbm_status" value="' . esc_attr(rbm_msch_teacher_current_status_filter()) . '">';
+}
+
+// Per-user list-state persistence (same generic pattern as rbm-instruments, docs/0913-1455-PLAN-
+// Generic-Query-Param-List-State-Persistence.txt): whatever's in the URL besides post_type/paged/
+// known action-noise params gets remembered, so a bare visit reopens where the user left off.
+// First-time use (nothing saved yet) falls through to WP's own current default behavior.
+add_action('load-edit.php', 'rbm_msch_teacher_remember_list_state');
+function rbm_msch_teacher_remember_list_state() {
+    if (($_GET['post_type'] ?? '') !== 'msch_teacher') {
+        return;
+    }
+    $ignore = ['post_type', 'paged', 'action', 'action2', '_wpnonce', '_wp_http_referer', 'ids'];
+    $state = array_diff_key($_GET, array_flip($ignore));
+    $user_id = get_current_user_id();
+    if (!empty($state)) {
+        $sanitized = [];
+        foreach ($state as $key => $value) {
+            if (is_string($value)) {
+                $sanitized[sanitize_key($key)] = sanitize_text_field(wp_unslash($value));
+            }
+        }
+        update_user_meta($user_id, '_rbm_msch_teacher_list_state', $sanitized);
+        return;
+    }
+    $saved = get_user_meta($user_id, '_rbm_msch_teacher_list_state', true);
+    if (!empty($saved) && is_array($saved)) {
+        wp_safe_redirect(add_query_arg($saved));
+        exit;
+    }
+}
+
+// --- Filter Instruments (docs/0913-1644-Copilot-REQUEST-Implement-Teacher-By-Instrument-Filtering-
+// And-Tile-Links.txt): structured, separate from the display-only Instruments Taught text field.
+// Canonical Instrument identity reused as-is from rbm-instruments: a published msch_lesson post
+// (no second taxonomy/catalog). Stored explicitly as an array of msch_lesson post IDs on the
+// teacher; empty explicit value falls back to the teacher's Faculty category-derived set.
+function rbm_msch_teacher_category_derived_instruments($teacher_id) {
+    $terms = get_the_terms($teacher_id, 'msch_instrument');
+    if (!is_array($terms) || is_wp_error($terms) || empty($terms) || !post_type_exists('msch_lesson')) {
+        return [];
+    }
+    $lesson_ids = get_posts([
+        'post_type'      => 'msch_lesson',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'tax_query'      => [[
+            'taxonomy' => 'msch_instrument',
+            'field'    => 'term_id',
+            'terms'    => wp_list_pluck($terms, 'term_id'),
+        ]],
+    ]);
+    return array_map('intval', $lesson_ids);
+}
+
+function rbm_msch_teacher_get_filter_instruments($teacher_id) {
+    $explicit = get_post_meta($teacher_id, '_msch_teacher_filter_instruments', true);
+    if (is_array($explicit) && !empty($explicit)) {
+        return array_map('intval', $explicit);
+    }
+    return rbm_msch_teacher_category_derived_instruments($teacher_id);
+}
+
+// One-time backfill (existing teachers only; empty Filter Instruments only) so the admin control
+// shows real saved values, not just a runtime fallback. Idempotent via the option guard, matching
+// this codebase's existing seed-once pattern (e.g. rbm_seed_lesson_category_terms()).
+add_action('init', 'rbm_backfill_teacher_filter_instruments', 20);
+function rbm_backfill_teacher_filter_instruments() {
+    if (get_option('rbm_teacher_filter_instruments_backfilled_v1')) {
+        return;
+    }
+    $teacher_ids = get_posts([
+        'post_type'      => 'msch_teacher',
+        'post_status'    => 'any',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+    ]);
+    foreach ($teacher_ids as $teacher_id) {
+        $existing = get_post_meta($teacher_id, '_msch_teacher_filter_instruments', true);
+        if (is_array($existing) && !empty($existing)) {
+            continue; // never overwrite an existing explicit value
+        }
+        $derived = rbm_msch_teacher_category_derived_instruments($teacher_id);
+        if (!empty($derived)) {
+            update_post_meta($teacher_id, '_msch_teacher_filter_instruments', $derived);
+        }
+    }
+    update_option('rbm_teacher_filter_instruments_backfilled_v1', 1);
+}
+
 // --- [msch_teachers] shortcode (Phase 3: compact mode, Phase 4: full mode) ---
 
 add_shortcode('msch_teachers', 'rbm_msch_teachers_shortcode');
@@ -530,6 +834,29 @@ function rbm_msch_teachers_shortcode($atts) {
     }
 
     $teachers = get_posts($query_args);
+
+    // Public per-Instrument filtering (docs/0913-1644-...): server-side only, independent of the
+    // broad Faculty-category 'instrument' attribute above. ?instrument=<canonical Lesson slug>
+    // narrows to teachers whose effective Filter Instruments (explicit, or category-derived when
+    // empty) include that Instrument. An invalid/unknown slug is ignored (normal page, no error,
+    // no term/post created from the URL).
+    $rbm_filter_instrument_id = 0;
+    if (!empty($_GET['instrument'])) {
+        $slug = sanitize_title(wp_unslash($_GET['instrument']));
+        $matched = get_posts([
+            'post_type'      => 'msch_lesson',
+            'name'           => $slug,
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+        ]);
+        if (!empty($matched)) {
+            $rbm_filter_instrument_id = $matched[0]->ID;
+            $teachers = array_values(array_filter($teachers, function ($t) use ($rbm_filter_instrument_id) {
+                return in_array($rbm_filter_instrument_id, rbm_msch_teacher_get_filter_instruments($t->ID), true);
+            }));
+        }
+    }
+
     if (empty($teachers)) {
         return '';
     }
@@ -615,6 +942,9 @@ function rbm_msch_teachers_shortcode($atts) {
                 <?php endforeach; ?>
             </select>
         </div>
+    <?php endif; ?>
+    <?php if ($rbm_filter_instrument_id) : ?>
+        <p class="msch-teacher-view-all"><a href="<?php echo esc_url(remove_query_arg('instrument')); ?>">View All Faculty</a></p>
     <?php endif; ?>
     <div class="thesis-lesson-card-grid">
         <?php foreach ($teachers as $teacher) :

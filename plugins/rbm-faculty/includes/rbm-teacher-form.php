@@ -80,6 +80,14 @@ function rbm_render_teacher_form_page() {
     $portrait_id = $teacher_id ? (int) get_post_thumbnail_id($teacher_id) : 0;
     $selected_terms = $teacher_id ? wp_get_post_terms($teacher_id, 'msch_instrument', ['fields' => 'ids']) : [];
     $all_terms = get_terms(['taxonomy' => 'msch_instrument', 'hide_empty' => false]);
+    $selected_filter_instruments = $teacher_id ? rbm_msch_teacher_get_filter_instruments($teacher_id) : [];
+    $all_lessons = post_type_exists('msch_lesson') ? get_posts([
+        'post_type'      => 'msch_lesson',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ]) : [];
     ?>
     <div class="wrap">
         <h1><?php echo $teacher_id ? 'Edit Teacher' : 'Add Teacher'; ?></h1>
@@ -120,6 +128,18 @@ function rbm_render_teacher_form_page() {
                 <label for="rbm_msch_teaches"><strong>Instruments Taught</strong></label><br>
                 <input type="text" id="rbm_msch_teaches" name="rbm_msch_teaches" class="widefat" value="<?php echo esc_attr($teaches); ?>" placeholder="e.g. Violin &amp; Viola">
                 <span class="description">Short public display string shown after the teacher's name on their Teacher Profile Page (e.g. "Carol Hutter, Violin &amp; Viola"). Independent from Instrument Category above; not auto-generated.</span>
+            </p>
+
+            <p>
+                <strong>Filter Instruments</strong><br>
+                <?php foreach ($all_lessons as $lesson) : ?>
+                    <label style="display:inline-block;margin:2px 12px 2px 0;">
+                        <input type="checkbox" name="rbm_filter_instruments[]" value="<?php echo (int) $lesson->ID; ?>" <?php checked(in_array($lesson->ID, $selected_filter_instruments, true)); ?>>
+                        <?php echo esc_html(get_the_title($lesson)); ?>
+                    </label>
+                <?php endforeach; ?>
+                <br>
+                <span class="description">Used to match this teacher when visitors filter Faculty by a specific Instrument. Automatically filled from the teacher's Faculty category/categories. Edit only when this teacher teaches a different subset.</span>
             </p>
 
             <p>
@@ -219,6 +239,10 @@ function rbm_save_teacher_form_submit() {
         wp_set_post_terms($teacher_id, $term_ids, 'msch_instrument', false);
 
         update_post_meta($teacher_id, '_msch_teaches', sanitize_text_field(wp_unslash($_POST['rbm_msch_teaches'] ?? '')));
+
+        $filter_ids = isset($_POST['rbm_filter_instruments']) ? array_map('intval', (array) $_POST['rbm_filter_instruments']) : [];
+        $filter_ids = array_values(array_filter($filter_ids, function ($id) { return get_post_type($id) === 'msch_lesson'; }));
+        update_post_meta($teacher_id, '_msch_teacher_filter_instruments', $filter_ids);
 
         $portrait_id = (int) ($_POST['rbm_portrait_photo_id'] ?? 0);
         if ($portrait_id > 0 && wp_attachment_is_image($portrait_id)) {
