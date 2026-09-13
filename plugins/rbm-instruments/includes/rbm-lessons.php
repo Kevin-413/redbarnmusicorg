@@ -1526,11 +1526,15 @@ function rbm_msch_lesson_card_html($lesson, $hidden = false) {
 
 // Docs/0913-1644-Copilot-REQUEST-Implement-Teacher-By-Instrument-Filtering-And-Tile-Links.txt:
 // resolves the Faculty page URL dynamically (never hardcoded) with ?instrument=<canonical Lesson
-// slug> appended, so rbm-faculty's server-side filter can match this exact Instrument.
+// slug> appended, so rbm-faculty's server-side filter can match this exact Instrument. Also carries
+// the current Lessons page URL as ?return= (docs/0913-1731-...) so rbm-faculty's terminal fallback
+// can send a visitor back to the exact Lessons context they came from, same-site only.
 function rbm_msch_faculty_filter_url($lesson_slug) {
     $page = get_posts(['post_type' => 'page', 'name' => 'faculty', 'posts_per_page' => 1]);
     $base = !empty($page) ? get_permalink($page[0]) : home_url('/faculty/');
-    return add_query_arg('instrument', $lesson_slug, $base);
+    $url = add_query_arg('instrument', $lesson_slug, $base);
+    $current_url = home_url(add_query_arg(null, null));
+    return add_query_arg('return', rawurlencode($current_url), $url);
 }
 
 add_shortcode('msch_lessons', 'rbm_msch_lessons_shortcode');

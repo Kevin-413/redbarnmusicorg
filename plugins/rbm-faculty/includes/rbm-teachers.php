@@ -794,6 +794,96 @@ function rbm_backfill_teacher_filter_instruments() {
     update_option('rbm_teacher_filter_instruments_backfilled_v1', 1);
 }
 
+// Fallback chain (docs/0913-1731-Copilot-REQUEST-Implement-Missing-Faculty-Fallback-Chain.txt):
+// EXACT INSTRUMENT -> CATEGORY FALLBACK -> (caller decides terminal return-to-Lessons when this
+// returns 'none'). Single resolver reused by both the template_redirect safety check below and the
+// shortcode itself, so there is exactly one place that decides who matches an Instrument.
+function rbm_msch_resolve_faculty_by_instrument($lesson_id) {
+    $base_args = [
+        'post_type'      => 'msch_teacher',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => ['title' => 'ASC'],
+    ];
+    $teachers = get_posts($base_args);
+    $exact = array_values(array_filter($teachers, function ($t) use ($lesson_id) {
+        return in_array($lesson_id, rbm_msch_teacher_get_filter_instruments($t->ID), true);
+    }));
+    if (!empty($exact)) {
+        return ['teachers' => $exact, 'mode' => 'exact', 'category_name' => ''];
+    }
+
+    // Category fallback: the same shared msch_instrument taxonomy is the only bridge used — no new
+    // mapping table, no string matching on names.
+    $terms = get_the_terms($lesson_id, 'msch_instrument');
+    if (is_array($terms) && !is_wp_error($terms) && !empty($terms)) {
+        $category_args = $base_args;
+        $category_args['tax_query'] = [[
+            'taxonomy' => 'msch_instrument',
+            'field'    => 'term_id',
+            'terms'    => wp_list_pluck($terms, 'term_id'),
+        ]];
+        $category_teachers = get_posts($category_args);
+        if (!empty($category_teachers)) {
+            // Prefer a normal (non-Direct-Display) term name for the optional UI note; a Lesson can
+            // also be tagged with the special "Instruments We Teach" term, which isn't a real
+            // Faculty category label a visitor would recognize.
+            $display_term = $terms[0];
+            foreach ($terms as $term) {
+                if (!function_exists('rbm_msch_category_is_direct_display') || !rbm_msch_category_is_direct_display($term->term_id)) {
+                    $display_term = $term;
+                    break;
+                }
+            }
+            return ['teachers' => $category_teachers, 'mode' => 'category', 'category_name' => $display_term->name];
+        }
+    }
+
+    return ['teachers' => [], 'mode' => 'none', 'category_name' => ''];
+}
+
+// Same-site-only return target for the terminal "Back to Lessons" fallback. Accepts an optional
+// ?return= path/URL (only honored if its host matches this site) so a visitor can be sent back to
+// the exact Lessons context they came from; otherwise resolves the canonical Lessons page by slug.
+function rbm_msch_faculty_return_url() {
+    if (!empty($_GET['return'])) {
+        $parsed = wp_parse_url(wp_unslash($_GET['return']));
+        $home_host = wp_parse_url(home_url(), PHP_URL_HOST);
+        if (empty($parsed['host']) || $parsed['host'] === $home_host) {
+            $path = isset($parsed['path']) ? $parsed['path'] : '/';
+            $query = isset($parsed['query']) ? ('?' . $parsed['query']) : '';
+            return home_url($path . $query);
+        }
+    }
+    $page = get_posts(['post_type' => 'page', 'name' => 'lessons', 'posts_per_page' => 1]);
+    return !empty($page) ? get_permalink($page[0]) : home_url('/lessons/');
+}
+
+// Terminal fallback: runs before any output, since a shortcode-time redirect would be too late
+// (headers already sent). Only acts on the actual Faculty page (has the Teachers shortcode), and
+// only when ?instrument= resolves to nothing renderable, per the fallback chain's STOP condition.
+add_action('template_redirect', 'rbm_faculty_instrument_fallback_redirect');
+function rbm_faculty_instrument_fallback_redirect() {
+    if (empty($_GET['instrument']) || !is_singular('page')) {
+        return;
+    }
+    $post = get_queried_object();
+    if (!$post || (!has_shortcode($post->post_content, 'rbm_msch_teachers_element') && !has_shortcode($post->post_content, 'msch_teachers'))) {
+        return;
+    }
+    $slug = sanitize_title(wp_unslash($_GET['instrument']));
+    $matched = get_posts(['post_type' => 'msch_lesson', 'name' => $slug, 'post_status' => 'publish', 'posts_per_page' => 1]);
+    if (empty($matched)) {
+        wp_safe_redirect(rbm_msch_faculty_return_url());
+        exit;
+    }
+    $result = rbm_msch_resolve_faculty_by_instrument($matched[0]->ID);
+    if (empty($result['teachers'])) {
+        wp_safe_redirect(rbm_msch_faculty_return_url());
+        exit;
+    }
+}
+
 // --- [msch_teachers] shortcode (Phase 3: compact mode, Phase 4: full mode) ---
 
 add_shortcode('msch_teachers', 'rbm_msch_teachers_shortcode');
@@ -835,12 +925,14 @@ function rbm_msch_teachers_shortcode($atts) {
 
     $teachers = get_posts($query_args);
 
-    // Public per-Instrument filtering (docs/0913-1644-...): server-side only, independent of the
-    // broad Faculty-category 'instrument' attribute above. ?instrument=<canonical Lesson slug>
-    // narrows to teachers whose effective Filter Instruments (explicit, or category-derived when
-    // empty) include that Instrument. An invalid/unknown slug is ignored (normal page, no error,
-    // no term/post created from the URL).
+    // Public per-Instrument filtering (docs/0913-1644-..., fallback chain added in
+    // docs/0913-1731-...): server-side only, independent of the broad Faculty-category
+    // 'instrument' attribute above. EXACT INSTRUMENT -> CATEGORY FALLBACK via the shared resolver;
+    // the terminal "Back to Lessons" case is handled earlier by template_redirect (a shortcode-time
+    // redirect would be too late), so an empty result here is just a safety-net blank render for
+    // any context that reaches this shortcode without going through that check.
     $rbm_filter_instrument_id = 0;
+    $rbm_fallback_note = '';
     if (!empty($_GET['instrument'])) {
         $slug = sanitize_title(wp_unslash($_GET['instrument']));
         $matched = get_posts([
@@ -851,9 +943,15 @@ function rbm_msch_teachers_shortcode($atts) {
         ]);
         if (!empty($matched)) {
             $rbm_filter_instrument_id = $matched[0]->ID;
-            $teachers = array_values(array_filter($teachers, function ($t) use ($rbm_filter_instrument_id) {
-                return in_array($rbm_filter_instrument_id, rbm_msch_teacher_get_filter_instruments($t->ID), true);
-            }));
+            $result = rbm_msch_resolve_faculty_by_instrument($rbm_filter_instrument_id);
+            $teachers = $result['teachers'];
+            if ($result['mode'] === 'category') {
+                $rbm_fallback_note = sprintf(
+                    'No exact teachers found for %s. Showing %s faculty.',
+                    get_the_title($rbm_filter_instrument_id),
+                    $result['category_name']
+                );
+            }
         }
     }
 
@@ -944,6 +1042,9 @@ function rbm_msch_teachers_shortcode($atts) {
         </div>
     <?php endif; ?>
     <?php if ($rbm_filter_instrument_id) : ?>
+        <?php if ($rbm_fallback_note !== '') : ?>
+            <p class="msch-teacher-fallback-note"><em><?php echo esc_html($rbm_fallback_note); ?></em></p>
+        <?php endif; ?>
         <p class="msch-teacher-view-all"><a href="<?php echo esc_url(remove_query_arg('instrument')); ?>">View All Faculty</a></p>
     <?php endif; ?>
     <div class="thesis-lesson-card-grid">
