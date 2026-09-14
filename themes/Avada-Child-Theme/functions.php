@@ -29,11 +29,14 @@ function redbarn_fix_sidebar_rendering_timing() {
 add_action( 'wp', 'redbarn_fix_sidebar_rendering_timing', 21 );
 
 /**
- * Mobile-only 3-button bottom action bar (Site Frame Plan, mobile bottom
+ * Mobile-only 4-button bottom action bar (Site Frame Plan, mobile bottom
  * action bar). Real destinations only: Lessons landing page, the site's
- * current Lessons Inquiry sign-up flow, and the Contact page. Hidden on
- * desktop/tablet via CSS (Additional CSS post 20363); shown only below
- * the existing mobile breakpoint. Not a plugin; markup output only.
+ * current Lessons Inquiry sign-up flow, the Contact page, and a Menu
+ * button that opens Avada's own mobile nav (triggers the existing
+ * .awb-menu__m-toggle button already in the header, rather than
+ * duplicating the menu). Hidden on desktop/tablet via CSS (Additional
+ * CSS post 20363); shown only below the existing mobile breakpoint.
+ * Not a plugin; markup output only.
  */
 function redbarn_mobile_bottom_action_bar() {
 	?>
@@ -50,7 +53,25 @@ function redbarn_mobile_bottom_action_bar() {
 			<span class="rbm-mobile-bottom-bar-icon" aria-hidden="true">&#9993;</span>
 			<span class="rbm-mobile-bottom-bar-label">Contact</span>
 		</a>
+		<button type="button" class="rbm-mobile-bottom-bar-btn" id="rbm-mobile-menu-trigger" aria-label="Menu">
+			<span class="rbm-mobile-bottom-bar-icon" aria-hidden="true">&#9776;</span>
+			<span class="rbm-mobile-bottom-bar-label">Menu</span>
+		</button>
 	</nav>
+	<script>
+	( function () {
+		var btn = document.getElementById( 'rbm-mobile-menu-trigger' );
+		if ( ! btn ) {
+			return;
+		}
+		btn.addEventListener( 'click', function () {
+			var toggle = document.querySelector( '.awb-menu__m-toggle' );
+			if ( toggle ) {
+				toggle.click();
+			}
+		} );
+	} )();
+	</script>
 	<?php
 }
 
@@ -78,3 +99,11 @@ function redbarn_redirect_404_to_post_255() {
 }
 add_action( 'template_redirect', 'redbarn_redirect_404_to_post_255' );
 add_action( 'wp_footer', 'redbarn_mobile_bottom_action_bar', 20 );
+
+/**
+ * Retired: sitewide test-announcement strip (public testing period ended).
+ * Function kept for quick reinstatement; hook removed so it no longer renders.
+ */
+function rbm_test_site_notice() {
+	echo '<div class="rbm-test-site-notice"><strong>We’re testing our new website!</strong> If you notice anything confusing or broken, please use the <strong>Suggestions</strong> button at the bottom and let us know. Thank you!</div>';
+}

@@ -27,7 +27,7 @@ function rbm_msch_lessons_map_element() {
         return;
     }
     fusion_builder_map([
-        'name'            => 'Music School Lessons',
+        'name'            => 'Music School Instruments',
         'shortcode'       => 'rbm_msch_lessons_element',
         'icon'            => 'fusiona-single',
         'allow_generator' => true,
@@ -53,14 +53,14 @@ function rbm_msch_lessons_map_element() {
     ]);
 }
 
-// '' key ("All Lessons") first, then dynamic terms so new categories appear automatically.
+// '' key ("All Instruments") first, then dynamic terms so new categories appear automatically.
 function rbm_msch_lessons_instrument_choices() {
     // fusion_builder_before_init can fire before WP 'init' (mu-plugins load pre-plugins), so the
     // taxonomy may not be registered yet; register it defensively (idempotent) before querying.
     if (!taxonomy_exists('msch_instrument') && function_exists('rbm_register_instrument_taxonomy')) {
         rbm_register_instrument_taxonomy();
     }
-    $choices = ['' => 'All Lessons'];
+    $choices = ['' => 'All Instruments'];
     $terms = get_terms([
         'taxonomy'   => 'msch_instrument',
         'hide_empty' => false,

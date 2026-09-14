@@ -4,7 +4,18 @@ Description: Child theme for Avada theme
 Author: ThemeFusion
 Author URI: https://theme-fusion.com
 Template: Avada
-Version: 1.0.0
+Version: 1.0.1
 Text Domain:  Avada
 */
+
+/* Temporary test-announcement strip (rbm_test_site_notice, functions.php) */
+.rbm-test-site-notice {
+	background: #fff6d8;
+	border-bottom: 1px solid #e0c94f;
+	color: #4a3c00;
+	font-size: 14px;
+	line-height: 1.5;
+	padding: 8px 20px;
+	text-align: center;
+}
 

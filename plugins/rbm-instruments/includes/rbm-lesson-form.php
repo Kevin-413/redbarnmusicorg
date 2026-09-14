@@ -73,6 +73,16 @@ function rbm_render_lesson_form_page() {
     $catalog_images = rbm_msch_lesson_catalog_images();
     $selected_terms = $lesson_id ? wp_get_post_terms($lesson_id, 'msch_instrument', ['fields' => 'ids']) : [];
     $all_terms      = get_terms(['taxonomy' => 'msch_instrument', 'hide_empty' => false]);
+    // Each Instrument may have only one normal Category (plus optionally Instruments We Teach);
+    // a radio group enforces that at entry. Pre-existing data never has more than one (enforced
+    // on every save), so taking the first match here is just a defensive fallback, not a real choice.
+    $selected_normal_term_id = 0;
+    foreach ($selected_terms as $term_id) {
+        if (!rbm_msch_category_is_direct_display($term_id)) {
+            $selected_normal_term_id = (int) $term_id;
+            break;
+        }
+    }
     ?>
     <div class="wrap">
         <h1><?php echo $lesson_id ? 'Edit Instrument' : 'Add Instrument'; ?></h1>
@@ -96,14 +106,18 @@ function rbm_render_lesson_form_page() {
             </p>
 
             <p>
-                <strong>Category</strong><br>
+                <strong>Category</strong> <span class="description">(one only; use INSTRUMENTS WE TEACH below in addition if needed)</span><br>
+                <label style="display:inline-block;margin:2px 12px 2px 0;">
+                    <input type="radio" name="rbm_category" value="" <?php checked($selected_normal_term_id === 0); ?>>
+                    <em>&#8212; None &#8212;</em>
+                </label>
                 <?php foreach ($all_terms as $term) :
                     if (rbm_msch_category_is_direct_display($term->term_id)) {
                         continue; // shown in its own separated section below (docs/0912-1751-...), same relationship
                     }
                 ?>
                     <label style="display:inline-block;margin:2px 12px 2px 0;">
-                        <input type="checkbox" name="rbm_categories[]" value="<?php echo (int) $term->term_id; ?>" <?php checked(in_array($term->term_id, $selected_terms, true)); ?>>
+                        <input type="radio" name="rbm_category" value="<?php echo (int) $term->term_id; ?>" <?php checked($selected_normal_term_id === $term->term_id); ?>>
                         <?php echo esc_html($term->name); ?>
                     </label>
                 <?php endforeach; ?>
@@ -119,7 +133,7 @@ function rbm_render_lesson_form_page() {
                 <strong>INSTRUMENTS WE TEACH</strong><br>
                 <?php foreach ($direct_display_terms as $term) : ?>
                     <label style="display:inline-block;margin:2px 12px 2px 0;">
-                        <input type="checkbox" name="rbm_categories[]" value="<?php echo (int) $term->term_id; ?>" <?php checked(in_array($term->term_id, $selected_terms, true)); ?>>
+                        <input type="checkbox" name="rbm_categories_iwt[]" value="<?php echo (int) $term->term_id; ?>" <?php checked(in_array($term->term_id, $selected_terms, true)); ?>>
                         INSTRUMENTS WE TEACH
                     </label>
                 <?php endforeach; ?>
@@ -146,7 +160,7 @@ function rbm_render_lesson_form_page() {
                         <span id="rbm_lesson_title_preview" style="display:block;padding:12px 16px;font-size:16px;"><?php echo esc_html($title); ?></span>
                     </div>
                 </div>
-                <span class="description">Populated from <code>wp-content/plugins/rbm-instruments/assets/images/</code> — add files there to expand this list. The preview above crops the same way the tile does on the live Lessons page, so you can catch images that get cut off before saving.</span>
+                <span class="description">Populated from <code>wp-content/plugins/rbm-instruments/assets/images/</code> — add files there to expand this list. The preview above crops the same way the tile does on the live Instruments page, so you can catch images that get cut off before saving.</span>
                 <script>
                 (function(){
                     var urls = <?php echo wp_json_encode(array_combine($catalog_images, array_map('rbm_msch_lesson_catalog_image_url', $catalog_images))); ?>;
@@ -229,7 +243,20 @@ function rbm_save_lesson_form_submit() {
     }
 
     if ($lesson_id && !is_wp_error($lesson_id)) {
-        $term_ids = isset($_POST['rbm_categories']) ? array_map('intval', (array) $_POST['rbm_categories']) : [];
+        // Enforce: at most one normal Category, plus optionally Instruments We Teach. The radio
+        // group already limits this at entry; re-checked here (is_direct_display()) in case a
+        // submitted value doesn't match what it claims to be.
+        $term_ids = [];
+        $normal_term_id = isset($_POST['rbm_category']) ? (int) $_POST['rbm_category'] : 0;
+        if ($normal_term_id > 0 && !rbm_msch_category_is_direct_display($normal_term_id)) {
+            $term_ids[] = $normal_term_id;
+        }
+        $iwt_term_ids = isset($_POST['rbm_categories_iwt']) ? array_map('intval', (array) $_POST['rbm_categories_iwt']) : [];
+        foreach ($iwt_term_ids as $iwt_term_id) {
+            if ($iwt_term_id > 0 && rbm_msch_category_is_direct_display($iwt_term_id)) {
+                $term_ids[] = $iwt_term_id;
+            }
+        }
         wp_set_post_terms($lesson_id, $term_ids, 'msch_instrument', false);
 
         update_post_meta($lesson_id, '_msch_lesson_instrument_text', sanitize_text_field(wp_unslash($_POST['rbm_msch_lesson_instrument_text'] ?? '')));

@@ -88,7 +88,7 @@ function rbm_lessons_align_list_page_heading() {
     }
     global $wp_post_types;
     if (isset($wp_post_types['msch_lesson'])) {
-        $wp_post_types['msch_lesson']->labels->name = 'Instruments';
+        $wp_post_types['msch_lesson']->labels->name = 'Instruments We Teach';
     }
 }
 
@@ -132,7 +132,56 @@ function rbm_msch_lesson_hide_tablenav_bar() {
     <style>
         .tablenav .actions { display: none !important; }
         .wp-list-table .column-date { white-space: nowrap; width: 160px; }
+        .wp-list-table .column-rbm_iwt_dot { width: 40px; text-align: center; }
     </style>
+    <?php
+}
+
+// Clickable Icon column thumbnail preview (docs/0914-Copilot-REQUEST-Add-Instrument-Thumbnail-
+// Preview.txt): a small, self-contained overlay (no new library) — opens the same image already
+// shown as the thumbnail, capped at 500px so it's never shown at full original size, closes via its
+// own button, clicking outside it, or Escape. Never touches the image/attachment/alt text data.
+add_action('admin_footer-edit.php', 'rbm_msch_lesson_icon_preview_modal');
+function rbm_msch_lesson_icon_preview_modal() {
+    if (($_GET['post_type'] ?? '') !== 'msch_lesson') {
+        return;
+    }
+    ?>
+    <div id="rbm-icon-preview-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+        <div style="position:relative;max-width:500px;max-height:500px;">
+            <img id="rbm-icon-preview-img" src="" alt="" style="display:block;max-width:500px;max-height:500px;width:auto;height:auto;border-radius:4px;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
+            <button type="button" id="rbm-icon-preview-close" aria-label="Close preview" style="position:absolute;top:-16px;right:-16px;width:32px;height:32px;border-radius:50%;border:none;background:#fff;color:#111;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.4);">&times;</button>
+        </div>
+    </div>
+    <script>
+    (function () {
+        var overlay = document.getElementById('rbm-icon-preview-overlay');
+        var img = document.getElementById('rbm-icon-preview-img');
+        function openPreview(src) {
+            img.src = src;
+            overlay.style.display = 'flex';
+        }
+        function closePreview() {
+            overlay.style.display = 'none';
+            img.src = '';
+        }
+        document.addEventListener('click', function (e) {
+            var trigger = e.target.closest('.rbm-icon-preview-trigger');
+            if (trigger) {
+                openPreview(trigger.getAttribute('data-full-src'));
+                return;
+            }
+            if (e.target === overlay || e.target.id === 'rbm-icon-preview-close') {
+                closePreview();
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && overlay.style.display !== 'none') {
+                closePreview();
+            }
+        });
+    })();
+    </script>
     <?php
 }
 
@@ -236,16 +285,32 @@ add_filter('manage_msch_lesson_posts_columns', 'rbm_msch_lesson_admin_columns');
 function rbm_msch_lesson_admin_columns($columns) {
     // Bulk Actions is disabled on this list, so the row-select checkboxes serve no purpose.
     unset($columns['cb']);
-    // Drag-and-drop reorder handle: only in the exact scope Reset Display Order is enabled for
-    // (docs/0913-1512-Copilot-REQUEST-Add-Drag-And-Drop-Display-Order-To-Instruments-And-Categories.txt).
-    $drag_enabled = (rbm_msch_lesson_current_view() === 'iwt' && rbm_msch_lesson_current_status_filter() === 'active');
+    // Show Date Column setting (docs/0914-Copilot-REQUEST-Add-Show-Date-Column-Setting.txt, see
+    // rbm-lessons-display-settings.php): one plugin-wide option, applies to every filter/view/search
+    // state of this same list table (column headers don't vary by query args) — never touches
+    // Posts, Pages, Faculty, or any other admin list.
+    if (!rbm_msch_lesson_show_date_column()) {
+        unset($columns['date']);
+    }
+    // Drag-and-drop reorder handle: shown whenever the current view/Category/Status combination
+    // has a non-empty drag scope (docs/0913-1512-..., extended by docs/0914-Copilot-REQUEST-Enable-
+    // Drag-And-Drop-Within-Category.txt to also cover a single selected Category).
+    $drag_enabled = !empty(rbm_msch_lesson_drag_scope(
+        rbm_msch_lesson_current_view(),
+        rbm_msch_lesson_current_category(),
+        rbm_msch_lesson_current_status_filter()
+    ));
     // Insert right after Title (Instruments/Date already appear via WP's own taxonomy/date logic).
     $new_columns = [];
     foreach ($columns as $key => $label) {
-        // Relabel only on the Lessons list; the taxonomy's own "Instruments" label stays intact
-        // everywhere else (e.g. Faculty), since this filter is scoped to manage_msch_lesson_posts_columns.
+        // Replace WP's native taxonomy column with our own custom-rendered one (rbm_categories, see
+        // rbm_msch_lesson_admin_column_content()), so Instruments We Teach can be excluded from the
+        // visible list/sort here without affecting the taxonomy's native column anywhere else (e.g.
+        // Faculty). Sort order (orderby=taxonomy-msch_instrument) is unchanged, see
+        // rbm_msch_lesson_sortable_columns().
         if ($key === 'taxonomy-msch_instrument') {
-            $label = 'Categories';
+            $key = 'rbm_categories';
+            $label = 'Category';
         }
         if ($key === 'title') {
             if ($drag_enabled) {
@@ -258,15 +323,44 @@ function rbm_msch_lesson_admin_columns($columns) {
             $new_columns['rbm_status'] = 'Status';
             $new_columns['rbm_display_order'] = 'Display Order';
         }
-        if ($key === 'taxonomy-msch_instrument') {
-            $new_columns['rbm_iwt_status'] = 'INSTRUMENTS WE TEACH';
+        if ($key === 'rbm_categories') {
+            // Narrow status dot (docs/0914-Copilot-REQUEST-Add-IWT-Status-Dot-Column.txt) sits
+            // immediately before the Add/Remove action column — read-only, doesn't affect membership.
+            $new_columns['rbm_iwt_dot'] = 'IWT';
+            $new_columns['rbm_iwt_status'] = 'Instruments We Teach';
         }
     }
     return $new_columns;
 }
 
+// Removes The SEO Framework's per-post SEO score column from this list (docs/0914-Copilot-REQUEST-
+// Replace-SEO-Column-With-IWT-Membership-Column.txt) — Instruments aren't indexed content the way
+// blog posts are, so that column is unused here. TSF registers it via the screen-based columns
+// hook, not the post-type one rbm-instruments otherwise uses, so both are covered here; priority 20
+// runs after TSF's own priority-10 registration so its column key is always present to remove.
+add_filter('manage_msch_lesson_posts_columns', 'rbm_msch_lesson_remove_seo_column', 20);
+add_filter('manage_edit-msch_lesson_columns', 'rbm_msch_lesson_remove_seo_column', 20);
+function rbm_msch_lesson_remove_seo_column($columns) {
+    unset($columns['tsf-seo-bar-wrap']);
+    return $columns;
+}
+
 add_action('manage_msch_lesson_posts_custom_column', 'rbm_msch_lesson_admin_column_content', 10, 2);
 function rbm_msch_lesson_admin_column_content($column, $post_id) {
+    if ($column === 'rbm_iwt_dot') {
+        // Read-only indicator, same green/red convention as the Status column (docs/0914-Copilot-
+        // REQUEST-Add-IWT-Status-Dot-Column.txt) — membership itself is only changed via the Add/
+        // Remove IWT column next to it.
+        $is_iwt = rbm_msch_lesson_is_instruments_we_teach($post_id);
+        $label = $is_iwt ? 'In Instruments We Teach' : 'Not in Instruments We Teach';
+        printf(
+            '<span style="display:inline-block;width:12px;height:12px;border-radius:50%%;background:%s;" title="%s" aria-label="%s" role="img"></span>',
+            $is_iwt ? '#1a7e1a' : '#a00',
+            esc_attr($label),
+            esc_attr($label)
+        );
+        return;
+    }
     if ($column === 'rbm_drag') {
         echo '<span class="dashicons dashicons-menu rbm-drag-handle" style="cursor:move;" title="Drag to reorder"></span>';
         return;
@@ -277,18 +371,53 @@ function rbm_msch_lesson_admin_column_content($column, $post_id) {
             echo '&#8212;';
             return;
         }
-        echo '<img src="' . esc_url($icon_url) . '" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:4px;">';
+        // Clickable thumbnail opens a larger (not full-size) preview in a simple overlay (docs/0914-
+        // Copilot-REQUEST-Add-Instrument-Thumbnail-Preview.txt); see rbm_msch_lesson_icon_preview_modal().
+        printf(
+            '<button type="button" class="rbm-icon-preview-trigger" data-full-src="%1$s" style="padding:0;border:0;background:none;cursor:zoom-in;" title="Click to preview"><img src="%1$s" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:4px;"></button>',
+            esc_url($icon_url)
+        );
+        return;
+    }
+    if ($column === 'rbm_categories') {
+        // Instruments We Teach is a display-mode flag, not a real Category (docs/0912-1650-...) —
+        // never listed here, matching the one-normal-category rule enforced on save.
+        $terms = get_the_terms($post_id, 'msch_instrument');
+        $names = [];
+        if (is_array($terms)) {
+            foreach ($terms as $term) {
+                if (!rbm_msch_category_is_direct_display($term->term_id)) {
+                    $names[] = $term->name;
+                }
+            }
+        }
+        echo empty($names) ? '&#8212;' : esc_html(implode(', ', $names));
         return;
     }
     if ($column === 'rbm_iwt_status') {
+        // Single IWT membership control for the list (docs/0914-Copilot-REQUEST-Replace-SEO-Column-
+        // With-IWT-Membership-Column.txt): only adds/removes the existing Direct Display term(s) —
+        // never touches the normal Category, title, status, or Display Order. Disabled inside the
+        // IWT view itself, since every row shown there is already IWT by definition.
+        if (empty(rbm_msch_direct_display_term_ids())) {
+            echo '&#8212;';
+            return;
+        }
         $is_iwt = rbm_msch_lesson_is_instruments_we_teach($post_id);
-        $label = $is_iwt ? 'Instruments We Teach: Yes' : 'Instruments We Teach: No';
-        printf(
-            '<span style="display:inline-block;width:12px;height:12px;border-radius:50%%;vertical-align:middle;background:%s;" title="%s" aria-label="%s" role="img"></span>',
-            $is_iwt ? '#1a7e1a' : '#a00',
-            esc_attr($label),
-            esc_attr($label)
+        $label = $is_iwt ? 'Remove from IWT' : 'Add to IWT';
+        if (rbm_msch_lesson_current_view() === 'iwt') {
+            printf(
+                '<span class="button button-small" style="pointer-events:none;opacity:0.5;" title="%s" aria-disabled="true">%s</span>',
+                esc_attr('Switch to the Categories view to change Instruments We Teach membership'),
+                esc_html($label)
+            );
+            return;
+        }
+        $url = wp_nonce_url(
+            add_query_arg(['action' => 'rbm_toggle_lesson_iwt', 'post_id' => $post_id], admin_url('admin-post.php')),
+            'rbm_toggle_lesson_iwt_' . $post_id
         );
+        printf('<a class="button button-small" href="%s">%s</a>', esc_url($url), esc_html($label));
         return;
     }
     if ($column === 'rbm_display_order') {
@@ -305,14 +434,38 @@ function rbm_msch_lesson_admin_column_content($column, $post_id) {
         : '<span style="color:#a00;font-weight:600;">Inactive</span>';
 }
 
+// Instruments We Teach membership is toggled from the Instruments We Teach column above (docs/0914-
+// Copilot-REQUEST-Replace-SEO-Column-With-IWT-Membership-Column.txt) — kept here as the single IWT
+// control on this list, not duplicated as a row action too.
+add_action('admin_post_rbm_toggle_lesson_iwt', 'rbm_toggle_lesson_iwt');
+function rbm_toggle_lesson_iwt() {
+    $post_id = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
+    check_admin_referer('rbm_toggle_lesson_iwt_' . $post_id);
+    if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) !== 'msch_lesson') {
+        wp_die('Insufficient permissions.');
+    }
+    $direct_term_ids = rbm_msch_direct_display_term_ids();
+    if (!empty($direct_term_ids)) {
+        if (rbm_msch_lesson_is_instruments_we_teach($post_id)) {
+            wp_remove_object_terms($post_id, $direct_term_ids, 'msch_instrument');
+        } else {
+            // Append only — the Instrument's one normal Category term is left exactly as-is.
+            wp_set_object_terms($post_id, $direct_term_ids, 'msch_instrument', true);
+        }
+    }
+    wp_safe_redirect(wp_get_referer() ?: admin_url('edit.php?post_type=msch_lesson'));
+    exit;
+}
+
 // Make Status and Categories sortable on the Lessons list. Status sorts directly on post_status;
 // Categories sorts on the joined term name (a lesson normally has one Category, but the JOIN/GROUP BY
 // below keeps pagination counts correct even if a lesson is ever tagged with more than one).
 add_filter('manage_edit-msch_lesson_sortable_columns', 'rbm_msch_lesson_sortable_columns');
 function rbm_msch_lesson_sortable_columns($columns) {
     $columns['rbm_status'] = 'rbm_status';
-    $columns['taxonomy-msch_instrument'] = 'taxonomy-msch_instrument';
+    $columns['rbm_categories'] = 'taxonomy-msch_instrument';
     $columns['rbm_display_order'] = 'rbm_display_order';
+    $columns['rbm_iwt_dot'] = 'rbm_iwt_dot';
     return $columns;
 }
 
@@ -327,12 +480,24 @@ function rbm_msch_lesson_custom_orderby($orderby, $query) {
         return "{$wpdb->posts}.post_status {$order}";
     }
     if ($query->get('orderby') === 'taxonomy-msch_instrument') {
-        return "rbm_instrument_term.name {$order}";
+        // Title tiebreaker keeps ties within a Category alphabetical instead of arbitrary JOIN order.
+        return "rbm_instrument_term.name {$order}, {$wpdb->posts}.post_title ASC";
     }
     if ($query->get('orderby') === 'rbm_display_order') {
         // docs/0913-1315-...: numbered Instruments low-to-high, blank/unset always last, ties A-Z.
         return "(rbm_display_order_meta.meta_value IS NULL OR rbm_display_order_meta.meta_value = '') ASC,"
             . " CAST(rbm_display_order_meta.meta_value AS SIGNED) ASC, {$wpdb->posts}.post_title ASC";
+    }
+    if ($query->get('orderby') === 'rbm_iwt_dot') {
+        // docs/0914-Copilot-REQUEST-Add-Sort-To-IWT-Column.txt: IWT-tagged Instruments first on ASC
+        // (matching the dot column's green-first reading), ties broken alphabetically by title. A
+        // correlated subquery (not a JOIN) avoids the GROUP BY picking an arbitrary row for an
+        // Instrument that also has its own normal Category term.
+        $direct_ids = rbm_msch_direct_display_term_ids();
+        $terms_sql = empty($direct_ids) ? '0' : implode(',', array_map('intval', $direct_ids));
+        return "(SELECT COUNT(*) FROM {$wpdb->term_relationships} rbm_iwt_tr"
+            . " INNER JOIN {$wpdb->term_taxonomy} rbm_iwt_tt ON rbm_iwt_tt.term_taxonomy_id = rbm_iwt_tr.term_taxonomy_id"
+            . " WHERE rbm_iwt_tr.object_id = {$wpdb->posts}.ID AND rbm_iwt_tt.taxonomy = 'msch_instrument' AND rbm_iwt_tt.term_id IN ({$terms_sql})) = 0 {$order}, {$wpdb->posts}.post_title ASC";
     }
     return $orderby;
 }
@@ -344,8 +509,11 @@ function rbm_msch_lesson_custom_join($join, $query) {
     }
     global $wpdb;
     if ($query->get('orderby') === 'taxonomy-msch_instrument') {
+        // Instruments We Teach is excluded here too, so sorting reflects only the one normal Category.
+        $direct_ids = rbm_msch_direct_display_term_ids();
+        $exclude_sql = empty($direct_ids) ? '' : ' AND rbm_instrument_tt.term_id NOT IN (' . implode(',', $direct_ids) . ')';
         $join .= " LEFT JOIN {$wpdb->term_relationships} AS rbm_instrument_tr ON ({$wpdb->posts}.ID = rbm_instrument_tr.object_id)";
-        $join .= " LEFT JOIN {$wpdb->term_taxonomy} AS rbm_instrument_tt ON (rbm_instrument_tr.term_taxonomy_id = rbm_instrument_tt.term_taxonomy_id AND rbm_instrument_tt.taxonomy = 'msch_instrument')";
+        $join .= " LEFT JOIN {$wpdb->term_taxonomy} AS rbm_instrument_tt ON (rbm_instrument_tr.term_taxonomy_id = rbm_instrument_tt.term_taxonomy_id AND rbm_instrument_tt.taxonomy = 'msch_instrument'{$exclude_sql})";
         $join .= " LEFT JOIN {$wpdb->terms} AS rbm_instrument_term ON (rbm_instrument_tt.term_id = rbm_instrument_term.term_id)";
     }
     if ($query->get('orderby') === 'rbm_display_order') {
@@ -359,7 +527,10 @@ function rbm_msch_lesson_custom_join($join, $query) {
 
 add_filter('posts_groupby', 'rbm_msch_lesson_custom_groupby', 10, 2);
 function rbm_msch_lesson_custom_groupby($groupby, $query) {
-    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'msch_lesson' || $query->get('orderby') !== 'taxonomy-msch_instrument') {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'msch_lesson') {
+        return $groupby;
+    }
+    if (!in_array($query->get('orderby'), ['taxonomy-msch_instrument'], true)) {
         return $groupby;
     }
     global $wpdb;
@@ -402,13 +573,21 @@ function rbm_msch_lesson_current_view() {
     return $view === 'iwt' ? 'iwt' : 'categories';
 }
 
-// Selected Category dropdown value (docs/0913-1150-...). Only meaningful in the 'categories' view;
-// Lessons We Teach ignores it since it's a separate, mutually-exclusive filter.
+// Selected Category dropdown value (docs/0913-1150-...). Meaningful in both views: in
+// 'categories' view it's the sole filter; in 'iwt' view it narrows Lessons We Teach to just that
+// Category (docs/0914-Copilot-REQUEST-Improve-Lessons-We-Teach-Category-Filtering.txt), applied as
+// an additional tax_query clause alongside the Direct Display term — see
+// rbm_msch_lesson_filter_iwt_view(). 'all' is an explicit reset sentinel (matches the front-end
+// select's own "all" convention) and is treated the same as no category selected — needed so the
+// All Categories link always carries a query arg of its own, otherwise the generic
+// list-state-remember redirect (load-edit.php) treats a bare reset URL as an empty first visit and
+// bounces it back to the last-remembered filtered category.
 function rbm_msch_lesson_current_category() {
-    if (rbm_msch_lesson_current_view() === 'iwt' || !isset($_GET['rbm_category'])) {
+    if (!isset($_GET['rbm_category'])) {
         return '';
     }
-    return sanitize_title(wp_unslash($_GET['rbm_category']));
+    $slug = sanitize_title(wp_unslash($_GET['rbm_category']));
+    return $slug === 'all' ? '' : $slug;
 }
 
 // Status filter (docs/0913-1319-Copilot-REQUEST-Add-Status-Filters-To-Instruments-And-Categories.txt):
@@ -426,14 +605,24 @@ function rbm_msch_lesson_view_by_control() {
         return;
     }
 
-    // Reset Display Order (docs/0913-1338-...): clears then renumbers _msch_lesson_display_order
-    // (1, 2, 3...) by alpha title order, scoped to the same Lessons We Teach + Active list this
-    // button is enabled for; does not touch status, assignments, images, or other post meta. Sits
-    // level with View By / Status, with the native "Add Instrument" button (moved via JS) next to it.
-    $reset_count = count(rbm_msch_lesson_display_order_reset_scope());
+    // Reset Display Order (docs/0913-1338-..., fixed by docs/0914-Copilot-REQUEST-Fix-Reset-
+    // Display-Order-Scope.txt): clears then renumbers _msch_lesson_display_order (restarting at 1
+    // for each Category), scoped to every Active Instrument with a normal Category — Instruments We
+    // Teach membership is ignored, since IWT is a display filter only, not a separate order.
+    $reset_count = count(rbm_msch_lesson_category_reset_scope());
     $view = rbm_msch_lesson_current_view();
     $current_category = rbm_msch_lesson_current_category();
-    $base_url = remove_query_arg(['rbm_view', 'rbm_category', 'paged']);
+    // Category selection stays within the current view: preserve rbm_view=iwt so picking a Category
+    // from Lessons We Teach narrows within it instead of switching to Categories view.
+    $base_url = remove_query_arg(['rbm_category', 'paged']);
+    if ($view !== 'iwt') {
+        $base_url = remove_query_arg('rbm_view', $base_url);
+    }
+    // Instruments We Teach toggle: on -> off returns to whatever View By Category is already
+    // selected (or All Categories), never resetting it — so this only adds/removes rbm_view,
+    // leaving rbm_category (and everything else) exactly as-is.
+    $iwt_toggle_base = remove_query_arg(['rbm_view', 'paged']);
+    $iwt_toggle_url = ($view === 'iwt') ? $iwt_toggle_base : add_query_arg('rbm_view', 'iwt', $iwt_toggle_base);
 
     $terms = get_terms(['taxonomy' => 'msch_instrument', 'hide_empty' => false]);
     if (is_wp_error($terms)) {
@@ -465,9 +654,12 @@ function rbm_msch_lesson_view_by_control() {
     $eligible_terms = rbm_msch_category_sort_terms($eligible_terms);
     $status_filter = rbm_msch_lesson_current_status_filter();
     $status_base_url = remove_query_arg(['rbm_status', 'paged']);
-    // Reset Display Order only makes sense while viewing the list it reorders: Lessons We Teach,
-    // Active status (matches the view Drag-and-Drop reordering will use).
-    $reset_enabled = ($view === 'iwt' && $status_filter === 'active');
+    // Reset Display Order is a Category-ordering action (docs/0914-Copilot-REQUEST-Fix-Reset-
+    // Display-Order-Scope.txt): available from either View By, as long as Status = Active.
+    $reset_enabled = ($status_filter === 'active');
+    // Drag-and-drop (docs/0914-Copilot-REQUEST-Enable-Drag-And-Drop-Within-Category.txt): also
+    // active within a single selected Category + Active, same ordering system, narrowed scope.
+    $drag_enabled = !empty(rbm_msch_lesson_drag_scope($view, $current_category, $status_filter));
     ?>
     <div style="clear:both; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:20px; margin:10px 0;">
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:20px;">
@@ -475,12 +667,12 @@ function rbm_msch_lesson_view_by_control() {
             <div class="rbm-instruments-view-by">
                 <strong>View By:</strong>
                 <select onchange="if(this.value){window.location.href=this.value;}">
-                    <option value="<?php echo esc_url($base_url); ?>"<?php selected($view === 'categories' && $current_category === ''); ?>>All Categories</option>
+                    <option value="<?php echo esc_url(add_query_arg('rbm_category', 'all', $base_url)); ?>"<?php selected($current_category === ''); ?>>All Categories</option>
                     <?php foreach ($eligible_terms as $term) : ?>
-                        <option value="<?php echo esc_url(add_query_arg('rbm_category', $term->slug, $base_url)); ?>"<?php selected($view === 'categories' && $current_category === $term->slug); ?>><?php echo esc_html($term->name); ?></option>
+                        <option value="<?php echo esc_url(add_query_arg('rbm_category', $term->slug, $base_url)); ?>"<?php selected($current_category === $term->slug); ?>><?php echo esc_html($term->name); ?></option>
                     <?php endforeach; ?>
                 </select>
-                <a href="<?php echo esc_url(add_query_arg('rbm_view', 'iwt', $base_url)); ?>" class="button<?php echo $view === 'iwt' ? ' button-primary' : ''; ?>">Lessons We Teach</a>
+                <a href="<?php echo esc_url($iwt_toggle_url); ?>" class="button<?php echo $view === 'iwt' ? ' button-primary' : ''; ?>">Instruments We Teach</a>
             </div>
             <div class="rbm-instruments-status-filter" style="display:flex; align-items:center; gap:6px;">
                 <strong>Status:</strong>
@@ -490,10 +682,13 @@ function rbm_msch_lesson_view_by_control() {
             </div>
         </div>
         <div id="rbm-top-right-controls" style="display:flex; align-items:center; gap:10px;">
-            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('This will clear Display Order for ALL Instruments (including Inactive/All) and renumber the <?php echo (int) $reset_count; ?> in Lessons We Teach / Active by alphabetical order (1, 2, 3...). Continue?');">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('This will clear Display Order for ALL Instruments (including Inactive/All) and renumber the <?php echo (int) $reset_count; ?> Active Instruments with a Category — grouped by Category, alphabetical within each Category, restarting at 1. Continue?');">
                 <input type="hidden" name="action" value="rbm_reset_lesson_display_order">
+                <input type="hidden" name="rbm_view" value="<?php echo esc_attr($view); ?>">
+                <input type="hidden" name="rbm_category" value="<?php echo esc_attr($current_category !== '' ? $current_category : 'all'); ?>">
+                <input type="hidden" name="rbm_status" value="<?php echo esc_attr($status_filter); ?>">
                 <?php wp_nonce_field('rbm_reset_lesson_display_order'); ?>
-                <button type="submit" class="button"<?php disabled($reset_enabled, false); ?> title="<?php echo $reset_enabled ? '' : esc_attr('Only available in Lessons We Teach + Active view'); ?>">Reset Display Order<?php echo $reset_count ? ' (' . (int) $reset_count . ')' : ''; ?></button>
+                <button type="submit" class="button"<?php disabled($reset_enabled, false); ?> title="<?php echo $reset_enabled ? '' : esc_attr('Only available in Active view'); ?>">Reset Display Order<?php echo $reset_count ? ' (' . (int) $reset_count . ')' : ''; ?></button>
             </form>
             <span id="rbm-add-instrument-slot"></span>
         </div>
@@ -509,7 +704,7 @@ function rbm_msch_lesson_view_by_control() {
     });
     </script>
     <?php
-    if ($reset_enabled) :
+    if ($drag_enabled) :
         wp_enqueue_script('jquery-ui-sortable');
         ?>
         <script>
@@ -523,7 +718,14 @@ function rbm_msch_lesson_view_by_control() {
                     var ids = $list.children('tr').map(function () {
                         return parseInt($(this).attr('id').replace('post-', ''), 10);
                     }).get();
-                    $.post(ajaxurl, { action: 'rbm_save_lesson_display_order', nonce: '<?php echo esc_js(wp_create_nonce('rbm_drag_lesson_display_order')); ?>', ids: ids })
+                    $.post(ajaxurl, {
+                        action: 'rbm_save_lesson_display_order',
+                        nonce: '<?php echo esc_js(wp_create_nonce('rbm_drag_lesson_display_order')); ?>',
+                        ids: ids,
+                        view: '<?php echo esc_js($view); ?>',
+                        category: '<?php echo esc_js($current_category); ?>',
+                        status: '<?php echo esc_js($status_filter); ?>'
+                    })
                         .done(function (r) {
                             if (!r || !r.success) {
                                 location.reload();
@@ -549,8 +751,9 @@ function rbm_reset_lesson_display_order() {
         wp_die('Insufficient permissions.');
     }
     check_admin_referer('rbm_reset_lesson_display_order');
-    // Clear every Instrument's value first, including ones outside Lessons We Teach / Active
-    // (Inactive, All), so no stale numbers are left behind; then renumber just the enabled scope.
+    // Clear every Instrument's value first, including ones outside the Active/Category scope
+    // (Inactive, All, Instruments We Teach-only), so no stale numbers are left behind; then
+    // renumber just the Active + normal-Category scope below.
     $all_ids = get_posts([
         'post_type'      => 'msch_lesson',
         'post_status'    => 'any',
@@ -561,15 +764,65 @@ function rbm_reset_lesson_display_order() {
     foreach ($all_ids as $id) {
         delete_post_meta($id, '_msch_lesson_display_order');
     }
-    $lessons = rbm_msch_lesson_display_order_reset_scope();
-    usort($lessons, function ($a, $b) {
-        return strcasecmp($a->post_title, $b->post_title);
-    });
-    foreach ($lessons as $i => $lesson) {
-        update_post_meta($lesson->ID, '_msch_lesson_display_order', $i + 1);
+    // Reset order (docs/0914-Copilot-REQUEST-Fix-Reset-Display-Order-Scope.txt): every Active
+    // Instrument with a normal Category (Instruments We Teach membership ignored — it's a display
+    // filter only, not a separate order), grouped by Category using the existing Category-page
+    // order, numbering restarted at 1 for each Category, alphabetical by title within it.
+    $lessons = rbm_msch_lesson_category_reset_scope();
+    $by_category = [];
+    $category_terms = [];
+    foreach ($lessons as $lesson) {
+        $terms = get_the_terms($lesson->ID, 'msch_instrument');
+        $normal_term = null;
+        if (is_array($terms)) {
+            foreach ($terms as $term) {
+                if (!rbm_msch_category_is_direct_display($term->term_id)) {
+                    $normal_term = $term;
+                    break;
+                }
+            }
+        }
+        if ($normal_term) {
+            $category_terms[$normal_term->term_id] = $normal_term;
+            $by_category[$normal_term->term_id][] = $lesson;
+        }
     }
-    wp_safe_redirect(admin_url('edit.php?post_type=msch_lesson&rbm_view=iwt&rbm_status=active&reset_display_order=1'));
+    foreach (rbm_msch_category_sort_terms(array_values($category_terms)) as $term) {
+        $group = $by_category[$term->term_id];
+        usort($group, function ($a, $b) {
+            return strcasecmp($a->post_title, $b->post_title);
+        });
+        foreach ($group as $i => $lesson) {
+            update_post_meta($lesson->ID, '_msch_lesson_display_order', $i + 1);
+        }
+    }
+    $redirect_view = (($_POST['rbm_view'] ?? '') === 'iwt') ? 'iwt' : 'categories';
+    $redirect_category = isset($_POST['rbm_category']) ? sanitize_title(wp_unslash($_POST['rbm_category'])) : 'all';
+    wp_safe_redirect(admin_url('edit.php?post_type=msch_lesson&rbm_view=' . $redirect_view . '&rbm_category=' . $redirect_category . '&rbm_status=active&reset_display_order=1'));
     exit;
+}
+
+// Every Active Instrument with a normal Category, regardless of Instruments We Teach membership
+// (docs/0914-Copilot-REQUEST-Fix-Reset-Display-Order-Scope.txt): the scope Reset Display Order
+// now covers — IWT is a display filter, not a factor in Category ordering.
+function rbm_msch_lesson_category_reset_scope() {
+    $lessons = get_posts([
+        'post_type'      => 'msch_lesson',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+    ]);
+    return array_values(array_filter($lessons, function ($lesson) {
+        $terms = get_the_terms($lesson->ID, 'msch_instrument');
+        if (!is_array($terms)) {
+            return false;
+        }
+        foreach ($terms as $term) {
+            if (!rbm_msch_category_is_direct_display($term->term_id)) {
+                return true;
+            }
+        }
+        return false;
+    }));
 }
 
 // Same Lessons We Teach + Active scope the Reset button is enabled for (docs/0913-1319-...,
@@ -595,6 +848,110 @@ function rbm_msch_lesson_display_order_reset_scope() {
             'terms'    => array_map('intval', $direct_term_ids),
         ]],
     ]);
+}
+
+// What Drag-and-Drop currently governs for a given view/Category/Status combination (docs/0914-
+// Copilot-REQUEST-Enable-Drag-And-Drop-Within-Category.txt): Instruments We Teach + Active reuses
+// the existing scope helper unchanged; a single selected Category + Active is the same idea
+// narrowed to that Category's own published Instruments. Reused by the column, the sortable init,
+// and the AJAX validator, so there is exactly one definition of "what's draggable right now".
+function rbm_msch_lesson_drag_scope($view, $category, $status) {
+    if ($status !== 'active') {
+        return [];
+    }
+    if ($view === 'iwt') {
+        $scope = rbm_msch_lesson_display_order_reset_scope();
+        if ($category === '') {
+            return $scope;
+        }
+        // Narrow to just this Category's Instruments We Teach rows (docs/0914-Copilot-REQUEST-
+        // Align-IWT-Ordering-With-Category-Page-Order.txt): dragging while IWT is narrowed to one
+        // Category must only renumber that Category's own IWT order values, never the rest.
+        return array_values(array_filter($scope, function ($lesson) use ($category) {
+            $terms = get_the_terms($lesson->ID, 'msch_instrument');
+            if (!is_array($terms)) {
+                return false;
+            }
+            foreach ($terms as $term) {
+                if ($term->slug === $category) {
+                    return true;
+                }
+            }
+            return false;
+        }));
+    }
+    if ($category === '') {
+        return [];
+    }
+    $term = get_term_by('slug', $category, 'msch_instrument');
+    if (!$term || rbm_msch_category_is_direct_display($term->term_id)) {
+        return [];
+    }
+    return get_posts([
+        'post_type'      => 'msch_lesson',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'tax_query'      => [[
+            'taxonomy' => 'msch_instrument',
+            'field'    => 'term_id',
+            'terms'    => [$term->term_id],
+        ]],
+    ]);
+}
+
+// IWT admin list, All Categories (docs/0914-Copilot-REQUEST-Align-IWT-Ordering-With-Category-Page-
+// Order.txt): group by each Instrument's one normal Category, in that Category's own Category-page
+// order (rbm_msch_category_sort_terms() — no separate IWT category-group order), then by the
+// existing IWT order field within each Category group (effectively restarting per group, since
+// ties only ever compare within the same group). Only the flat All-Categories IWT view needs this;
+// narrowing to one Category is already a single group with nothing to reorder here.
+add_filter('the_posts', 'rbm_msch_lesson_group_iwt_by_category', 10, 2);
+function rbm_msch_lesson_group_iwt_by_category($posts, $query) {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'msch_lesson') {
+        return $posts;
+    }
+    if (rbm_msch_lesson_current_view() !== 'iwt' || rbm_msch_lesson_current_category() !== '' || $query->get('orderby') !== 'rbm_display_order') {
+        return $posts;
+    }
+    $terms = get_terms(['taxonomy' => 'msch_instrument', 'hide_empty' => false]);
+    $category_rank = [];
+    if (!is_wp_error($terms)) {
+        $normal_terms = array_values(array_filter($terms, function ($term) {
+            return !rbm_msch_category_is_direct_display($term->term_id);
+        }));
+        foreach (rbm_msch_category_sort_terms($normal_terms) as $i => $term) {
+            $category_rank[$term->term_id] = $i;
+        }
+    }
+    $rank_of = function ($lesson) use ($category_rank) {
+        $lesson_terms = get_the_terms($lesson->ID, 'msch_instrument');
+        if (is_array($lesson_terms)) {
+            foreach ($lesson_terms as $term) {
+                if (isset($category_rank[$term->term_id])) {
+                    return $category_rank[$term->term_id];
+                }
+            }
+        }
+        return PHP_INT_MAX; // No normal Category: sorts after every grouped Category.
+    };
+    usort($posts, function ($a, $b) use ($rank_of) {
+        $rank_cmp = $rank_of($a) <=> $rank_of($b);
+        if ($rank_cmp !== 0) {
+            return $rank_cmp;
+        }
+        $a_order = get_post_meta($a->ID, '_msch_lesson_display_order', true);
+        $b_order = get_post_meta($b->ID, '_msch_lesson_display_order', true);
+        $a_has = ($a_order !== '');
+        $b_has = ($b_order !== '');
+        if ($a_has !== $b_has) {
+            return $a_has ? -1 : 1;
+        }
+        if ($a_has && (int) $a_order !== (int) $b_order) {
+            return (int) $a_order <=> (int) $b_order;
+        }
+        return strcasecmp($a->post_title, $b->post_title);
+    });
+    return $posts;
 }
 
 // Persist the selected view/category/status through the list's own search form submission
@@ -635,6 +992,17 @@ function rbm_msch_lesson_filter_iwt_view($query) {
                 'field'    => 'slug',
                 'terms'    => [$current_category],
             ]]);
+            if ($status_filter === 'active') {
+                // Drag-and-drop within a Category (docs/0914-Copilot-REQUEST-Enable-Drag-And-Drop-
+                // Within-Category.txt): same forced full-list, Display-Order scope as Instruments We
+                // Teach + Active below, just narrowed to this Category instead.
+                $query->set('posts_per_page', -1);
+                $query->set('orderby', 'rbm_display_order');
+                $query->set('order', 'ASC');
+            }
+        } else {
+            // All Categories: show every Instrument on one page instead of paginating.
+            $query->set('posts_per_page', -1);
         }
         return;
     }
@@ -651,11 +1019,25 @@ function rbm_msch_lesson_filter_iwt_view($query) {
         $query->set('post__in', [0]);
         return;
     }
-    $query->set('tax_query', [[
+    $iwt_tax_query = [[
         'taxonomy' => 'msch_instrument',
         'field'    => 'term_id',
         'terms'    => array_map('intval', $direct_term_ids),
-    ]]);
+    ]];
+    // Optional Category narrowing within Lessons We Teach (docs/0914-Copilot-REQUEST-Improve-
+    // Lessons-We-Teach-Category-Filtering.txt): a second AND'd clause on the same shared taxonomy —
+    // an Instrument can hold both the Direct Display term and its one normal Category at once
+    // (enforced elsewhere), so this correctly narrows to "in Category X AND Instruments We Teach".
+    $current_category = rbm_msch_lesson_current_category();
+    if ($current_category !== '') {
+        $iwt_tax_query['relation'] = 'AND';
+        $iwt_tax_query[] = [
+            'taxonomy' => 'msch_instrument',
+            'field'    => 'slug',
+            'terms'    => [$current_category],
+        ];
+    }
+    $query->set('tax_query', $iwt_tax_query);
     if ($status_filter === 'active') {
         // Drag-and-drop scope: show every reorderable row on one page, already in the order it
         // persists (docs/0913-1512-Copilot-REQUEST-Add-Drag-And-Drop-...).
@@ -909,8 +1291,15 @@ function rbm_ajax_save_lesson_display_order() {
     if (!current_user_can('manage_options')) {
         wp_send_json_error('forbidden', 403);
     }
+    // The view/Category/Status the drag happened in (docs/0914-Copilot-REQUEST-Enable-Drag-And-
+    // Drop-Within-Category.txt) so the scope check below matches whatever list was actually shown,
+    // not just the original Instruments We Teach scope.
+    $view = (($_POST['view'] ?? '') === 'iwt') ? 'iwt' : 'categories';
+    $category = isset($_POST['category']) ? sanitize_title(wp_unslash($_POST['category'])) : '';
+    $status = sanitize_key($_POST['status'] ?? '');
+    $status = in_array($status, ['active', 'inactive', 'all'], true) ? $status : 'active';
     $ids = array_map('intval', (array) ($_POST['ids'] ?? []));
-    $scope_ids = wp_list_pluck(rbm_msch_lesson_display_order_reset_scope(), 'ID');
+    $scope_ids = wp_list_pluck(rbm_msch_lesson_drag_scope($view, $category, $status), 'ID');
     sort($ids);
     sort($scope_ids);
     if ($ids !== $scope_ids) {
@@ -1338,7 +1727,7 @@ function rbm_msch_category_display_mode_add_form_field($taxonomy) {
             <label><input type="radio" name="rbm_category_display_mode" value="" checked> Normal Category Tile</label><br>
             <label><input type="radio" name="rbm_category_display_mode" value="direct"> Display Assigned Instruments Directly</label>
         </fieldset>
-        <p>Direct Display categories don't show as a clickable tile — their assigned Active Instruments appear immediately on the Lessons page instead.</p>
+        <p>Direct Display categories don't show as a clickable tile — their assigned Active Instruments appear immediately on the Instruments page instead.</p>
     </div>
     <?php
 }
@@ -1354,7 +1743,7 @@ function rbm_msch_category_display_mode_edit_form_field($term) {
                 <label><input type="radio" name="rbm_category_display_mode" value="" <?php checked($current_mode, ''); ?>> Normal Category Tile</label><br>
                 <label><input type="radio" name="rbm_category_display_mode" value="direct" <?php checked($current_mode, 'direct'); ?>> Display Assigned Instruments Directly</label>
             </fieldset>
-            <p class="description">Direct Display categories don't show as a clickable tile — their assigned Active Instruments appear immediately on the Lessons page instead.</p>
+            <p class="description">Direct Display categories don't show as a clickable tile — their assigned Active Instruments appear immediately on the Instruments page instead.</p>
         </td>
     </tr>
     <?php
@@ -1376,6 +1765,20 @@ function rbm_msch_category_display_mode_save_term_meta($term_id) {
 
 function rbm_msch_category_is_direct_display($term_id) {
     return get_term_meta($term_id, '_msch_category_display_mode', true) === 'direct';
+}
+
+// All Direct Display ("Instruments We Teach") term IDs, for contexts that need to exclude the
+// whole set at once (e.g. the Lessons Categories column/sort, docs/0914-Copilot-REQUEST-Enforce-
+// One-Normal-Category-Per-Instrument.txt) rather than checking a single known term_id.
+function rbm_msch_direct_display_term_ids() {
+    $ids = get_terms([
+        'taxonomy'   => 'msch_instrument',
+        'hide_empty' => false,
+        'meta_key'   => '_msch_category_display_mode',
+        'meta_value' => 'direct',
+        'fields'     => 'ids',
+    ]);
+    return is_array($ids) ? array_map('intval', $ids) : [];
 }
 
 // Category Display Order (docs/0913-1208-Copilot-REQUEST-Implement-Category-Display-Order.txt):
@@ -1491,10 +1894,10 @@ function rbm_msch_lesson_is_instruments_we_teach($post_id) {
 
 // --- [msch_lessons] shortcode (Stage 4: public tile grid only — image, name, Sign Up button) ---
 
-// Shared single-card renderer (image, title, Sign Up button) — used both by the normal filtered
-// tile grid and by the Direct Display section below, so there is exactly one card implementation.
+// Shared single-card renderer (image, title) — the whole tile links to that Instrument's Faculty
+// view; used both by the normal filtered tile grid and by the Direct Display section below, so
+// there is exactly one card implementation.
 function rbm_msch_lesson_card_html($lesson, $hidden = false) {
-    $signup_url = get_post_meta($lesson->ID, '_msch_lesson_signup_url', true);
     $image_filename = get_post_meta($lesson->ID, '_msch_lesson_image_filename', true);
     $image_url = rbm_msch_lesson_catalog_image_url($image_filename);
     $tile_image = ($image_url !== '')
@@ -1510,16 +1913,10 @@ function rbm_msch_lesson_card_html($lesson, $hidden = false) {
     $l_slugs = (is_array($l_terms) && !is_wp_error($l_terms)) ? wp_list_pluck($l_terms, 'slug') : [];
     ob_start();
     ?>
-    <div class="thesis-lesson-card" data-msch-lesson-instruments="<?php echo esc_attr(implode(',', $l_slugs)); ?>"<?php echo $hidden ? ' style="display:none;"' : ''; ?>>
+    <a class="thesis-lesson-card" href="<?php echo esc_url(rbm_msch_faculty_filter_url($lesson->post_name)); ?>" data-msch-lesson-instruments="<?php echo esc_attr(implode(',', $l_slugs)); ?>"<?php echo $hidden ? ' style="display:none;"' : ''; ?>>
         <span class="thesis-lesson-card-image"><?php echo $tile_image; ?></span>
         <span class="thesis-lesson-card-title"><?php echo esc_html(get_the_title($lesson)); ?></span>
-        <span style="display:block;padding:4px 16px 16px;">
-            <?php if (!empty($signup_url)) : ?>
-                <a class="thesis-cta-button" href="<?php echo esc_url($signup_url); ?>" target="_blank" rel="noopener noreferrer">Sign Up</a>
-            <?php endif; ?>
-            <a class="thesis-cta-button" style="margin-left:6px;" href="<?php echo esc_url(rbm_msch_faculty_filter_url($lesson->post_name)); ?>">Meet the Teachers</a>
-        </span>
-    </div>
+    </a>
     <?php
     return ob_get_clean();
 }
@@ -1563,6 +1960,17 @@ function rbm_msch_lessons_shortcode($atts) {
     $lessons = get_posts($query_args);
     if (empty($lessons)) {
         return '';
+    }
+    // Single page-level Sign Up button (docs/0914-Copilot-REQUEST-Simplify-Instruments-Page-Tile-
+    // Actions.txt): every Instrument already shares the same Sign Up URL, so reuse that existing
+    // data instead of adding a new option/field.
+    $rbm_page_signup_url = '';
+    foreach ($lessons as $l) {
+        $l_signup_url = get_post_meta($l->ID, '_msch_lesson_signup_url', true);
+        if (!empty($l_signup_url)) {
+            $rbm_page_signup_url = $l_signup_url;
+            break;
+        }
     }
     // Instrument Tile Order setting (docs/0913-1226-...) only governs the default alphabetical
     // path; an explicit order="manual" shortcode attribute keeps using the native menu_order field
@@ -1666,6 +2074,42 @@ function rbm_msch_lessons_shortcode($atts) {
         $rbm_lessons_css_printed = true;
         ?>
         <style>
+        .msch-lessons-actions-row{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            align-items:stretch;
+            gap:16px;
+            margin:0 0 1.5em;
+        }
+        .msch-lessons-actions-row .msch-lesson-filter{
+            margin:0;
+        }
+        .msch-lessons-actions-row .msch-lesson-filter-select{
+            width:100%;
+            height:50px;
+            box-sizing:border-box;
+            text-align:center;
+        }
+        .msch-lessons-signup-button{
+            height:50px;
+            margin:0;
+            box-sizing:border-box;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:18px;
+            font-weight:600;
+            font-family:inherit;
+            line-height:1.2;
+            padding:12px 24px;
+            border-radius:999px;
+            text-decoration:none;
+        }
+        @media (max-width:600px){
+            .msch-lessons-actions-row{
+                grid-template-columns:1fr;
+            }
+        }
         .msch-lesson-filter{display:<?php echo esc_attr($rbm_choose_instrument_pill_display); ?>;margin:0 0 1.5em;}
         .msch-lesson-filter-select{
             font-size:18px;
@@ -1747,6 +2191,9 @@ function rbm_msch_lessons_shortcode($atts) {
         .msch-lesson-category-grid[hidden]{
             display:none;
         }
+        .msch-lesson-direct-display-grid[hidden]{
+            display:none;
+        }
         .msch-lesson-tiles-header{
             display:flex;
             flex-direction:column;
@@ -1796,14 +2243,22 @@ function rbm_msch_lessons_shortcode($atts) {
                 return;
             }
             var container = e.target.closest('.msch-lessons');
-            // Scoped to the filterable tiles wrap only — the Direct Display grid (docs/0912-1650-
-            // PLAN-Direct-Display-Lessons-Category.txt) also uses .thesis-lesson-card-grid but is
-            // never filtered/hidden by category selection, so it must not be matched here.
-            var grid = container ? container.querySelector('.msch-lesson-tiles-wrap .thesis-lesson-card-grid') : null;
-            if (!grid) {
+            if (!container) {
                 return;
             }
             var value = e.target.value;
+            // Direct Display / Instruments We Teach is a landing-page overview only (docs/0912-1650-
+            // PLAN-Direct-Display-Lessons-Category.txt); once a Category (or All) is chosen, the tiles
+            // wrap below already shows the same Instruments, so it must hide entirely instead of
+            // duplicating them (rather than filtering its cards, which still left matching ones twice).
+            var directGrid = container.querySelector('.msch-lesson-direct-display-grid');
+            if (directGrid) {
+                directGrid.hidden = !!value;
+            }
+            var grid = container.querySelector('.msch-lesson-tiles-wrap .thesis-lesson-card-grid');
+            if (!grid) {
+                return;
+            }
             var cards = grid.querySelectorAll('[data-msch-lesson-instruments]');
             cards.forEach(function (card) {
                 if (!value || value === 'all') {
@@ -1899,6 +2354,12 @@ function rbm_msch_lessons_shortcode($atts) {
             var select = container.querySelector('.msch-lesson-filter-select');
             if (select) {
                 select.selectedIndex = 0;
+            }
+            // Restore the Direct Display / Instruments We Teach overview, hidden above while a
+            // Category (or All) was selected.
+            var directGrid = container.querySelector('.msch-lesson-direct-display-grid');
+            if (directGrid) {
+                directGrid.hidden = false;
             }
             var grid = container.querySelector('.msch-lesson-category-grid');
             if (grid) {
@@ -2026,30 +2487,36 @@ function rbm_msch_lessons_shortcode($atts) {
     $initial_back_disabled = ($initial_category === '');
     $initial_category_label = '';
     if ($initial_category === 'all') {
-        $initial_category_label = 'All Lessons';
+        $initial_category_label = 'All Instruments';
     } elseif ($initial_category !== '' && isset($filter_terms[$initial_category])) {
         $initial_category_label = $filter_terms[$initial_category];
     }
     ?>
     <div class="msch-lessons">
-    <?php if (!empty($direct_lessons)) : ?>
-        <div class="thesis-lesson-card-grid msch-lesson-direct-display-grid">
-            <?php foreach ($direct_lessons as $lesson) : ?>
-                <?php echo rbm_msch_lesson_card_html($lesson); ?>
-            <?php endforeach; ?>
+    <?php $rbm_show_filter_pill = (!$rbm_hide_categories_section && !empty($filter_terms)); ?>
+    <?php if ($rbm_show_filter_pill) : ?>
+        <div class="msch-lessons-actions-row">
+            <div class="msch-lesson-filter">
+                <select id="<?php echo esc_attr($filter_id); ?>" class="msch-lesson-filter-select" aria-label="Filter Instruments">
+                    <option value=""<?php echo $initial_category === '' ? ' disabled selected' : ' disabled'; ?>>Choose Instrument</option>
+                    <option value="all"<?php echo $initial_category === 'all' ? ' selected' : ''; ?>>All Instruments</option>
+                    <?php foreach ($filter_terms as $slug => $name) : ?>
+                        <option value="<?php echo esc_attr($slug); ?>"<?php echo $initial_category === $slug ? ' selected' : ''; ?>><?php echo esc_html($name); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?php if (!empty($rbm_page_signup_url)) : ?>
+                <a class="thesis-cta-button msch-lessons-signup-button" href="<?php echo esc_url($rbm_page_signup_url); ?>" target="_blank" rel="noopener noreferrer">Sign Up</a>
+            <?php endif; ?>
+        </div>
+    <?php elseif (!empty($rbm_page_signup_url)) : ?>
+        <div class="msch-lessons-top-actions" style="display:flex;justify-content:flex-end;margin:0 0 1em;">
+            <a class="thesis-cta-button" style="display:inline-block;width:auto;" href="<?php echo esc_url($rbm_page_signup_url); ?>" target="_blank" rel="noopener noreferrer">Sign Up</a>
         </div>
     <?php endif; ?>
+    <p class="msch-lessons-instruction" style="text-align:center;font-size:18px;font-weight:600;margin:0 0 1.5em;">Choose an Instrument to Meet the Teachers</p>
     <?php if (!$rbm_hide_categories_section) : ?>
     <?php if (!empty($filter_terms)) : ?>
-        <div class="msch-lesson-filter">
-            <select id="<?php echo esc_attr($filter_id); ?>" class="msch-lesson-filter-select" aria-label="Filter Lessons by instrument">
-                <option value=""<?php echo $initial_category === '' ? ' disabled selected' : ' disabled'; ?>>Choose Instrument</option>
-                <option value="all"<?php echo $initial_category === 'all' ? ' selected' : ''; ?>>All Lessons</option>
-                <?php foreach ($filter_terms as $slug => $name) : ?>
-                    <option value="<?php echo esc_attr($slug); ?>"<?php echo $initial_category === $slug ? ' selected' : ''; ?>><?php echo esc_html($name); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
         <div class="msch-lesson-tiles-header">
             <div class="msch-lesson-tiles-nav">
                 <button type="button" class="msch-lesson-tiles-prev"<?php echo $initial_prev_disabled ? ' disabled' : ''; ?>>&larr; Previous</button>
@@ -2059,10 +2526,19 @@ function rbm_msch_lessons_shortcode($atts) {
             <span class="msch-lesson-tiles-category-name" aria-live="polite"><?php echo esc_html($initial_category_label); ?></span>
         </div>
     <?php endif; ?>
+    <?php endif; ?>
+    <?php if (!empty($direct_lessons)) : ?>
+        <div class="thesis-lesson-card-grid msch-lesson-direct-display-grid"<?php echo ($initial_category !== '') ? ' hidden' : ''; ?>>
+            <?php foreach ($direct_lessons as $lesson) : ?>
+                <?php echo rbm_msch_lesson_card_html($lesson); ?>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+    <?php if (!$rbm_hide_categories_section) : ?>
     <?php
     // Category icon grid (Stage 3): only for the unfiltered, main-page view; only categories with Active lessons.
     if (empty($atts['instrument']) && !empty($filter_terms)) : ?>
-        <div class="msch-lesson-category-grid" role="group" aria-label="Choose a lesson category"<?php echo $initial_category !== '' ? ' hidden' : ''; ?>>
+        <div class="msch-lesson-category-grid" role="group" aria-label="Choose an instrument category"<?php echo $initial_category !== '' ? ' hidden' : ''; ?>>
             <?php foreach ($filter_terms as $slug => $name) :
                 $term = get_term_by('slug', $slug, 'msch_instrument');
                 $icon_file = $term ? get_term_meta($term->term_id, '_msch_category_icon_filename', true) : '';

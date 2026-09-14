@@ -49,6 +49,15 @@ function rbm_msch_lesson_tile_order_mode() {
     return $mode === 'display_order' ? 'display_order' : 'alphabetical';
 }
 
+// docs/0914-Copilot-REQUEST-Add-Show-Date-Column-Setting.txt: Instruments admin list only (see
+// rbm_msch_lesson_admin_columns() in rbm-lessons.php) — no effect on Posts, Pages, Faculty, or any
+// other admin list. Default off, matching the list's existing hard-coded-hidden behavior.
+define('RBM_MSCH_LESSON_SHOW_DATE_COLUMN_OPTION', 'rbm_msch_lesson_show_date_column');
+
+function rbm_msch_lesson_show_date_column() {
+    return get_option(RBM_MSCH_LESSON_SHOW_DATE_COLUMN_OPTION, '') === '1';
+}
+
 // Single source of truth for the plaintext list: the same Instruments We Teach category
 // relationship already used by the Instrument editor checkbox and the Instruments list status
 // column (rbm_msch_lesson_is_instruments_we_teach() in includes/rbm-lessons.php). Sorted
@@ -91,6 +100,7 @@ function rbm_lessons_render_display_settings_page() {
     $current_pill_mode = rbm_instruments_get_choose_instrument_pill_mode();
     $current_category_order_mode = rbm_msch_category_order_mode();
     $current_tile_order_mode = rbm_msch_lesson_tile_order_mode();
+    $current_show_date_column = rbm_msch_lesson_show_date_column();
     ?>
     <div class="wrap">
         <h1>Instruments Page Display</h1>
@@ -108,7 +118,7 @@ function rbm_lessons_render_display_settings_page() {
                 <label><input type="radio" name="rbm_lessons_display_mode" value="none" <?php checked($current_mode, 'none'); ?>> None</label>
             </p>
             <?php if ($current_mode === '') : ?>
-                <p class="description">No explicit choice has been saved yet. The public Lessons page currently shows the existing combined Categories + Instruments We Teach view. Choose an option above and Save Changes to switch to a single mode.</p>
+                <p class="description">No explicit choice has been saved yet. The public Instruments page currently shows the existing combined Categories + Instruments We Teach view. Choose an option above and Save Changes to switch to a single mode.</p>
             <?php endif; ?>
             <p><strong>Choose Instrument pill</strong></p>
             <p>
@@ -128,6 +138,11 @@ function rbm_lessons_render_display_settings_page() {
                 <label><input type="radio" name="rbm_msch_lesson_tile_order_mode" value="display_order" <?php checked($current_tile_order_mode, 'display_order'); ?>> Display Order</label>
             </p>
             <p class="description">Display Order uses each Instrument's optional numeric Display Order field (Instrument edit screen), low to high; ties and Instruments left blank fall back to alphabetical, with blank always last. Applies to the public Instrument tile grid. Has no effect on any [msch_lessons order="manual"] shortcode usage, which keeps using its own explicit Order field.</p>
+            <p><strong>Show Date Column</strong></p>
+            <p>
+                <label><input type="checkbox" name="rbm_msch_lesson_show_date_column" value="1" <?php checked($current_show_date_column); ?>> Show the WordPress publication date in the Instruments list</label>
+            </p>
+            <p class="description">Controls only the Instruments admin list's Date column. Off by default. Does not affect Posts, Pages, Faculty, or any other admin list.</p>
             <?php submit_button('Save Changes'); ?>
         </form>
 
@@ -205,6 +220,8 @@ function rbm_lessons_save_display_settings() {
         $tile_order_mode = 'alphabetical';
     }
     update_option(RBM_MSCH_LESSON_TILE_ORDER_MODE_OPTION, $tile_order_mode);
+
+    update_option(RBM_MSCH_LESSON_SHOW_DATE_COLUMN_OPTION, !empty($_POST['rbm_msch_lesson_show_date_column']) ? '1' : '');
 
     wp_safe_redirect(admin_url('edit.php?post_type=msch_lesson&page=rbm-lessons-display-settings&saved=1'));
     exit;

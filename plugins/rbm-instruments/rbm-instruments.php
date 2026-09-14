@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Red Barn Music School Instruments
- * Description: Lessons/Instruments data model (msch_lesson CPT, shared msch_instrument taxonomy). Stage 2 of the Lessons module staged reuse plan.
+ * Description: Instruments data model (msch_lesson CPT, shared msch_instrument taxonomy). Stage 2 of the Instruments module staged reuse plan.
  * Version: 1.0.0
  * Author: Red Barn Music School
  */
