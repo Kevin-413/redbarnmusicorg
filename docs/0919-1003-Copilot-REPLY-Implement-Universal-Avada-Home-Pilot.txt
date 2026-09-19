@@ -156,11 +156,12 @@ CONFIRMATIONS
 
 COMMIT / PUSH
 
-- Commit: db9d419 — "Universal Avada Home pilot: green pill button standard + Gallery CTA"
+- Commit: e8c8456 — "Universal Avada Home pilot: green pill button standard + Gallery CTA"
   (files: CHANGELOG.md, docs/0906-1649-STANDARD-Home-Page-Container-Formats.txt,
-  docs/0919-1003-Copilot-REPLY-Implement-Universal-Avada-Home-Pilot.txt; post
-  20440 content change lives in the database, not in this commit).
-- Pushed to `origin/0904-1425-avada-safe-check`.
+  docs/0919-0942-PLAN-Universal-Avada-Standards-And-Legacy-Cleanup.txt, this
+  Reply, and the Request doc; post 20440's content change lives in the
+  database, not in this commit).
+- Pushed to `origin/0904-1425-avada-safe-check` (78b9458..e8c8456).
 - Pre-existing unrelated uncommitted changes (asset deletions, Forminator/
   UpdraftPlus/rbm plugin files, child-theme functions.php) were left
   uncommitted and unpushed, as instructed.
