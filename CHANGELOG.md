@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-19 (wire #page-title anchor into site navigation)
+- `mu-plugins/rbm-interior-page-title-anchor.php`: the existing `#page-title` anchor (added
+  previously but never linked to) is now appended to real internal navigation links: the main/
+  mobile/sticky header menu, and the two footer Text widgets ("Quick Links" and "Connect").
+  Excludes the Home link, external links, and anything that already carries its own fragment.
+  Two implementation notes found only by testing against the live render (not visible from code
+  alone): (1) Avada's header actually calls `wp_nav_menu()` with a direct `menu` ID, not
+  `theme_location` (both are now checked, resolving the location→ID mapping dynamically); (2) core's
+  `widget_text_content` filter never fires for these footer widgets, so `widget_display_callback`
+  is used instead to rewrite the widget's saved text before output. `themes/Avada-Child-Theme/
+  functions.php`: the 3 real links in the mobile bottom quick-action bar (Lessons/Sign Up/Contact)
+  now append `#page-title` directly. Verified via direct HTML fetch and a real click-through: Home
+  link and the external Facebook link are unaffected; homepage still has no `#page-title` element.
+
 ## 2026-09-19 (Universal Avada Home pilot - shared green pill button standard)
 - Implemented docs/0919-1003-Copilot-REQUEST-Implement-Universal-Avada-Home-Pilot.txt. Added one
   `fusion_button` green solid pill ("GALLERY" -> `/gallery/`) to the Gallery section of the shared

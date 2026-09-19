@@ -41,15 +41,15 @@ add_action( 'wp', 'redbarn_fix_sidebar_rendering_timing', 21 );
 function redbarn_mobile_bottom_action_bar() {
 	?>
 	<nav class="rbm-mobile-bottom-bar" aria-label="Quick actions">
-		<a class="rbm-mobile-bottom-bar-btn" href="<?php echo esc_url( home_url( '/lessons/' ) ); ?>">
+		<a class="rbm-mobile-bottom-bar-btn" href="<?php echo esc_url( home_url( '/lessons/#page-title' ) ); ?>">
 			<span class="rbm-mobile-bottom-bar-icon" aria-hidden="true">&#9834;</span>
 			<span class="rbm-mobile-bottom-bar-label">Lessons</span>
 		</a>
-		<a class="rbm-mobile-bottom-bar-btn" href="<?php echo esc_url( home_url( '/lessons-inquiry/' ) ); ?>">
+		<a class="rbm-mobile-bottom-bar-btn" href="<?php echo esc_url( home_url( '/lessons-inquiry/#page-title' ) ); ?>">
 			<span class="rbm-mobile-bottom-bar-icon" aria-hidden="true">&#9998;</span>
 			<span class="rbm-mobile-bottom-bar-label">Sign Up</span>
 		</a>
-		<a class="rbm-mobile-bottom-bar-btn" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">
+		<a class="rbm-mobile-bottom-bar-btn" href="<?php echo esc_url( home_url( '/contact/#page-title' ) ); ?>">
 			<span class="rbm-mobile-bottom-bar-icon" aria-hidden="true">&#9993;</span>
 			<span class="rbm-mobile-bottom-bar-label">Contact</span>
 		</a>

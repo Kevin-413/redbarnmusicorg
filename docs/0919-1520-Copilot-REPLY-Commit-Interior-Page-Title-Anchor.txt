@@ -1,0 +1,96 @@
+0919-1520-Copilot-REPLY-Commit-Interior-Page-Title-Anchor.txt
+
+Implemented against: chat request to commit and push the verified interior-page
+title-anchor implementation (docs/... wiring work performed earlier this session,
+no separate REQUEST file existed for the wiring itself).
+
+SCOPE OF THIS COMMIT
+
+Included only:
+- mu-plugins/rbm-interior-page-title-anchor.php (new file)
+- themes/Avada-Child-Theme/functions.php (only the 3-line mobile-bottom-bar hunk;
+  the unrelated contact-scrambler comment and the Adult Student Name Sync hunks
+  in this same file were left uncommitted, via `git add -p`)
+- CHANGELOG.md (only the "wire #page-title anchor into site navigation" entry;
+  the other 4 entries already sitting in the working tree from earlier this
+  session were left uncommitted, via a hand-built partial blob staged with
+  `git hash-object` + `git update-index --cacheinfo` rather than `git add`)
+- This Reply document
+
+All other uncommitted working-tree changes (rbm-instruments, rbm-faculty, other
+CHANGELOG entries, etc.) were left exactly as they were — not staged, not
+touched.
+
+BRANCH
+
+0904-1425-avada-safe-check
+
+COMMIT HASH
+
+98cee9c
+
+PUSH RESULT
+
+Pushed to origin/0904-1425-avada-safe-check. (See terminal output for the exact
+push confirmation captured at commit time.)
+
+TECHNICAL FINDINGS RECORDED
+
+1. Avada Header Builder uses direct menu IDs, not theme_location
+   Avada's actual front-end header render calls `wp_nav_menu()` with
+   `'menu' => 19` (the site's single registered menu, resolved by ID) rather
+   than `'theme_location' => 'main_navigation'`, even though that same menu is
+   assigned to the `main_navigation`/`mobile_navigation`/`sticky_navigation`
+   locations. A filter that only checks `$args->theme_location` silently never
+   fires on the real site (confirmed via direct instrumentation: theme_location
+   was empty string on every real request). Fixed by resolving the menu ID(s)
+   assigned to those three locations via `get_nav_menu_locations()` and matching
+   `$args->menu` against them, in addition to checking theme_location, so the
+   filter works regardless of which calling convention a given call site uses.
+
+2. widget_display_callback required for Avada's footer Text widgets
+   Core's `widget_text_content` filter — the documented, expected hook for
+   rewriting a Text widget's rendered content — never fires at all for Avada's
+   footer widget areas (confirmed by instrumenting the filter: zero invocations
+   logged for any widget on a real page load, despite the widgets clearly being
+   the standard core Text widget by id_base). `widget_display_callback` (which
+   fires earlier, before `WP_Widget::widget()` runs, and is part of the more
+   fundamental `WP_Widget::display_callback()` wrapper every registered widget
+   goes through) does fire and was used instead, rewriting `$instance['text']`
+   directly before Avada renders it.
+
+3. Home link and external Facebook link verified unchanged
+   Confirmed via direct HTML fetch (`curl`) against the live-rendered page,
+   both before and after the fix:
+   - Home link: both its absolute (`http://redbarnmusicorg-avada.local/`) and
+     relative (`/`) forms remain exactly `href="/"` / the bare domain root —
+     no `#page-title` appended, matching the required "must keep loading at
+     the true top" rule.
+   - External Facebook link in the footer "Connect" widget
+     (`https://www.facebook.com/groups/FriendsOfTheRedBarn/`) is byte-for-byte
+     unchanged in both instances found in the rendered HTML.
+
+VERIFICATION PERFORMED BEFORE THIS COMMIT (same session)
+
+- `php -l` clean on both edited files.
+- Direct HTML fetch confirmed `#page-title` present on: main nav (About,
+  Faculty, Instruments, Inquiry, Recitals, Policies, Contact us), the footer
+  "Quick Links" widget (Lessons, Gallery, About, Community Links, Contact us),
+  the footer "Connect" widget (Contact us), and the mobile bottom bar (Lessons,
+  Sign Up, Contact).
+- Real click-through test (Policies -> About via the header nav) landed with
+  the `#page-title` element positioned well below the header (no clipping),
+  zero console errors.
+- Homepage confirmed to still have no `#page-title` element and no forced
+  scroll/jump.
+
+NOT COMMITTED / NOT TOUCHED
+
+- All other uncommitted plugin work from this session (rbm-instruments slug
+  duplicate checker, Slug/URL Mode admin columns, IWT pagination fix, Global/
+  Custom Sign-Up URL settings, Faculty controls-row CSS, etc.) — untouched,
+  still present in the working tree exactly as before this commit.
+- The unrelated contact-scrambler comment and Adult Student Name Sync additions
+  already sitting uncommitted in themes/Avada-Child-Theme/functions.php.
+- The other 4 CHANGELOG.md entries already sitting uncommitted from earlier in
+  this session.
