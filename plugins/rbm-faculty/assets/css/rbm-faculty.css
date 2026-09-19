@@ -1,0 +1,106 @@
+/* Front-end styles for Teacher Profile pages and the [msch_teachers] Faculty filter select.
+ * Extracted from inline <style> blocks in includes/rbm-teachers.php (docs/0917-1053-PLAN-Extract-
+ * Inline-JS-CSS-From-RBM-Plugins.txt). Selectors/rules unchanged from their inline originals.
+ */
+
+/* Teacher Profile Page only; does not affect Faculty/Lesson pages or other post types. */
+body.single-msch_teacher .fusion-post-slideshow,
+body.single-msch_teacher .post-slideshow { display: none !important; }
+body.single-msch_teacher .fusion-post-title { font-size: 34px !important; line-height: 1.3 !important; margin-bottom: 8px !important; }
+body.single-msch_teacher .thesis-teacher-row { max-width: 900px; }
+body.single-msch_teacher .thesis-teacher-photo { flex: 0 0 320px; }
+body.single-msch_teacher .thesis-teacher-photo img { width: 320px; }
+body.single-msch_teacher .thesis-teacher-photo-secondary { margin-top: 16px; }
+/* Avada core .single-navigation adds margin-bottom:60px; tighten it on Teacher Profile only. */
+body.single-msch_teacher .single-navigation { margin-bottom: 20px; display: flex; justify-content: space-between; text-align: left; }
+body.single-msch_teacher .single-navigation a[rel="prev"] { margin-left: 0; }
+body.single-msch_teacher .single-navigation a[rel="next"] { margin-left: 0; margin-right: 0; }
+/* Arrow characters are hard-coded into the link text (see rbm_msch_teacher_post_nav_arrow); suppress Avada's icon-font pseudo-elements here. */
+body.single-msch_teacher .single-navigation a[rel="prev"]::before,
+body.single-msch_teacher .single-navigation a[rel="next"]::after {
+    content: none !important;
+}
+@media (max-width: 480px) {
+    body.single-msch_teacher .fusion-post-title { font-size: 28px !important; }
+}
+
+/* [msch_teachers] Faculty filter select. */
+.msch-teacher-filter{margin:0 0 1.5em;}
+.msch-teacher-filter-select{
+    font-size:18px;
+    font-weight:600;
+    font-family:inherit;
+    line-height:1.2;
+    padding:12px 24px;
+    border:none;
+    border-radius:999px;
+    background:#6cbf3f;
+    color:#ffffff;
+    cursor:pointer;
+    box-shadow:none;
+    transition:background-color 0.15s ease;
+}
+.msch-teacher-filter-select:hover,
+.msch-teacher-filter-select:focus{
+    background:#5aa932;
+    outline:none;
+}
+
+/* docs/0918-1532-...: filtered Faculty results anchor, so the sticky Avada header (measured
+   63px) does not cover the heading when a visitor lands via #teachers. +12px over the initial
+   80px so the heading text no longer clips under the header. */
+#teachers{
+    scroll-margin-top:92px;
+}
+.msch-teacher-results-heading{
+    margin:0 0 1em;
+}
+
+/* docs/0919-0141-...: Sign Up CTAs (filtered/general Faculty top, Teacher profile top/bottom)
+   reuse the existing site-wide .thesis-cta-button; these rules only cap its width/spacing in a
+   standalone paragraph so a full-width block button doesn't stretch edge-to-edge. */
+.msch-teacher-signup-cta,
+.msch-teacher-signup-top,
+.msch-teacher-signup-bottom{
+    margin:0 0 1.5em;
+}
+.msch-teacher-signup-cta .thesis-cta-button,
+.msch-teacher-signup-top .thesis-cta-button,
+.msch-teacher-signup-bottom .thesis-cta-button{
+    display:inline-block;
+    width:auto;
+    min-width:200px;
+}
+
+/* Teacher card View Profile | Sign Up action row (docs/0919-0141-...): the card is now a <div>
+   wrapper (was a single whole-card <a>) so these two actions can be separate valid links. */
+.thesis-teacher-card-link{
+    display:block;
+    color:inherit;
+    text-decoration:none;
+}
+.thesis-teacher-card-actions{
+    display:flex;
+    gap:8px;
+    padding:0 12px 12px;
+}
+.thesis-teacher-card-view-profile,
+.thesis-teacher-card-actions .thesis-cta-button{
+    flex:1 1 0;
+    width:auto;
+    font-size:14px;
+    padding:10px 12px;
+    margin:0;
+    text-align:center;
+}
+.thesis-teacher-card-view-profile{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #4d4d4d;
+    color:#4d4d4d;
+    text-decoration:none;
+}
+.thesis-teacher-card-view-profile:hover{
+    background:#f5f5f5;
+}

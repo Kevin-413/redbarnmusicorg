@@ -80,6 +80,33 @@ function rbm_msch_teacher_maybe_flush_rewrite_rules() {
     update_option('rbm_msch_teacher_rewrite_flushed_v1', 1);
 }
 
+// Canonical Sign Up / Lesson Inquiry destination (docs/0919-0141-Copilot-REQUEST-Implement-
+// Prominent-Sign-Up-Placement-And-Flow.txt): reuses the existing _msch_lesson_signup_url meta,
+// already set to the same value on every published Instrument, instead of hardcoding another
+// '/lessons-inquiry/' string in this plugin. Falls back to the Lessons Inquiry page itself if no
+// Instrument/meta value is found. No instrument/teacher context is passed yet (later phase).
+function rbm_msch_signup_url() {
+    static $url = null;
+    if ($url !== null) {
+        return $url;
+    }
+    $lessons = get_posts([
+        'post_type'      => 'msch_lesson',
+        'post_status'    => 'publish',
+        'posts_per_page' => 5,
+    ]);
+    foreach ($lessons as $lesson) {
+        $signup_url = get_post_meta($lesson->ID, '_msch_lesson_signup_url', true);
+        if (!empty($signup_url)) {
+            $url = $signup_url;
+            return $url;
+        }
+    }
+    $page = get_posts(['post_type' => 'page', 'name' => 'lessons-inquiry', 'posts_per_page' => 1]);
+    $url = !empty($page) ? get_permalink($page[0]) : home_url('/lessons-inquiry/');
+    return $url;
+}
+
 // --- Public single-Teacher profile page (canonical /teacher/<slug>/) ---
 // Reuses Avada's own single.php (its fallback template for post types with no dedicated template)
 // by filtering the_content(), so no new template file or template_include hook is needed.
@@ -122,31 +149,11 @@ function rbm_msch_teacher_single_content($content) {
     $long_bio = rbm_msch_teacher_long_bio(get_post($teacher_id));
     $bio_html = ($long_bio !== '') ? wpautop(wp_kses_post($long_bio)) : '';
     $website = get_post_meta($teacher_id, '_msch_website', true);
+    rbm_faculty_enqueue_frontend_style();
 
     ob_start();
     ?>
-    <style>
-    /* Scoped to Teacher Profile Pages only; does not affect Faculty/Lesson pages or other post types. */
-    body.single-msch_teacher .fusion-post-slideshow,
-    body.single-msch_teacher .post-slideshow { display: none !important; }
-    body.single-msch_teacher .fusion-post-title { font-size: 34px !important; line-height: 1.3 !important; margin-bottom: 8px !important; }
-    body.single-msch_teacher .thesis-teacher-row { max-width: 900px; }
-    body.single-msch_teacher .thesis-teacher-photo { flex: 0 0 320px; }
-    body.single-msch_teacher .thesis-teacher-photo img { width: 320px; }
-    body.single-msch_teacher .thesis-teacher-photo-secondary { margin-top: 16px; }
-    /* Avada core .single-navigation adds margin-bottom:60px; tighten it on Teacher Profile only. */
-    body.single-msch_teacher .single-navigation { margin-bottom: 20px; display: flex; justify-content: space-between; text-align: left; }
-    body.single-msch_teacher .single-navigation a[rel="prev"] { margin-left: 0; }
-    body.single-msch_teacher .single-navigation a[rel="next"] { margin-left: 0; margin-right: 0; }
-    /* Arrow characters are hard-coded into the link text (see rbm_msch_teacher_post_nav_arrow); suppress Avada's icon-font pseudo-elements here. */
-    body.single-msch_teacher .single-navigation a[rel="prev"]::before,
-    body.single-msch_teacher .single-navigation a[rel="next"]::after {
-        content: none !important;
-    }
-    @media (max-width: 480px) {
-        body.single-msch_teacher .fusion-post-title { font-size: 28px !important; }
-    }
-    </style>
+    <p class="msch-teacher-signup-top"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
     <div class="thesis-teacher-row">
         <div class="thesis-teacher-photo">
             <?php echo rbm_msch_render_portrait_photo($teacher_id, 'medium'); ?>
@@ -164,8 +171,22 @@ function rbm_msch_teacher_single_content($content) {
             <?php endif; ?>
         </div>
     </div>
+    <p class="msch-teacher-signup-bottom"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
     <?php
     return ob_get_clean();
+}
+
+// Front-end CSS loader (docs/0917-1053-PLAN-Extract-Inline-JS-CSS-From-RBM-Plugins.txt) — shared by
+// the Teacher Profile page above and the [msch_teachers] filter select below, enqueued rather than
+// echoed inline so it's only registered once per page regardless of how many times it's needed.
+function rbm_faculty_enqueue_frontend_style() {
+    static $enqueued = false;
+    if ($enqueued) {
+        return;
+    }
+    $enqueued = true;
+    $css_path = RBM_FACULTY_DIR . '/assets/css/rbm-faculty.css';
+    wp_enqueue_style('rbm-faculty', RBM_FACULTY_URL . 'assets/css/rbm-faculty.css', [], file_exists($css_path) ? filemtime($css_path) : false);
 }
 
 // --- Simplified Teacher Editor meta boxes: Status, Website, Advanced (admin-only) ---
@@ -310,8 +331,11 @@ function rbm_save_teacher_meta($post_id) {
     }
 }
 
-// --- Media picker JS (Card Photo box + Teacher Placeholder settings page) ---
-
+// Centralized admin asset loader for rbm-faculty (docs/0917-1053-PLAN-Extract-Inline-JS-CSS-From-
+// RBM-Plugins.txt): the Teacher edit screen, the Teacher Placeholder settings page, and the
+// standalone Teacher form. Covers the Media Library picker (Card Photo/Portrait/Second Profile/
+// Placeholder fields) and the Copy Shortcode/Copy List clipboard controls. Never enqueued globally
+// across wp-admin.
 add_action('admin_enqueue_scripts', 'rbm_teacher_media_picker_assets');
 function rbm_teacher_media_picker_assets($hook) {
     $screen = get_current_screen();
@@ -325,38 +349,8 @@ function rbm_teacher_media_picker_assets($hook) {
         return;
     }
     wp_enqueue_media();
-    wp_add_inline_script('media-editor', <<<'JS'
-        jQuery(function($){
-            var frame;
-            $(document).on('click', '.rbm-media-picker', function(e){
-                e.preventDefault();
-                var button = $(this);
-                var targetId = '#' + button.data('target');
-                var previewId = '#' + button.data('preview');
-                frame = wp.media({ title: 'Select Image', multiple: false, library: { type: 'image' } });
-                frame.on('select', function(){
-                    var attachment = frame.state().get('selection').first().toJSON();
-                    $(targetId).val(attachment.id);
-                    var url = (attachment.sizes && attachment.sizes.thumbnail) ? attachment.sizes.thumbnail.url : attachment.url;
-                    $(previewId).html('<img src="' + url + '" style="max-width:150px;height:auto;display:block;">');
-                    button.text('Replace Image');
-                    button.siblings('.rbm-media-remove').show();
-                });
-                frame.open();
-            });
-            $(document).on('click', '.rbm-media-remove', function(e){
-                e.preventDefault();
-                var button = $(this);
-                var targetId = '#' + button.data('target');
-                var previewId = '#' + button.data('preview');
-                $(targetId).val('');
-                $(previewId).html('');
-                button.hide();
-                button.siblings('.rbm-media-picker').text('Select Image');
-            });
-        });
-        JS
-    );
+    $js_path = RBM_FACULTY_DIR . '/assets/js/rbm-faculty-admin.js';
+    wp_enqueue_script('rbm-faculty-admin', RBM_FACULTY_URL . 'assets/js/rbm-faculty-admin.js', ['jquery'], file_exists($js_path) ? filemtime($js_path) : false, true);
 }
 
 // --- Faculty Instruments We Teach (docs/0912-1838-Copilot-REQUEST-Add-Faculty-Instruments-We-Teach-List-And-Download.txt) ---
@@ -452,7 +446,7 @@ function rbm_add_teacher_placeholder_menu() {
     add_submenu_page(
         'edit.php?post_type=msch_teacher',
         'Teacher Placeholder',
-        'Placeholder',
+        'Settings',
         'manage_options',
         'rbm-teacher-placeholder',
         'rbm_render_teacher_placeholder_page'
@@ -508,33 +502,10 @@ function rbm_render_teacher_placeholder_page() {
                 <textarea id="rbm-faculty-iwt-list" readonly rows="<?php echo (int) max(3, count($instrument_titles)); ?>" style="width:320px;max-width:100%;font-family:monospace;"><?php echo esc_textarea(implode("\n", $instrument_titles)); ?></textarea>
             </p>
             <p>
-                <button type="button" class="button" id="rbm-faculty-iwt-copy">Copy List</button>
+                <button type="button" class="button rbm-copy-list-trigger" data-copy-target="rbm-faculty-iwt-list" data-status-target="rbm-faculty-iwt-copy-status">Copy List</button>
                 <a class="button" href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=rbm_download_faculty_instruments_we_teach'), 'rbm_download_faculty_instruments_we_teach')); ?>">Download .txt</a>
                 <span id="rbm-faculty-iwt-copy-status" style="margin-left:8px;"></span>
             </p>
-            <script>
-            (function () {
-                var btn = document.getElementById('rbm-faculty-iwt-copy');
-                var status = document.getElementById('rbm-faculty-iwt-copy-status');
-                if (!btn) {
-                    return;
-                }
-                btn.addEventListener('click', function () {
-                    var ta = document.getElementById('rbm-faculty-iwt-list');
-                    ta.select();
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(ta.value).then(function () {
-                            status.textContent = 'Copied';
-                            setTimeout(function () { status.textContent = ''; }, 2000);
-                        });
-                    } else {
-                        document.execCommand('copy');
-                        status.textContent = 'Copied';
-                        setTimeout(function () { status.textContent = ''; }, 2000);
-                    }
-                });
-            })();
-            </script>
         <?php endif; ?>
 
         <h2>FACULTY &mdash; LESSONS WE TEACH</h2>
@@ -546,33 +517,10 @@ function rbm_render_teacher_placeholder_page() {
             <textarea id="rbm-faculty-lwt-list" readonly rows="<?php echo (int) max(3, count($lwt_rows) + 1); ?>" style="width:480px;max-width:100%;font-family:monospace;white-space:pre;"><?php echo esc_textarea($lwt_text); ?></textarea>
         </p>
         <p>
-            <button type="button" class="button" id="rbm-faculty-lwt-copy">Copy List</button>
+            <button type="button" class="button rbm-copy-list-trigger" data-copy-target="rbm-faculty-lwt-list" data-status-target="rbm-faculty-lwt-copy-status">Copy List</button>
             <a class="button" href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=rbm_download_faculty_lessons_we_teach'), 'rbm_download_faculty_lessons_we_teach')); ?>">Download .txt</a>
             <span id="rbm-faculty-lwt-copy-status" style="margin-left:8px;"></span>
         </p>
-        <script>
-        (function () {
-            var btn = document.getElementById('rbm-faculty-lwt-copy');
-            var status = document.getElementById('rbm-faculty-lwt-copy-status');
-            if (!btn) {
-                return;
-            }
-            btn.addEventListener('click', function () {
-                var ta = document.getElementById('rbm-faculty-lwt-list');
-                ta.select();
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(ta.value).then(function () {
-                        status.textContent = 'Copied';
-                        setTimeout(function () { status.textContent = ''; }, 2000);
-                    });
-                } else {
-                    document.execCommand('copy');
-                    status.textContent = 'Copied';
-                    setTimeout(function () { status.textContent = ''; }, 2000);
-                }
-            });
-        })();
-        </script>
     </div>
     <?php
 }
@@ -652,6 +600,17 @@ function rbm_teacher_admin_column_content($column, $post_id) {
         $post = get_post($post_id);
         echo esc_html($post->menu_order);
     }
+}
+
+// Removes The SEO Framework's per-post SEO score column from this list — Teachers aren't indexed
+// content the way blog posts are, so that column is unused here. TSF registers it via the screen-
+// based columns hook, not the post-type one this plugin otherwise uses, so both are covered here;
+// priority 20 runs after TSF's own priority-10 registration so its column key is always present.
+add_filter('manage_msch_teacher_posts_columns', 'rbm_teacher_remove_seo_column', 20);
+add_filter('manage_edit-msch_teacher_columns', 'rbm_teacher_remove_seo_column', 20);
+function rbm_teacher_remove_seo_column($columns) {
+    unset($columns['tsf-seo-bar-wrap']);
+    return $columns;
 }
 
 // Status filter (docs/0913-1544-Copilot-REQUEST-Add-Faculty-Status-Controls-And-List-State-
@@ -842,6 +801,24 @@ function rbm_msch_resolve_faculty_by_instrument($lesson_id) {
     return ['teachers' => [], 'mode' => 'none', 'category_name' => ''];
 }
 
+// Full Faculty group for a whole msch_instrument Category term — single resolver reused by both
+// the template_redirect safety check and the shortcode's ?category= handling below (docs/0917-1005-
+// Copilot-REQUEST-Implement-Category-Click-Destination-Setting.txt). Unlike the per-Instrument
+// resolver above, this is always an exact Category match — no further fallback chain involved.
+function rbm_msch_teachers_for_category_term($term_id) {
+    return get_posts([
+        'post_type'      => 'msch_teacher',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => ['title' => 'ASC'],
+        'tax_query'      => [[
+            'taxonomy' => 'msch_instrument',
+            'field'    => 'term_id',
+            'terms'    => $term_id,
+        ]],
+    ]);
+}
+
 // Same-site-only return target for the terminal "Back to Lessons" fallback. Accepts an optional
 // ?return= path/URL (only honored if its host matches this site) so a visitor can be sent back to
 // the exact Lessons context they came from; otherwise resolves the canonical Lessons page by slug.
@@ -861,24 +838,36 @@ function rbm_msch_faculty_return_url() {
 
 // Terminal fallback: runs before any output, since a shortcode-time redirect would be too late
 // (headers already sent). Only acts on the actual Faculty page (has the Teachers shortcode), and
-// only when ?instrument= resolves to nothing renderable, per the fallback chain's STOP condition.
+// only when ?instrument= or ?category= resolves to nothing renderable, per the fallback chain's
+// STOP condition.
 add_action('template_redirect', 'rbm_faculty_instrument_fallback_redirect');
 function rbm_faculty_instrument_fallback_redirect() {
-    if (empty($_GET['instrument']) || !is_singular('page')) {
+    if ((empty($_GET['instrument']) && empty($_GET['category'])) || !is_singular('page')) {
         return;
     }
     $post = get_queried_object();
     if (!$post || (!has_shortcode($post->post_content, 'rbm_msch_teachers_element') && !has_shortcode($post->post_content, 'msch_teachers'))) {
         return;
     }
-    $slug = sanitize_title(wp_unslash($_GET['instrument']));
-    $matched = get_posts(['post_type' => 'msch_lesson', 'name' => $slug, 'post_status' => 'publish', 'posts_per_page' => 1]);
-    if (empty($matched)) {
-        wp_safe_redirect(rbm_msch_faculty_return_url());
-        exit;
+    if (!empty($_GET['instrument'])) {
+        $slug = sanitize_title(wp_unslash($_GET['instrument']));
+        $matched = get_posts(['post_type' => 'msch_lesson', 'name' => $slug, 'post_status' => 'publish', 'posts_per_page' => 1]);
+        if (empty($matched)) {
+            wp_safe_redirect(rbm_msch_faculty_return_url());
+            exit;
+        }
+        $result = rbm_msch_resolve_faculty_by_instrument($matched[0]->ID);
+        if (empty($result['teachers'])) {
+            wp_safe_redirect(rbm_msch_faculty_return_url());
+            exit;
+        }
+        return;
     }
-    $result = rbm_msch_resolve_faculty_by_instrument($matched[0]->ID);
-    if (empty($result['teachers'])) {
+    // docs/0917-1005-Copilot-REQUEST-Implement-Category-Click-Destination-Setting.txt: ?category=
+    // <msch_instrument term slug>, a direct Category match (no per-Instrument fallback chain).
+    $slug = sanitize_title(wp_unslash($_GET['category']));
+    $term = get_term_by('slug', $slug, 'msch_instrument');
+    if (!$term || is_wp_error($term) || empty(rbm_msch_teachers_for_category_term($term->term_id))) {
         wp_safe_redirect(rbm_msch_faculty_return_url());
         exit;
     }
@@ -932,6 +921,8 @@ function rbm_msch_teachers_shortcode($atts) {
     // redirect would be too late), so an empty result here is just a safety-net blank render for
     // any context that reaches this shortcode without going through that check.
     $rbm_filter_instrument_id = 0;
+    $rbm_filter_category_slug = '';
+    $rbm_filter_category_name = '';
     $rbm_fallback_note = '';
     if (!empty($_GET['instrument'])) {
         $slug = sanitize_title(wp_unslash($_GET['instrument']));
@@ -951,6 +942,19 @@ function rbm_msch_teachers_shortcode($atts) {
                     get_the_title($rbm_filter_instrument_id),
                     $result['category_name']
                 );
+            }
+        }
+    } elseif (!empty($_GET['category'])) {
+        // docs/0917-1005-Copilot-REQUEST-Implement-Category-Click-Destination-Setting.txt: direct
+        // Category group link (Instruments "Category Click Destination" = Faculty Group Page).
+        $slug = sanitize_title(wp_unslash($_GET['category']));
+        $term = get_term_by('slug', $slug, 'msch_instrument');
+        if ($term && !is_wp_error($term)) {
+            $category_teachers = rbm_msch_teachers_for_category_term($term->term_id);
+            if (!empty($category_teachers)) {
+                $teachers = $category_teachers;
+                $rbm_filter_category_slug = $slug;
+                $rbm_filter_category_name = $term->name;
             }
         }
     }
@@ -979,58 +983,31 @@ function rbm_msch_teachers_shortcode($atts) {
     $rbm_teachers_instance++;
     $filter_id = 'msch-teacher-filter-' . $rbm_teachers_instance;
 
-    static $rbm_teachers_css_printed = false;
-    ob_start();
-    if (!$rbm_teachers_css_printed) {
-        $rbm_teachers_css_printed = true;
-        ?>
-        <style>
-        .msch-teacher-filter{margin:0 0 1.5em;}
-        .msch-teacher-filter-select{
-            font-size:18px;
-            font-weight:600;
-            font-family:inherit;
-            line-height:1.2;
-            padding:12px 24px;
-            border:none;
-            border-radius:999px;
-            background:#6cbf3f;
-            color:#ffffff;
-            cursor:pointer;
-            box-shadow:none;
-            transition:background-color 0.15s ease;
-        }
-        .msch-teacher-filter-select:hover,
-        .msch-teacher-filter-select:focus{
-            background:#5aa932;
-            outline:none;
-        }
-        </style>
-        <script>
-        document.addEventListener('change', function (e) {
-            if (!e.target || !e.target.classList || !e.target.classList.contains('msch-teacher-filter-select')) {
-                return;
-            }
-            var wrap = e.target.closest('.msch-teacher-filter');
-            var grid = wrap ? wrap.nextElementSibling : null;
-            if (!grid || !grid.classList.contains('thesis-lesson-card-grid')) {
-                return;
-            }
-            var value = e.target.value;
-            var cards = grid.querySelectorAll('.thesis-teacher-card');
-            cards.forEach(function (card) {
-                if (!value || value === 'all') {
-                    card.style.display = '';
-                    return;
-                }
-                var terms = (card.getAttribute('data-msch-instruments') || '').split(',');
-                card.style.display = (terms.indexOf(value) !== -1) ? '' : 'none';
-            });
-        }, false);
-        </script>
-        <?php
+    // docs/0918-1532-...: filtered-results heading + #teachers landing anchor. An Instrument
+    // request keeps the Instrument's own name even when it fell back to Category teachers (the
+    // fallback note above already explains the discrepancy); a direct ?category= link uses the
+    // Category's name.
+    $rbm_is_filtered = ($rbm_filter_instrument_id || $rbm_filter_category_slug !== '');
+    $rbm_teachers_heading = '';
+    if ($rbm_filter_instrument_id) {
+        $rbm_teachers_heading = get_the_title($rbm_filter_instrument_id) . ' Teachers';
+    } elseif ($rbm_filter_category_slug !== '') {
+        $rbm_teachers_heading = $rbm_filter_category_name . ' Teachers';
     }
-    if (!empty($filter_terms)) : ?>
+
+    ob_start();
+    rbm_faculty_enqueue_frontend_style();
+    $js_path = RBM_FACULTY_DIR . '/assets/js/rbm-faculty.js';
+    wp_enqueue_script('rbm-faculty', RBM_FACULTY_URL . 'assets/js/rbm-faculty.js', [], file_exists($js_path) ? filemtime($js_path) : false, true);
+    ?>
+    <div id="teachers">
+    <?php if ($rbm_teachers_heading !== '') : ?>
+        <h2 class="msch-teacher-results-heading"><?php echo esc_html($rbm_teachers_heading); ?></h2>
+    <?php endif; ?>
+    <?php if ($rbm_is_filtered) : ?>
+        <p class="msch-teacher-signup-cta"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
+    <?php endif; ?>
+    <?php if (!$rbm_is_filtered && !empty($filter_terms)) : ?>
         <div class="msch-teacher-filter">
             <select id="<?php echo esc_attr($filter_id); ?>" class="msch-teacher-filter-select" aria-label="Filter Faculty by instrument">
                 <option value="" disabled selected>Choose Instrument</option>
@@ -1041,32 +1018,65 @@ function rbm_msch_teachers_shortcode($atts) {
             </select>
         </div>
     <?php endif; ?>
-    <?php if ($rbm_filter_instrument_id) : ?>
+    <?php if (!$rbm_is_filtered) : ?>
+        <p class="msch-teacher-signup-cta"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
+    <?php endif; ?>
+    <?php if ($rbm_is_filtered) : ?>
         <?php if ($rbm_fallback_note !== '') : ?>
             <p class="msch-teacher-fallback-note"><em><?php echo esc_html($rbm_fallback_note); ?></em></p>
         <?php endif; ?>
-        <p class="msch-teacher-view-all"><a href="<?php echo esc_url(remove_query_arg('instrument')); ?>">View All Faculty</a></p>
+        <p class="msch-teacher-view-all"><a href="<?php echo esc_url(remove_query_arg(['instrument', 'category'])); ?>">View All Faculty</a></p>
     <?php endif; ?>
     <div class="thesis-lesson-card-grid">
-        <?php foreach ($teachers as $teacher) :
-            $instruments = get_the_terms($teacher->ID, 'msch_instrument');
-            $instrument_slugs = (is_array($instruments) && !is_wp_error($instruments))
-                ? wp_list_pluck($instruments, 'slug')
-                : [];
-            $teaches = trim((string) get_post_meta($teacher->ID, '_msch_teaches', true));
-            $profile_url = get_permalink($teacher->ID);
-        ?>
-        <a class="thesis-lesson-card thesis-teacher-card" href="<?php echo esc_url($profile_url); ?>" data-msch-instruments="<?php echo esc_attr(implode(',', $instrument_slugs)); ?>">
+        <?php foreach ($teachers as $teacher) : ?>
+            <?php echo rbm_msch_teacher_card_html($teacher); ?>
+        <?php endforeach; ?>
+    </div>
+    </div><!-- #teachers -->
+    <?php
+    return ob_get_clean();
+}
+
+// Single Teacher-card renderer, shared by the [msch_teachers] compact grid above and the
+// standalone [rbm_teacher] shortcode below (docs/0917-1034-Copilot-REQUEST-Implement-Reusable-
+// RBM-Shortcodes-And-Copy-Buttons.txt) — exactly one Teacher-card template.
+function rbm_msch_teacher_card_html($teacher) {
+    $instruments = get_the_terms($teacher->ID, 'msch_instrument');
+    $instrument_slugs = (is_array($instruments) && !is_wp_error($instruments))
+        ? wp_list_pluck($instruments, 'slug')
+        : [];
+    $teaches = trim((string) get_post_meta($teacher->ID, '_msch_teaches', true));
+    $profile_url = get_permalink($teacher->ID);
+    ob_start();
+    ?>
+    <div class="thesis-lesson-card thesis-teacher-card" data-msch-instruments="<?php echo esc_attr(implode(',', $instrument_slugs)); ?>">
+        <a class="thesis-teacher-card-link" href="<?php echo esc_url($profile_url); ?>">
             <span class="thesis-lesson-card-image"><?php echo rbm_msch_render_card_photo($teacher->ID); ?></span>
             <span class="thesis-lesson-card-title"><?php echo esc_html(get_the_title($teacher)); ?></span>
             <?php if ($teaches !== '') : ?>
                 <span class="thesis-lesson-card-line thesis-teacher-card-instrument"><?php echo esc_html($teaches); ?></span>
             <?php endif; ?>
         </a>
-        <?php endforeach; ?>
+        <div class="thesis-teacher-card-actions">
+            <a class="thesis-teacher-card-view-profile" href="<?php echo esc_url($profile_url); ?>">View Profile</a>
+            <a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a>
+        </div>
     </div>
     <?php
     return ob_get_clean();
+}
+
+// docs/0917-1034-Copilot-REQUEST-Implement-Reusable-RBM-Shortcodes-And-Copy-Buttons.txt: single
+// reusable Teacher card for manual placement on any Avada page/content area (Text Block, Shortcode
+// element, etc.). Fails silently for a missing/unpublished Teacher — no PHP warnings/notices.
+add_shortcode('rbm_teacher', 'rbm_teacher_shortcode');
+function rbm_teacher_shortcode($atts) {
+    $atts = shortcode_atts(['id' => 0], $atts, 'rbm_teacher');
+    $teacher = get_post((int) $atts['id']);
+    if (!$teacher || $teacher->post_type !== 'msch_teacher' || $teacher->post_status !== 'publish') {
+        return '';
+    }
+    return '<div class="thesis-lesson-card-grid">' . rbm_msch_teacher_card_html($teacher) . '</div>';
 }
 
 // Reads the stored Excerpt field directly; never auto-generates from post content.
