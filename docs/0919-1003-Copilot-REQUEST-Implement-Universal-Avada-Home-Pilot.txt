@@ -1,0 +1,345 @@
+0919-1003-Copilot-REQUEST-Implement-Universal-Avada-Home-Pilot.txt
+
+REQUEST
+Implement Universal Avada Standards — Streamlined Home Page Pilot
+
+AUTHORITY
+
+Implement the first controlled batch of:
+
+0919-0942-PLAN-Universal-Avada-Standards-And-Legacy-Cleanup.txt
+
+Use the updated version of that PLAN reviewed immediately before this Request.
+
+This Request supersedes the PLAN's former "planning and review only" boundary
+for the specific implementation scope defined below. It does not authorize the
+entire site-wide migration or cleanup.
+
+TARGET
+
+Canonical Local site only:
+redbarnmusicorg-avada.local
+
+Git repository root:
+wp-content
+
+LIVE redbarnmusic.org is not authorized for inspection or modification.
+
+PURPOSE
+
+Complete one useful Home-page implementation batch while establishing reusable
+Avada presentation standards. Avoid unnecessary intermediate plans, review
+documents, and approval ceremonies.
+
+This is a controlled migration and standardization pass, not a redesign.
+Preserve the Home page's newspaper style, wording, images, colors, links, shared
+content behavior, and friendly character.
+
+STREAMLINED WORKFLOW
+
+Perform the following in one working session:
+
+1. Git Airlock checkpoint
+2. Focused current-state verification
+3. Universal green pill button standard
+4. Home-page action-button pilot
+5. Responsive and functional verification
+6. One concise Reply document
+7. One verified commit and push
+
+Do not create separate inventory, recommendation, implementation, verification,
+commit, or push Requests unless a genuine blocker is found.
+
+GOVERNANCE
+
+Follow:
+
+- .github/copilot-instructions.md
+- docs/0905-1224-GUIDELINES-RedBarnMusicOrg-Copilot-Governance.txt
+- docs/0906-1649-STANDARD-Home-Page-Container-Formats.txt
+- Applicable existing STANDARD and PROCEDURE documents
+
+Do not edit Avada parent-theme files, WordPress core, vendor code, or unrelated
+plugins.
+
+IMPORTANT TERMINOLOGY AND SAFEGUARDS
+
+1. Avada Builder was formerly Fusion Builder. Current Avada still requires
+   fusion_* shortcodes, classes, functions, and identifiers. Do not remove or
+   rewrite code merely because its name contains "fusion."
+
+2. The following are current, approved Red Barn components despite their names:
+   - thesis-page-header
+   - thesis-page-title
+   - thesis-page-intro
+   - thesis-metrics-title
+
+   Preserve them. Do not classify them as legacy or replace them in this pass.
+
+3. Before flagging any other thesis-* class, check existing STANDARD and
+   PROCEDURE documents. Only undocumented and demonstrably obsolete usage is a
+   legacy candidate.
+
+4. The Gutenberg Synced Pattern is intentional. Do not split, duplicate, or
+   replace its shared-content architecture merely to make the page uniformly
+   Avada.
+
+5. Preserve all Media Library, rbm-faculty, rbm-instruments, Forminator, RBM,
+   and other database records unrelated to this exact Home-page presentation
+   work.
+
+CURRENT DOCUMENTED STATE TO RE-VERIFY
+
+- Home post: 20046
+- Redirect post: 255
+- Shared pattern: Home Body (Synced), post 20440
+- Both pages should reference the same Pattern 20440.
+- Lessons, Open House, and Block Party should use Avada Builder elements.
+- Gallery and Scholarships should remain Gutenberg wp:heading + wp:columns.
+- Existing Lessons/Open House/Block Party fusion_button markup provides a
+  working green solid-pill reference:
+  - border radius: 999px
+  - normal green: #6cbf3f
+  - hover green: #5aa932
+  - text/accent: #ffffff
+  - approximately 12px vertical / 24px horizontal padding
+  - approximately 600 font weight
+
+Treat the documented state as likely accurate but confirm it from the current
+Local WordPress content before editing.
+
+IMPLEMENTATION SCOPE
+
+PART 1 — GIT AIRLOCK
+
+Before changes:
+
+- Confirm the repository root, branch, HEAD, and working-tree state.
+- Identify pre-existing changes and leave unrelated work untouched.
+- Create the required recoverable checkpoint under current governance.
+- Do not use destructive Git commands.
+
+PART 2 — FOCUSED CURRENT-STATE CHECK
+
+Inspect only what is required for this Home pilot:
+
+- Home post 20046
+- Redirect post 255
+- Synced Pattern 20440
+- Existing Home action buttons and destinations
+- Existing Lessons/Open House/Block Party fusion_button configuration
+- Gallery and Scholarships block types
+- Relevant Avada Global Options or reusable style mechanisms
+- Custom Red Barn CSS or plugin code directly affecting these components
+
+Confirm:
+
+- Home and post 255 still reference the same Pattern 20440.
+- Lessons, Open House, and Block Party remain Avada Builder sections.
+- Gallery and Scholarships remain Gutenberg unless the current content proves
+  otherwise.
+- Approved thesis-* components remain active and documented.
+
+Do not perform a broad site-wide legacy audit in this pass.
+
+PART 3 — ESTABLISH THE UNIVERSAL GREEN PILL STANDARD
+
+Create one maintainable source of truth for the existing green pill treatment.
+
+Required solid-pill behavior:
+
+- Background: #6cbf3f
+- Hover background: #5aa932
+- Text: #ffffff
+- Fully rounded corners: 999px
+- Approximately 12px vertical / 24px horizontal padding
+- Approximately 600 font weight
+- Thumb-friendly target size
+- Visible keyboard focus
+- Accessible contrast
+- Consistent desktop, tablet, and mobile behavior
+
+Also define an outline-pill variant only if it is already needed by the current
+Home content. Do not add unused architecture.
+
+Choose the smallest appropriate central mechanism after inspecting the current
+implementation:
+
+- Prefer a native Avada global button style or existing supported global style
+  mechanism when it can provide one dependable source of truth.
+- Otherwise use one documented shared Red Barn component class in custom code.
+- Do not create a Global Element merely to centralize styling when the link and
+  label need to vary.
+- Do not duplicate full button styling separately in every Home section.
+- Do not modify the Avada parent theme.
+
+Document the selected mechanism and why it is the safest fit.
+
+PART 4 — HOME NEWSPAPER-CONTAINER ACTION BUTTONS
+
+Apply the universal solid green pill style to appropriate action buttons within
+the Home newspaper-style containers in Pattern 20440.
+
+For each visible Home section:
+
+- Inspect the section's existing title, text, image link, and primary
+  destination.
+- Add or normalize one clear action button when the section has an existing,
+  unambiguous destination.
+- Use concise action text consistent with the current content.
+- Reuse the section's existing primary destination; do not invent new pages,
+  URLs, campaigns, events, or business decisions.
+- Keep the button aligned with the article content and visually subordinate to
+  the headline.
+- Keep the newspaper appearance rather than turning containers into modern
+  promotional cards.
+- Avoid making the entire container clickable when a visible button provides
+  the clearer action.
+- Preserve existing image and text links unless duplication causes a genuine
+  accessibility or usability problem.
+- If a section has no safe, obvious destination or action label, leave that
+  section unchanged and record the exact ambiguity in the Reply. Do not stop
+  the whole task and do not guess.
+
+The goal is consistency, not a forced button count. Do not add a meaningless
+button merely so every container has one.
+
+PART 5 — GALLERY AND SCHOLARSHIPS
+
+Re-verify their current Gutenberg structure, but do not automatically convert
+Gallery or Scholarships to Avada Builder in this pass.
+
+Retain them as Gutenberg when their current structure is responsive,
+maintainable, accessible, and compatible with the shared Pattern 20440.
+
+Convert either section only if all of the following are true:
+
+- A concrete maintainability, responsiveness, accessibility, or editing-safety
+  problem is demonstrated.
+- Conversion is necessary to complete the action-button standard safely.
+- Existing wording, images, links, and layout intent can be preserved.
+- The change remains limited to that section inside Pattern 20440.
+
+If those conditions are not met, defer conversion and document why keeping
+Gutenberg is the better choice.
+
+PART 6 — VERIFICATION
+
+Verify the completed pilot on both Home post 20046 and redirect post 255.
+
+Desktop:
+
+- Newspaper layout and content order preserved
+- Buttons visually consistent
+- Existing images, wording, and links preserved
+- All action destinations correct
+
+Tablet:
+
+- Columns remain balanced and readable
+- Buttons do not overlap, clip, or distort content
+
+Mobile 375px and 320px:
+
+- Sections stack correctly
+- Buttons remain thumb-friendly
+- Text does not clip
+- No horizontal overflow
+- Mobile Bottom Action Bar remains correct
+
+Accessibility and function:
+
+- Buttons work with keyboard navigation
+- Focus indication is visible
+- Hover and focus behavior are consistent
+- Contrast remains readable
+- Links have meaningful labels
+- Header, footer, sidebar, menu, and page-specific headings remain correct
+- Home and post 255 still reference and render the same Pattern 20440
+- No PHP, JavaScript, browser-console, or visible WordPress errors introduced
+- No unrelated page or component changed
+
+PART 7 — DOCUMENT, COMMIT, AND PUSH
+
+Create one concise Reply document:
+
+docs/0919-1003-Copilot-REPLY-Implement-Universal-Avada-Home-Pilot.txt
+
+The Reply must include:
+
+- Executive summary
+- Git Airlock starting state and checkpoint
+- Verified current Home architecture
+- Exact files, database objects, settings, or post content changed
+- Universal pill-button mechanism selected
+- Before/after mapping of each Home section and its action button
+- Any sections intentionally left unchanged and why
+- Gallery/Scholarships keep-or-convert decision
+- Desktop, tablet, 375px, and 320px verification results
+- Accessibility and link verification
+- Confirmation that Home and post 255 still share Pattern 20440
+- Confirmation that approved thesis-* components were preserved
+- Confirmation that current Avada fusion_* requirements were preserved
+- Commit hash
+- Push result
+- Clear remaining work for the next bounded implementation batch
+
+Update the appropriate existing CHANGELOG or rolling migration checklist if
+current governance requires it. Do not create several overlapping status docs.
+
+Commit only the verified files and database-export artifacts, if any, belonging
+to this task. Preserve unrelated working-tree changes.
+
+Push the verified commit to the current authorized branch.
+
+STOP CONDITIONS
+
+Stop and report instead of guessing if:
+
+- Home/post-255 synchronization is broken or Pattern 20440 cannot be resolved.
+- The Local database state conflicts materially with the documented state.
+- The universal style would require editing Avada parent-theme/vendor files.
+- A required action destination cannot be derived from existing content.
+- The task would alter RBM records or unrelated Forminator data.
+- Pre-existing Git changes overlap the exact files or database artifacts that
+  must be changed and cannot be safely separated.
+- Implementation would require LIVE access.
+
+An ambiguous button for one section is not a whole-task blocker. Leave that
+section unchanged, document it, and continue with the safe portions.
+
+OUT OF SCOPE
+
+- Full site-wide legacy inventory or removal
+- Broad Thesis/Fusion cleanup
+- Converting every Gutenberg section to Avada
+- Redesigning the Home page
+- Rewriting article content
+- Creating new destination pages
+- Changing Header, Footer, Sidebar, menus, or Mobile Bottom Action Bar
+- Modifying Avada parent-theme/vendor files or WordPress core
+- Changing RBAdmin, rbm-faculty, rbm-instruments, Forminator, or stored business
+  records
+- Packaging or deploying to LIVE
+
+DONE WHEN
+
+- The current Home architecture has been directly verified.
+- One universal, maintainable solid green pill style is established.
+- Safe Home-container actions use that standard.
+- The newspaper appearance and shared Pattern 20440 workflow are preserved.
+- Gallery and Scholarships have a documented keep-or-convert decision.
+- Desktop, tablet, 375px, and 320px checks pass.
+- One Reply document is complete.
+- One focused commit is created and pushed.
+- No unrelated changes were made.
+
+HANDOFF
+
+If complete, report:
+
+UNIVERSAL AVADA HOME PILOT COMPLETE — SHARED PILL STANDARD AND HOME ACTIONS VERIFIED, COMMITTED, AND PUSHED
+
+Put the Reply filename alone on the final line of your response.
+
+Thank you.

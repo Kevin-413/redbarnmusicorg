@@ -1,0 +1,179 @@
+0919-1003-Copilot-REPLY-Implement-Universal-Avada-Home-Pilot.txt
+
+EXECUTIVE SUMMARY
+
+Implemented the streamlined Home pilot on redbarnmusicorg-avada.local only.
+Established the green solid pill button as a documented, reusable Avada
+Builder component (a fixed `fusion_button` attribute template, not a new
+Global Element or sitewide Theme Option change), and applied it once to the
+Home page's Gallery section, the only section with a safe, unambiguous
+existing destination that did not already have a button. Open House, Block
+Party, and Scholarships were left unchanged and are documented below with the
+specific reason each was ambiguous. Gallery and Scholarships remain native
+Gutenberg, per the plan's Part 5 (no conversion was needed or performed).
+Verified on both Home post 20046 and redirect post 255, at desktop, tablet,
+375px, and 320px. No PHP, JS, or console errors observed. Committed and
+pushed.
+
+GIT AIRLOCK
+
+- Repo: wp-content, branch `0904-1425-avada-safe-check`, HEAD `78b9458`
+  (matches `origin/0904-1425-avada-safe-check`).
+- Pre-existing dirty working tree (not created by this task, not touched by
+  it): ~700 untracked docs/archive files, ~598 deleted files under
+  `plugins/rbm-instruments/assets/` and `plugins/rbm-lessons/assets/`
+  (image cleanup in progress from an earlier session), and modified files in
+  `plugins/forminator/`, `plugins/updraftplus/`, `plugins/rbm-faculty/`,
+  `plugins/rbm-instruments/`, `plugins/rbm-test-monitor/`,
+  `plugins/slick-popup/`, and `themes/Avada-Child-Theme/functions.php`
+  (an unrelated Forminator adult-student-name-sync helper, pending commit).
+  None of these overlap the files this task changed. All were left exactly
+  as found.
+
+VERIFIED CURRENT ARCHITECTURE (before editing)
+
+- Home post 20046 (page, publish) and redirect post 255 (page, publish) both
+  contain `<!-- wp:block {"ref":20440} -->`, confirmed via direct post
+  content inspection — both still reference the same Synced Pattern.
+- Pattern 20440 ("Home Body (Synced)", `wp_block`, publish) content, in
+  order: intro quote -> Lessons starting now (Avada Builder, has an existing
+  "FACULTY" pill button) -> Open House (Avada Builder, no button) -> Amherst
+  Block Party (Avada Builder, no button) -> Gallery (native Gutenberg
+  heading + columns, "See more..." text link, no button) -> Scholarships
+  (native Gutenberg heading + columns, no button, no links at all).
+- This matches the PLAN's corrected CURRENT CONFIRMED STATE items 7-9:
+  Lessons/Open House/Block Party are Avada Builder; Gallery/Scholarships
+  remain Gutenberg.
+- Approved `thesis-*` components (`thesis-page-header`, `thesis-metrics-title`,
+  `thesis-metrics-separator`) are still present and unchanged; not touched.
+
+FILES / DATABASE OBJECTS CHANGED
+
+- Post 20440 ("Home Body (Synced)") `post_content` only — one insertion (a
+  `wp:html` block containing one `fusion_button` shortcode) after the
+  existing "See more..." paragraph in the Gallery section. Verified via
+  before/after diff: exactly 5 lines added, 1 line changed, nothing else in
+  the ~11KB pattern touched.
+- docs/0906-1649-STANDARD-Home-Page-Container-Formats.txt — added new
+  section 9, "GREEN SOLID PILL BUTTON — APPROVED", documenting the mechanism
+  and the reused attribute template.
+- CHANGELOG.md — one new entry.
+- This Reply document.
+
+UNIVERSAL PILL-BUTTON MECHANISM SELECTED
+
+An Avada Builder `fusion_button` shortcode with one fixed attribute template
+(only `link` and label text vary), reused verbatim from the existing Lessons
+section button. Not a sitewide Avada Global Option: the Theme Options button
+defaults (`button_border_radius`, `button_gradient_top_color`, etc.) style
+every default Avada button sitewide, including unrelated pages/menus, so
+changing them would exceed the Home-pilot scope. Not a new Global Element:
+only the link and label vary per instance, so a fixed shortcode template
+already gives one dependable, copy-exact source of truth without new builder
+architecture. No new CSS/PHP file: `fusion_button` with `color="custom"`
+already renders identically whether placed in an Avada Builder row or
+embedded as a `wp:html` block inside native Gutenberg content — proven by
+this exact change. Documented in docs/0906-1649-STANDARD-Home-Page-Container-
+Formats.txt section 9 as the standing reference.
+
+HOME SECTION BEFORE/AFTER MAPPING
+
+1. Lessons starting now — unchanged. Already has the reference "FACULTY"
+   pill button; this is the template every other button reuses.
+2. Open House Sept 15 noon to 4 — unchanged, left as-is intentionally. The
+   event date (Sept 15) has already passed as of today (Sept 19); its only
+   links are a Google Maps "CLICK HERE" directions link and an unrelated
+   "for directions" link to `/piano-lessons-2/` combined in one sentence —
+   no single clear, current, page-level destination to attach a button to.
+   Adding a prominent action button to a lapsed event risked inventing a
+   destination/decision, which is out of scope.
+3. Amherst Block Party Sept 19 @ 5-9 — unchanged, left as-is intentionally.
+   This event is happening today, but the section has no link at all (its
+   image links only to its own media file). There is no existing page
+   destination for an in-person, same-day event to reuse.
+4. Gallery - Spring Recital pics — CHANGED. Added a "GALLERY" pill button
+   linking to `/gallery/`, the same destination already used by the
+   section's existing "See more..." text link. Existing text link and image
+   were left untouched.
+5. Scholarships — unchanged, left as-is intentionally. The section makes two
+   different asks ("Need a scholarship? Please ask" and "Please consider
+   making a donation") but has zero existing links of any kind — the visible
+   "PayPal donate now" graphic is baked into the static collage image, not a
+   real link on the page. There is no dedicated scholarship or donation page
+   in the site (checked all published pages) and no existing link to reuse
+   for either ask, so no button was added rather than guessing a destination.
+
+GALLERY / SCHOLARSHIPS KEEP-OR-CONVERT DECISION
+
+Both remain native Gutenberg. No conversion was needed: the required pill
+button renders correctly as a `fusion_button` shortcode embedded directly in
+the existing Gutenberg column, with no maintainability, responsiveness, or
+accessibility problem demonstrated that would justify converting either
+section to Avada Builder.
+
+VERIFICATION RESULTS
+
+Desktop (1280px): Gallery section renders image grid + list + "See more..."
++ new centered green "GALLERY" pill button, newspaper layout and spacing
+unchanged, all existing images/links/wording intact. Verified on both Home
+(20046, rendered at `/`) and redirect (255, rendered at `/welcome-to-the-red-
+barn/`) — both show the identical new button via the shared pattern.
+
+Tablet (768px): columns stack, button remains centered and undistorted, no
+overlap or clipping.
+
+Mobile 375px: no horizontal overflow (`document.documentElement.scrollWidth
+- clientWidth === 0`), button fits fully, Mobile Bottom Action Bar (Lessons /
+Sign Up / Contact / Menu) unaffected.
+
+Mobile 320px: button itself measured 106x38px and sits fully inside the
+viewport (right edge at 213px of 320px) — not the source of overflow. A
+15px horizontal overflow was present at 320px, traced to the WordPress
+admin toolbar's logged-in username ("admin") which is only rendered for a
+logged-in admin session; the same element (`span.display-name` inside
+`#wpadminbar`) is the widest element on the page regardless of this change
+and is not part of the Home page content or this task's scope.
+
+Accessibility/function: button is a real `<a>` link with visible text,
+reachable and activatable via keyboard (`Tab` + `Enter`), href confirmed
+correct. Focus does not produce a visible custom outline/box-shadow — but
+this is identical to the existing, already-approved "FACULTY" reference
+button (same shortcode mechanism, confirmed by direct comparison), so it is
+an existing characteristic of the reused component, not a regression
+introduced here.
+
+No PHP, JavaScript, or browser-console errors observed on either page during
+verification. No unrelated page or component was changed.
+
+CONFIRMATIONS
+
+- Home (20046) and post 255 still both reference Pattern 20440 (`ref:20440`)
+  and both render the new button identically.
+- Approved `thesis-*` components untouched and still present.
+- Current Avada `fusion_*` requirements untouched; the only `fusion_*`
+  addition is the new button shortcode, using the same shortcode/attributes
+  already active elsewhere on the same page.
+
+COMMIT / PUSH
+
+- Commit: db9d419 — "Universal Avada Home pilot: green pill button standard + Gallery CTA"
+  (files: CHANGELOG.md, docs/0906-1649-STANDARD-Home-Page-Container-Formats.txt,
+  docs/0919-1003-Copilot-REPLY-Implement-Universal-Avada-Home-Pilot.txt; post
+  20440 content change lives in the database, not in this commit).
+- Pushed to `origin/0904-1425-avada-safe-check`.
+- Pre-existing unrelated uncommitted changes (asset deletions, Forminator/
+  UpdraftPlus/rbm plugin files, child-theme functions.php) were left
+  uncommitted and unpushed, as instructed.
+
+REMAINING WORK FOR THE NEXT BOUNDED BATCH
+
+- Decide, in a future Request, whether Open House/Block Party should get a
+  different treatment (e.g. a "Directions" or "Contact" button) once a real,
+  current destination exists, rather than leaving them button-less.
+- Decide whether Scholarships should get a real donation/contact link (the
+  PayPal image is not a working link today) before any button is added
+  there.
+- Everything else from the master PLAN (Phases 2 and 4 site-wide standards
+  and migration) remains out of scope until separately authorized.
+
+UNIVERSAL AVADA HOME PILOT COMPLETE — SHARED PILL STANDARD AND HOME ACTIONS VERIFIED, COMMITTED, AND PUSHED

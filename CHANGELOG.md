@@ -1,5 +1,68 @@
 # Changelog
 
+## 2026-09-19 (Universal Avada Home pilot - shared green pill button standard)
+- Implemented docs/0919-1003-Copilot-REQUEST-Implement-Universal-Avada-Home-Pilot.txt. Added one
+  `fusion_button` green solid pill ("GALLERY" -> `/gallery/`) to the Gallery section of the shared
+  Gutenberg Synced Pattern "Home Body (Synced)" (post 20440, read by both Home post 20046 and
+  redirect post 255), reusing the exact button attributes already proven in the Lessons section of
+  the same pattern. Open House, Block Party, and Scholarships were left unchanged — no safe,
+  unambiguous existing destination to reuse (see Reply for detail). Documented the reused
+  `fusion_button` template as the standing "Green Solid Pill Button" standard in
+  docs/0906-1649-STANDARD-Home-Page-Container-Formats.txt (new section 9). No PHP, database
+  schema, RBM, or Forminator changes. See docs/0919-1003-Copilot-REPLY-Implement-Universal-Avada-
+  Home-Pilot.txt.
+
+## 2026-09-19 (preserve Instrument context through Teacher profile)
+- Extended the Faculty → Sign Up workflow (docs/0919-0916-Copilot-REQUEST-Preserve-Instrument-
+  Context-Through-Teacher-Profile.txt) so a visitor's specific-Instrument context survives one
+  more hop, from an Instrument-filtered Teacher card through to that Teacher's own profile page,
+  and from there into the Lessons Inquiry Sign Up link (`plugins/rbm-faculty/includes/rbm-
+  teachers.php`). `rbm_msch_teacher_card_html()` now appends the already-validated Instrument
+  slug as `?instrument=` onto the profile link/"View Profile" link (only when present).
+  `rbm_msch_teacher_single_content()` reads that incoming `?instrument=`, validates it against a
+  real published `msch_lesson` slug (never inferred from the Teacher's own assigned Instruments/
+  Categories, and never a broad Category slug), and passes it into the existing
+  `rbm_msch_signup_url()` alongside the Teacher slug. A direct profile visit, an invalid
+  Instrument value, or a Category-only path all continue to produce a teacher-only Sign Up link
+  exactly as before. No Forminator, rbm-instruments, or Teacher/Instrument assignment changes.
+
+## 2026-09-19 (prepare LIVE deployment package for Lessons Inquiry prefill)
+- No code or Local Forminator changes in this entry — Local (form 20709, `select-1`/`textarea-2`)
+  was already verified complete per the prior entry below. This entry only prepares the manual
+  LIVE deployment package per docs/0919-0258-Copilot-REQUEST-Promote-Lessons-Inquiry-Prefill-To-
+  Live.txt: a reviewable diff of `plugins/rbm-faculty/includes/rbm-teachers.php` (everything
+  uncommitted since the last commit, `78b9458`), a checklist of every numeric Form ID/field ID to
+  verify or change on LIVE, and step-by-step Forminator configuration instructions, all for you to
+  apply manually. Per your instruction, LIVE was not accessed and no LIVE change was made by this
+  task. See docs/0919-0258-Copilot-REPLY-Promote-Lessons-Inquiry-Prefill-To-Live.txt.
+
+## 2026-09-19 (correct context-aware prefill to current Inquiry form)
+- Corrected the prior context-aware Sign Up prefill work (docs/0919-0212 and 0919-0224 REQUESTs)
+  after discovering the original 0919-0154 task had targeted an obsolete demo Forminator form.
+  You imported updated forms during this task, creating new form posts 20709 (RBM Lesson Inquiry),
+  20710 (Contact Us), and 20711 (Student Registration); the old demo form 20330 was deleted as a
+  side effect of that import (not by this task) and was not restored, per your instruction, since
+  20709 supersedes it. `/lessons-inquiry/` was repointed from `[forminator_form id="20330"]` to
+  `id="20709"`.
+  - Updated `select-1` ("Select Instrument") on form 20709 from the old 9 broad categories to the
+    24 specific Instrument choices (Acoustic Guitar through Voice), using each option's real
+    `msch_lesson` post_name as its value so the existing `?instrument=<slug>` contract resolves
+    correctly. Enabled Forminator's native Pre-populate on `select-1` (query parameter:
+    `instrument`).
+  - The imported form 20709 already has a real "Preferred Teacher" field (`textarea-2`), so no
+    custom field was created. `rbm_msch_signup_prefill_teacher_name()` (rbm-teachers.php) now
+    targets `textarea-2` instead of the deleted demo form's `text-1`.
+  - No PHP logic changes were needed for the Category-tile rule: `rbm_msch_teachers_shortcode()`
+    already only ever passes a specific Instrument slug to `rbm_msch_signup_url()`, never a
+    Category slug, so Category-only Sign Up links already correctly omit `?instrument=`.
+  - Re-verified all scenarios end-to-end on the corrected form: specific-Instrument-only,
+    Category-only (Instrument left blank), Teacher-only, Instrument+Teacher combined, invalid
+    values (both fields left blank, no errors), and one real test submission (stored
+    `select-1 = Mandolin`, `textarea-2 = Catherine Bell`), then deleted the test entry.
+
+## 2026-09-19 (context-aware Sign Up prefill)
+- Extended the Sign Up workflow (`docs/0919-0154-Copilot-REQUEST-Add-Context-Aware-Sign-Up-Prefill.txt`) to carry visitor context into the existing Forminator Lesson Inquiry form (`plugins/rbm-faculty/includes/rbm-teachers.php`). `rbm_msch_signup_url()` now accepts optional Instrument/Teacher slugs and appends them as a small stable query-string contract (`?instrument=<lesson-slug>&teacher=<teacher-slug>`) onto the same canonical base URL as before. Filtered-Faculty Sign Up carries the visitor's original specific Instrument (preserved even through Category fallback, never the fallback Category itself); teacher cards and Teacher-profile buttons carry the Teacher slug (cards also carry Instrument when shown inside an Instrument-filtered view); general Faculty/Lessons Sign Up remain plain links. On the Forminator side: enabled the existing "Preferred Instrument" field's (`select-1`) native Pre-populate feature (query param `instrument`) — sufficient on its own since its option values are already canonical slugs, so an unrecognized Instrument slug is safely left unselected with no custom code needed. Added one new plain "Preferred Teacher" field (`text-1`) to the form, and one small script (Local page-scoped to `/lessons-inquiry/`) that resolves an incoming `?teacher=<slug>` into the matching published Teacher's canonical display name and fills that field, since Forminator's native Prefill can't do slug-to-name translation on its own. No Forminator submission/notification behavior changed; no dynamic Instrument-list sync was added; the Forminator "Preferred Instrument" field remains entirely separate from any registered/teacher-assignment Instrument data.
+
 ## 2026-09-19 (prominent Sign Up placement)
 - Added Sign Up CTAs to the four rbm-faculty-owned locations identified in `docs/0919-0127-PLAN-Prominent-Sign-Up-Placement-And-Flow.txt` (`plugins/rbm-faculty/includes/rbm-teachers.php`): a prominent button directly under the dynamic heading on filtered Faculty views (`?instrument=`/`?category=`), a general Sign Up button near the top of the normal `/faculty/` page (below Choose Instrument), a "View Profile | Sign Up" action row on every Teacher card (the card is now a `<div>` wrapper with an inner profile link, instead of one whole-card `<a>`, so both are valid separate links), and Sign Up buttons near the top and bottom of each Teacher profile. All reuse the existing site-wide `.thesis-cta-button` style (defined in Avada's global Additional CSS) — no new button style. Added one small shared `rbm_msch_signup_url()` helper that reads the destination from an existing published Instrument's `_msch_lesson_signup_url` meta (falling back to the Lessons Inquiry page) instead of hardcoding another `/lessons-inquiry/` string. No context-aware prefill yet (a later phase); no Forminator changes; the Lessons page's existing page-level Sign Up button and the mobile bottom bar's persistent Sign Up button were verified already correct and left unchanged. This closely follows a 2026-09-13 Faculty signup implementation that was built and then reverted the same day for undocumented (non-technical) reasons — reused its proven card-refactor/helper pattern.
 

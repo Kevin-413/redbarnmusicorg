@@ -1,0 +1,330 @@
+0919-0942-PLAN-Universal-Avada-Standards-And-Legacy-Cleanup.txt
+
+PLAN
+Universal Avada Standards and Legacy Thesis/Fusion Cleanup
+
+STATUS
+
+Planning and review only.
+
+Copilot should review this plan for technical accuracy, clarity, omissions,
+risks, and suggested improvements. Do not implement changes during this review.
+
+PROJECT TARGET
+
+Canonical Local development site:
+redbarnmusicorg-avada.local
+
+Git repository root:
+wp-content
+
+LIVE redbarnmusic.org is not authorized for inspection or modification.
+
+PURPOSE
+
+Complete the transition from the former Thesis-based website and older,
+inconsistent page-building methods to a maintainable Avada-based presentation
+system.
+
+The goal is not to redesign the website. Preserve its established newspaper
+style, content, colors, imagery, and friendly character while making the
+structure, styling, and editing workflow consistent.
+
+IMPORTANT TERMINOLOGY
+
+Avada Builder was formerly named Fusion Builder. Current Avada still uses
+internal fusion_* shortcodes, classes, functions, and identifiers.
+
+Therefore:
+
+- Do not remove code merely because its name contains "fusion."
+- Preserve current Avada Builder requirements.
+- Identify and remove only obsolete Fusion-era content, abandoned overrides,
+  duplicated styling, or structures no longer used by the current Avada site.
+- Thesis-specific markup and styling should be removed only after all active
+  dependencies have been identified and replaced.
+
+CURRENT CONFIRMED STATE
+
+1. Avada is the active presentation framework.
+
+2. Header, footer, sidebar, page layouts, faculty presentation, lesson cards,
+   and mobile controls have been rebuilt or developed around Avada.
+
+3. Historical docs/Thesis-web-pages/ material is reference-only and is not
+   active migration code.
+
+4. The Home page remains a hybrid implementation.
+
+5. Home post 20046 and redirect post 255 share one Gutenberg Synced Pattern:
+   - Name: Home Body (Synced)
+   - Post ID: 20440
+
+6. The shared Gutenberg pattern is intentional. It provides one-source editing
+   for both pages and should not be split merely to make everything use Avada
+   Builder.
+
+7. The former table-based "Lessons starting now" section was first converted to
+   responsive Gutenberg columns, then later converted again to native Avada
+   Builder elements (fusion_builder_container/row/column, fusion_title,
+   fusion_imageframe, fusion_text, fusion_button). Confirmed done per
+   docs/archive/2026-09/0912-1529-Copilot-REPLY-Convert-Home-Lessons-Synced-Section-To-Avada.txt.
+
+8. The Open House and Block Party sections of the same Synced Pattern were
+   also converted to the identical Avada structure. Confirmed done per
+   docs/archive/2026-09/0912-1605-Copilot-REPLY-Convert-Home-Open-House-Synced-Section-To-Avada.txt
+   and docs/archive/2026-09/0912-1634-Copilot-REPLY-Convert-Home-Block-Party-Synced-Section-To-Avada.txt.
+   The Gallery and
+   Scholarships sections were NOT converted and remain native Gutenberg
+   `wp:heading` + `wp:columns` blocks in Pattern 20440. This should be
+   re-verified at the start of Phase 3, but no conversion work remains
+   outstanding for Lessons/Open House/Block Party.
+
+9. thesis-page-header, thesis-page-title, thesis-page-intro, and
+   thesis-metrics-title use a "thesis-" prefix but are CURRENT, approved Red
+   Barn components, not legacy Thesis-theme remnants. They are documented in
+   docs/0906-1649-STANDARD-Home-Page-Container-Formats.txt and
+   docs/0906-1947-PROCEDURE-New-Lesson-Page-Template-And-Add-A-Lesson.txt and
+   are actively used on Home, Faculty, Contact, Policies, and lesson pages.
+   Do not flag these for removal. The inventory should instead look for any
+   thesis-* class that is NOT documented in an existing STANDARD or
+   PROCEDURE doc.
+
+10. A green pill button already exists in Avada Builder form: the fusion_button
+    added during the Lessons conversion above (border_radius 999px on all
+    corners, gradient_colors #6cbf3f, gradient_hover_colors #5aa932, accent
+    #ffffff), matched to the existing Lessons-page "Choose Instrument" pill
+    button. This is a working reference example, but it has not been
+    confirmed as the universal Avada button standard.
+
+GUIDING DECISIONS
+
+1. Use Avada for the site's universal visual system and major layout framework.
+
+2. Do not force every piece of valid WordPress content into Avada Builder.
+   Gutenberg Synced Patterns may remain where they provide a clean, reliable
+   shared-content workflow.
+
+3. Prefer native Avada settings, Global Options, Layouts, Layout Sections,
+   reusable elements, and documented project components over repeated custom
+   CSS or page-specific fixes.
+
+4. Keep reusable lesson and faculty components independent of RBAdmin so the
+   website package can be reused by other music schools.
+
+5. Preserve existing wording, images, links, content records, Media Library,
+   rbm-faculty data, rbm-instruments data, and other database records.
+
+6. Do not edit Avada parent-theme or other vendor files.
+
+7. Work on one verified component or page group at a time using the Git Airlock
+   workflow: checkpoint, narrow change, test, document, commit, and push (see
+   docs/0905-1224-GUIDELINES-RedBarnMusicOrg-Copilot-Governance.txt).
+
+PHASE 1 — READ-ONLY INVENTORY
+
+Create a precise inventory of active presentation structures and dependencies.
+
+Before flagging any thesis-* class as legacy, check whether it is already
+documented as an approved component in an existing STANDARD or PROCEDURE doc
+(for example docs/0906-1649-STANDARD-Home-Page-Container-Formats.txt). Only
+undocumented thesis-* usage is a legacy candidate.
+
+Inspect custom Red Barn code and relevant WordPress content for:
+
+- Active thesis-* classes and IDs not already covered by an approved STANDARD
+  or PROCEDURE doc
+- Thesis CSS, hooks, boxes, packages, templates, and layout remnants
+- Legacy HTML tables used for visual layout
+- Floated-image layouts
+- Inline CSS and inline JavaScript
+- Page-specific style blocks
+- Repeated button, heading, spacing, image, and container styles
+- Obsolete Fusion Builder shortcodes or content
+- Current Avada Builder shortcodes that must remain
+- Gutenberg blocks and Synced Patterns
+- Avada Global Options, Layouts, Layout Sections, Elements, and templates
+- Custom plugin or mu-plugin code supplying frontend presentation
+- Desktop-only rules that create mobile or tablet problems
+
+For every suspected legacy item, report:
+
+- File, database object, page, post, template, or setting where it exists
+- Whether it is currently active
+- What visible component depends on it
+- Whether Avada already provides a replacement
+- Recommended disposition: KEEP, CONVERT, CONSOLIDATE, or REMOVE
+- Risk level and required verification
+
+Do not change anything during the inventory.
+
+PHASE 2 — DEFINE UNIVERSAL AVADA STANDARDS
+
+Propose one central standard for each of the following:
+
+- Site content width and container behavior
+- Desktop, tablet, and mobile breakpoints
+- Typography and heading hierarchy
+- Newspaper-style article headings and metadata
+- Body text, lists, links, and quotations
+- Green solid pill buttons
+- Green outline pill buttons
+- Button size, padding, hover, focus, and disabled states
+- Thumb-friendly mobile controls
+- Image aspect ratios, borders, captions, and responsive behavior
+- Container padding and vertical rhythm
+- Column gaps and stacking order
+- Cards and article containers
+- Forms and calls to action
+- Accessibility focus indicators and color contrast
+
+For each standard, identify the preferred home:
+
+- Avada Global Options
+- Avada Global Element or reusable Builder component
+- Avada Layout or Layout Section
+- Gutenberg Synced Pattern
+- Shared custom plugin stylesheet
+- Component-specific stylesheet only when genuinely necessary
+
+Avoid creating a Global Element when a global Avada style or shared component
+class is the more appropriate source of truth.
+
+PHASE 3 — HOME PAGE PILOT
+
+Use the Home page as the first controlled migration pilot because it contains
+the clearest mixture of native Avada, Avada Builder converted, and native
+Gutenberg presentation.
+
+Before proposing edits:
+
+1. Verify the current contents of Home post 20046, redirect post 255, and Synced
+   Pattern 20440.
+
+2. Confirm that Lessons, Open House, and Block Party are still converted to
+   Avada Builder elements, and that Gallery and Scholarships are still native
+   Gutenberg `wp:heading` + `wp:columns` blocks (see CURRENT CONFIRMED STATE
+   items 7-8). Re-verify rather than re-discover.
+
+3. Document which Home sections are:
+   - Native Avada
+   - Gutenberg (Gallery, Scholarships)
+   - Shared through the Synced Pattern
+   - Dependent on approved thesis-* components (see item 9)
+   - Dependent on custom CSS
+
+4. Recommend the smallest safe sequence for:
+   - Converting the remaining Gallery and Scholarships sections, if warranted
+   - Applying universal typography and spacing
+   - Adding consistent green pill action buttons to article containers,
+     reusing the pill button already defined in the Lessons/Open
+     House/Block Party fusion_button markup (see item 10)
+   - Preserving the shared Home/post-255 workflow
+
+Do not convert the entire Home body to Avada merely for uniformity. Recommend a
+conversion only when it materially improves maintainability, responsiveness,
+accessibility, or editing safety.
+
+PHASE 4 — COMPONENT-BY-COMPONENT MIGRATION
+
+After the Home pilot is approved and verified, propose a staged order for the
+remaining website areas. Suggested order:
+
+1. Universal buttons and calls to action
+2. Typography and headings
+3. Standard containers, columns, and spacing
+4. Images and captions
+5. Forms
+6. Standard content pages
+7. Newspaper-style Home article containers
+8. Special templates and archive views
+9. Final legacy CSS and markup removal
+
+Each implementation pass should address only one clearly bounded component or
+page group.
+
+PHASE 5 — SAFE LEGACY REMOVAL
+
+Remove legacy code only after its replacement has been implemented and tested.
+
+Before deleting or disabling anything:
+
+- Search for every reference and consumer.
+- Confirm whether the identifier is Thesis-specific, obsolete Fusion-era code,
+  or required current Avada code.
+- Compare affected pages before and after the proposed removal.
+- Verify desktop, tablet, and mobile layouts.
+- Verify keyboard focus, links, buttons, forms, and menus.
+- Confirm that Home post 20046 and post 255 still share Pattern 20440 correctly.
+- Confirm that no RBM plugin functionality or stored content changed.
+- Keep the change recoverable through Git and the documented checkpoint.
+
+VERIFICATION STANDARD
+
+For every approved migration step, verify:
+
+- Desktop presentation
+- Tablet presentation
+- Mobile widths of 375px and 320px
+- No horizontal overflow
+- Keyboard operation and visible focus
+- Readable contrast and text sizing
+- Working images, links, and buttons
+- Correct responsive stacking
+- Header, footer, sidebar, and mobile action bar remain correct
+- Shared and global elements still update all intended locations
+- No unrelated page or component changed
+- No PHP, JavaScript, or browser-console errors were introduced
+
+COPILOT REVIEW REQUEST
+
+Review this plan without implementing it. Please answer:
+
+1. Is the description of the current architecture accurate based on the Local
+   site and repository?
+
+2. Which statements require correction or stronger qualification?
+
+3. What active Thesis dependencies remain?
+
+4. Which fusion_* identifiers are required by current Avada and must not be
+   treated as legacy?
+
+5. Are there additional sources of legacy layout or styling that the inventory
+   should include?
+
+6. Where should the universal green pill button style live?
+
+7. Should homepage article action buttons use a global Avada style, a reusable
+   Avada element, or a shared project component class? Explain the tradeoff.
+
+8. Is retaining the Gutenberg Synced Pattern for Home and post 255 the safest
+   architecture?
+
+9. What is the smallest safe Home page pilot?
+
+10. What sequence would reduce risk and avoid duplicated work?
+
+11. Which automated and manual verification checks should be added?
+
+12. Identify any part of this plan that would accidentally redesign the site,
+    affect RBM data, touch vendor code, or exceed the stated scope.
+
+REQUESTED COPILOT DELIVERABLE
+
+Create a review document only. Include:
+
+- Executive summary
+- Confirmed current-state findings
+- Corrections to this plan
+- Suggested additions or removals
+- Recommended phased sequence
+- Risks and safeguards
+- Clear proposed scope for the first implementation Request
+- Exact files, database objects, or settings that the first Request would need
+  to inspect or change
+
+Do not implement, edit WordPress content, change database records, modify files,
+commit, push, package, or deploy during this review.
+
+Thank you.

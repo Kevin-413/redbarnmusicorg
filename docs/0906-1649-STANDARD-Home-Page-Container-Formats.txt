@@ -1,0 +1,797 @@
+0906-1649-STANDARD-Home-Page-Container-Formats.txt
+
+PURPOSE
+
+Define the approved reusable content-section formats for redbarnmusicorg-avada.local, beginning with the Home page as the visual and structural template for the rest of the site.
+
+This standard is intended to prevent page-by-page improvisation.
+
+For the repeatable procedure that reuses these components to add a new
+lesson category page, see
+docs/0906-1947-PROCEDURE-New-Lesson-Page-Template-And-Add-A-Lesson.txt.
+For the repeatable procedure that reuses these components to add a new
+teacher, see
+docs/0906-2042-PROCEDURE-New-Teacher-Page-And-Add-A-Teacher.txt.
+
+HOME PAGE APPROVED PATTERN
+
+1. IMAGE + TEXT SECTION
+
+STRUCTURE
+- full-content-width gray separator above the section
+- full-width section title below the separator
+- responsive image/text row below the title
+- image on the left
+- text on the right
+
+DESKTOP GEOMETRY
+- actual rendered image width: 340px
+- image height: auto
+- preserve natural aspect ratio
+- image/text gap: 26px
+- text width: 260px
+- total row width: 626px
+- title width: 626px
+
+TYPOGRAPHY
+Title:
+- Georgia, Times New Roman, Times, serif
+- 26px
+- weight 400
+- line-height 39px
+- color #111111
+
+Body:
+- Georgia, Times New Roman, Times, serif
+- 16px
+- line-height 26px
+
+WORD WRAPPING
+- word-break: normal
+- overflow-wrap: normal
+- do not split normal words mid-word
+
+LISTS
+- list-style-position: outside
+- ul/ol padding-left: 1.25em
+- ul/ol margin-left: 0
+- li padding-left: 0.2em
+- wrapped lines align under the first line of text
+- nested lists retain clear hierarchy
+
+SEPARATOR
+- 1px solid #808080
+- spans the page content width
+- not limited to the 626px image/text row
+
+MOBILE
+- separator
+- full-width title
+- image
+- full-width text
+- image width: available content width up to 340px
+- image height: auto
+- no horizontal overflow
+- text not constrained by desktop width
+- hanging list indentation preserved
+
+REUSABLE CLASSES
+- thesis-metrics-title
+- thesis-metrics-section
+- thesis-metrics-separator
+
+HOME PAGE RULE
+
+All comparable Home image/text sections should use this same approved pattern.
+
+Do not create section-specific dimensions unless an explicit future standard defines another container type.
+
+2. TEXT-ONLY SECTION — APPROVED
+
+Approved and implemented on the Policies page (post 13197) only. Not yet rolled out site-wide.
+
+STRUCTURE
+- full-width section heading (h2.thesis-text-title)
+- text / paragraphs / lists below the heading
+- no separator (the reference page had no usable separator evidence; none invented)
+- no image column
+- no layout table
+- no floats
+
+SOURCE OF TRUTH NOTE
+The old redbarnmusicorg.local Policies page (post 13197 on that site) stores its
+content as escaped HTML inside a wp:code block, so it renders as literal code
+text, not real headings/paragraphs. It could not be used as a genuine visual
+typography reference. Per this standard's own fallback rule, the approved Home
+typography baseline was reused unchanged, and the desktop width was chosen from
+direct character-per-line measurement (see WIDTH below) rather than from the
+Thesis page.
+
+DESKTOP GEOMETRY
+- desktop text max-width: 700px (measured: at 650-700px, sample body text
+  averages ~67 characters per line, within the ~50-75 cpl optimal reading
+  range; at 750-800px it jumps to ~101 cpl, too wide for comfortable reading)
+- title max-width: 700px (same container)
+
+TYPOGRAPHY
+Reused unchanged from the approved Home Image + Text standard:
+
+Title:
+- Georgia, Times New Roman, Times, serif
+- 26px
+- weight 400
+- line-height 39px
+- color #111111
+- margin-bottom: 16px
+
+Body:
+- Georgia, Times New Roman, Times, serif
+- 16px
+- line-height 26px
+- margin-bottom: 26px
+
+WORD WRAPPING
+- word-break: normal
+- overflow-wrap: normal
+- do not split normal words mid-word
+
+LISTS
+- list-style-position: outside
+- ul/ol padding-left: 1.25em
+- ul/ol margin-left: 0
+- li padding-left: 0.2em
+- wrapped lines align under the first line of text
+
+SEPARATOR
+- NONE (no separator used on Policies; do not invent one for this pattern
+  unless a future source page proves a deliberate need)
+
+MOBILE (375px and 320px, verified in browser)
+- text uses full available content width (no fixed desktop width applied)
+- normal page side padding
+- no horizontal overflow
+- headings wrap naturally at word boundaries
+- lists use readable hanging indents
+- no mid-word breaks
+
+REUSABLE CLASSES
+- thesis-text-section
+- thesis-text-title
+
+TEXT-ONLY RULE
+
+Apply this pattern only to Policies for now. Do not roll out site-wide until
+explicitly authorized by a future Request.
+
+NEXT CONTAINER TYPES TO DEFINE
+
+3. TEACHER / BIO SECTION — APPROVED
+
+Approved and implemented on the Piano & Keyboards page (post 6141) only, as
+the representative test case. Not yet rolled out site-wide.
+
+STRUCTURE
+- full-width teacher name/title (h2.thesis-teacher-title) above the row
+- responsive image/text row below the title (.thesis-teacher-row)
+- image on the left (.thesis-teacher-photo), bio text on the right
+  (.thesis-teacher-bio)
+- no layout table (legacy <table><tbody><tr><td> wrapper removed)
+- no floats
+
+DESKTOP GEOMETRY
+- image width: 220px (chosen from actual native teacher photo sizes on the
+  page, e.g. Zhen Tu's photo is exactly 220x220; smaller than the Home
+  promo's 340px as the design intent required)
+- image height: auto (preserves natural aspect ratio)
+- image/text gap: 26px (reused from the approved Home value; no evidence
+  supported a different value)
+- text width: 540px (measured: sample bio text averages ~61 characters per
+  line at 540px, within the 50-75 cpl optimal reading range; this is wider
+  than the Home standard's 260px text column because bios are much longer
+  than the Home teasers)
+- row width: 786px (220 + 26 + 540)
+- title width: 786px (matches row width, same relationship as the Home
+  standard's title-matches-row-width pattern)
+
+TYPOGRAPHY
+Reused unchanged from the approved Home/Text-Only standards:
+
+Title:
+- Georgia, Times New Roman, Times, serif
+- 26px
+- weight 400
+- line-height 39px
+- color #111111
+- margin-top: 26px, margin-bottom: 16px
+
+Body:
+- Georgia, Times New Roman, Times, serif
+- 16px
+- line-height 26px
+
+NOTE: the theme's default post-content heading style (Inter, 48px, weight
+600) has higher CSS specificity than a plain `.thesis-teacher-title` class
+selector on this page template, so the title rule requires `!important` on
+font-family/font-size/font-weight/line-height/color to render correctly.
+The row/photo/bio rules did not need `!important`.
+
+WORD WRAPPING
+- word-break: normal
+- overflow-wrap: normal
+- do not split normal words mid-word
+
+MOBILE (375px and 320px, verified in browser)
+- title renders full available content width
+- image appears first, stacks above the full-width bio text (flex-wrap)
+- bio text uses full available content width
+- no fixed desktop width applied
+- no horizontal overflow
+
+REUSABLE CLASSES
+- thesis-teacher-title
+- thesis-teacher-row
+- thesis-teacher-photo
+- thesis-teacher-bio
+
+TEACHER/BIO RULE
+
+Apply this pattern only to the Piano & Keyboards page for now. Do not roll
+out site-wide until explicitly authorized by a future Request.
+
+4. LESSON CARD — APPROVED
+
+Approved and implemented as a bounded test only: 3 representative cards
+(Piano & Keyboards, Guitar, Voice) appended to the bottom of the existing
+Lessons page (post 280), below all current content. Not yet rolled out as
+a full Lessons landing page.
+
+PURPOSE
+- reusable card linking to a lesson/instrument category page
+- compact lesson discovery for a future Lessons landing page
+
+STRUCTURE
+- entire card is one anchor element (`.thesis-lesson-card`) wrapping image,
+  title, description, and supporting line, for a single clear/accessible
+  click target
+- image on top, text stacked below
+- no layout table, no floats
+
+DESKTOP GEOMETRY
+- card width: 260px (reused from the approved Home text-column value; no
+  duplicate width value introduced)
+- grid gap: 26px (reused from the approved Home/Teacher-Bio gap value)
+- grid max-width: 832px (3 cards + 2 gaps, for the 3-card test row)
+- image: 1:1 aspect-ratio box, object-fit: cover (consistent height across
+  cards regardless of each source photo's native aspect ratio)
+- card border: 1px solid #cccccc (neutral outline only; no shadow, no
+  gradient, no radius, no animation)
+- internal padding: 16px horizontal, 16px/8px vertical rhythm between title,
+  description, and supporting line
+
+TYPOGRAPHY
+Title:
+- Georgia, Times New Roman, Times, serif
+- 20px
+- weight 400
+- line-height 28px
+- color #111111
+(scaled down from the approved 26px section-title size for a compact card
+context; family/weight/color reused unchanged)
+
+Description:
+- Georgia, Times New Roman, Times, serif
+- 16px
+- line-height 26px
+(reused unchanged from the approved body baseline; measured ~28 characters
+per line at 260px for a short 1-3 line card description)
+
+Supporting line:
+- Georgia, Times New Roman, Times, serif
+- 14px italic
+- line-height 20px
+- color #444444 (muted, de-emphasized; no new accent color introduced)
+
+WORD WRAPPING
+- word-break: normal
+- overflow-wrap: normal
+
+LINK / ACCESSIBILITY BEHAVIOR
+- whole card is a single semantic `<a>` with visible text content (title,
+  description) inside it, so the link has a real accessible name beyond
+  just the image
+- underline appears on the title on hover as the only interaction affordance
+  (no color-only or shadow-only hover effect)
+
+MOBILE (375px and 320px, verified in browser)
+- cards stack vertically (flex-wrap), one per row
+- card width caps at `max-width: 100%` so it shrinks safely below 260px if
+  the available content width is narrower
+- no horizontal overflow at either width
+
+REUSABLE CLASSES
+- thesis-lesson-card-grid
+- thesis-lesson-card
+- thesis-lesson-card-image
+- thesis-lesson-card-title
+- thesis-lesson-card-desc
+- thesis-lesson-card-line
+
+LESSON CARD RULE
+
+Apply this pattern only to the 3 test cards on the Lessons page for now.
+Do not rebuild the full Lessons page or add further lesson cards until
+explicitly authorized by a future Request.
+
+5. TEACHER CARD — APPROVED
+
+Approved and implemented as a bounded test only: 3 representative teacher
+cards (Alan Geyer, Claudia Phillips, Zhen "Jen" Tu) appended to the bottom
+of the existing Piano & Keyboards page (post 6141), below the full,
+unchanged Teacher/Bio section. Not yet rolled out to the other Piano
+teachers or to other instrument pages.
+
+PURPOSE
+- compact teacher discovery/navigation, separate from and additional to
+  the full Teacher/Bio section (does not replace or duplicate its content)
+
+SOURCE OF TRUTH NOTE
+- the 3 teachers were chosen from the 7 already documented on the Piano &
+  Keyboards Teacher/Bio section for representative differences: Alan Geyer
+  (square source photo, short name), Claudia Phillips (portrait source
+  photo, different aspect ratio), Zhen "Jen" Tu (square source photo,
+  longer name with an embedded nickname). All 3 have working source images.
+  Teachers with broken/missing source images on that page were excluded
+  from the test rather than surfaced with a broken card image.
+
+STRUCTURE
+- entire card is one anchor element wrapping image, name, and instrument
+  label, for a single clear/accessible click target
+- image on top, text stacked below
+- links point to the existing teacher anchors already present in the
+  Piano & Keyboards Teacher/Bio section (e.g. `#Alan-Geyer-PIANO`); no new
+  teacher pages or URLs were invented
+
+AVADA / REUSE
+- shares the Lesson Card's box, image, and title classes directly on the
+  same element (`.thesis-lesson-card`, `.thesis-lesson-card-image`,
+  `.thesis-lesson-card-title`, `.thesis-lesson-card-line`) so the card
+  border, width, 1:1 image crop, and typography are not duplicated
+- only one new modifier class (`.thesis-teacher-card-instrument`) was added,
+  for the uppercase instrument label; `.thesis-teacher-card` itself carries
+  no unique rules and exists only as a documentation/scoping hook
+
+DESKTOP GEOMETRY
+- identical to the Lesson Card: 260px card width, 26px grid gap, 832px grid
+  max-width (3-card test row), 1:1 aspect-ratio image with object-fit:
+  cover (consistent crop across the square and portrait source photos,
+  without modifying the original image files or attachment metadata)
+
+TYPOGRAPHY
+Name (title):
+- reuses `.thesis-lesson-card-title` unchanged: Georgia, Times New Roman,
+  Times, serif / 20px / weight 400 / line-height 28px / color #111111
+
+Instrument label:
+- reuses `.thesis-lesson-card-line` unchanged for size/style (14px italic,
+  line-height 20px, color #444444), plus `.thesis-teacher-card-instrument`
+  which only adds text-transform: uppercase and letter-spacing: 0.5px
+- no separate description line (unlike the Lesson Card); name + instrument
+  label is sufficient for teacher discovery
+
+KNOWN MARKUP PITFALL (IMPORTANT FOR FUTURE APPENDS)
+- appending raw multi-line HTML to post_content can cause WordPress's
+  wpautop() to insert literal `<br />` elements between/inside inline
+  elements on some pages. Each inserted `<br />` becomes an extra flex
+  child inside `.thesis-lesson-card-grid`, which doubles the effective
+  gap between cards and can force cards to wrap onto extra rows even
+  though the grid math otherwise fits exactly.
+- fix used here: write each card's markup as a single line (no bare
+  newlines inside or between the `<a>` elements) so there is nothing for
+  wpautop to convert. Verified no `<br />` artifacts in the rendered output
+  and all 3 cards render in one row at desktop width.
+- apply this same single-line pattern for any future card grids appended
+  via raw post_content edits.
+
+LINK / ACCESSIBILITY BEHAVIOR
+- whole card is a single semantic `<a>` with visible text content (name,
+  instrument) inside it
+- underline appears on the name on hover, inherited from the shared
+  `.thesis-lesson-card:hover .thesis-lesson-card-title` rule; no new hover
+  behavior introduced
+
+MOBILE (375px and 320px, verified in browser)
+- cards stack vertically, one per row, no horizontal overflow at either
+  width (inherits the Lesson Card's `max-width: 100%` safety)
+
+REUSABLE CLASSES
+- thesis-lesson-card-grid (shared)
+- thesis-lesson-card (shared)
+- thesis-lesson-card-image (shared)
+- thesis-lesson-card-title (shared)
+- thesis-lesson-card-line (shared)
+- thesis-teacher-card (scoping modifier, no unique rules)
+- thesis-teacher-card-instrument (uppercase/letter-spacing modifier only)
+
+TEACHER CARD RULE
+
+Apply this pattern only to the 3 test cards on the Piano & Keyboards page
+for now. Do not add further teacher cards, roll this out to other Piano
+teachers, or apply it to other instrument pages until explicitly
+authorized by a future Request. The full Teacher/Bio section on this page
+remains the primary, unchanged source of teacher content.
+
+6. STANDARD PAGE HEADER — APPROVED
+
+Approved and implemented as a bounded test only: title-only header
+prepended to the top of the existing Policies page (post 13197), above
+all existing, unchanged content. Not yet rolled out to other pages.
+
+PURPOSE
+- a consistent opening (title + optional short intro) for public content
+  pages, before the normal page content begins
+
+SOURCE OF TRUTH NOTE / TEST PAGE CHOICE
+- Policies was used as the single bounded test page (explicitly permitted
+  by the Request as the test page)
+- the existing Policies body opens with a running paragraph ("Welcome to
+  the Red Barn...") that is not a standalone, reusable intro sentence —
+  splitting or duplicating it into a separate intro block would have
+  required restructuring existing body content, which is out of scope
+- per the Request's own contingency, this test uses TITLE-ONLY behavior:
+  the header shows only the exact existing page title ("Policies", from
+  post_title, no invented wording); the intro typography/spacing rules
+  below are defined and documented but not live-tested with real copy
+
+STRUCTURE
+- `.thesis-page-header` wraps a single `.thesis-page-title` (the page's
+  own title, e.g. an `<h1>`), with an optional `.thesis-page-intro`
+  paragraph immediately after it when a genuine short intro exists
+- no separator: none of the current candidate pages structurally called
+  for one, so no separator was invented (per Request instruction)
+- top spacing: none added by this pattern; it relies on the existing
+  spacing already provided below the site header/navigation by the page
+  template, so no template/global spacing was touched
+
+DESKTOP GEOMETRY
+- header max-width: 700px (reused from the approved Text-Only content
+  width; no duplicate width value introduced)
+- title max-width: same 700px (inherits the header's max-width)
+- intro max-width (documented, not live-tested): same 700px
+- title-to-intro spacing (documented, not live-tested): 12px top margin
+  on `.thesis-page-intro`
+- header-to-content spacing: 24px bottom margin on `.thesis-page-header`
+  (applies whether or not an intro is present)
+
+TYPOGRAPHY
+Title:
+- Georgia, Times New Roman, Times, serif
+- 32px
+- weight 400
+- line-height 40px
+- color #111111
+- uses `!important` on family/size/weight/line-height/color, for the same
+  reason documented in the Teacher/Bio standard: Avada's default heading
+  style otherwise overrides it with a much larger, heavier, non-Georgia
+  treatment (the "oversized modern SaaS-style" look this standard exists
+  to avoid)
+- deliberately larger than the 26px section title (Home) and 20px card
+  title (Lesson/Teacher Card) so a page-level title reads as one level
+  above section-level titles, without being oversized
+
+Intro (documented, not live-tested):
+- Georgia, Times New Roman, Times, serif
+- 16px
+- line-height 26px
+- color #444444 (reused unchanged from the Lesson Card supporting-line
+  muted color, to distinguish intro text from the darker #111111 title
+  and from normal #111111 body copy)
+
+WORD WRAPPING
+- word-break: normal
+- overflow-wrap: normal (default; no explicit rule needed)
+
+MOBILE (375px and 320px, verified in browser)
+- header and title both shrink to the available content width (300px at
+  375px viewport, 260px at 320px viewport in this test)
+- title wraps naturally at narrower widths; no horizontal overflow at
+  either width
+
+REUSABLE CLASSES
+- thesis-page-header
+- thesis-page-title
+- thesis-page-intro (defined now; not yet used with live copy)
+
+STANDARD PAGE HEADER RULE
+
+Apply this pattern only to the title-only test on the Policies page for
+now. Do not add intro copy, roll this out to Lessons/teacher-instrument
+pages/Contact/other public pages, or invent a separator until explicitly
+authorized by a future Request.
+
+7. CALL-TO-ACTION SECTION — APPROVED
+
+Approved and implemented as a bounded test only: one CTA instance
+appended to the bottom of the existing Lessons page (post 280), below
+all existing content and the Lesson Card test. Not yet rolled out to
+other pages or a full Lessons rebuild.
+
+PURPOSE
+- a reusable page-ending action (heading + short body + primary button
+  linking to a lesson/contact inquiry destination)
+
+TEST CONTENT
+- heading: "Not sure which lesson is right?"
+- body: "Tell us what you're interested in and we'll help you find a
+  teacher."
+- button: "Ask Us About Lessons", linking to the existing Contact page
+  (http://redbarnmusicorg-avada.local/contact/) — the destination already
+  used elsewhere on the site for lesson inquiries (e.g. the Home page's
+  "Questions? Contact Us" link); no new URL was invented
+
+STRUCTURE
+- `.thesis-cta` is a single contained box wrapping a heading, a body
+  paragraph, and one button-styled link, in that order
+- clearly separated from preceding content by its own bordered box and
+  top margin, without a full-width separator or background block
+
+DESKTOP GEOMETRY
+- max-width: 700px (reused from the approved Text-Only/Page Header
+  content width; no duplicate width value introduced)
+- top margin (separation from preceding content): 40px
+- internal padding: 32px on all sides
+- heading-to-body spacing: 12px (reused from the Page Header's
+  title/intro spacing value)
+- body-to-button spacing: 24px (reused from the approved
+  header-to-content spacing value)
+- border: 1px solid #cccccc (reused unchanged from the Lesson/Teacher
+  Card border treatment; no shadow, no gradient, no radius, no
+  animation)
+- text-align: center (the only new layout decision specific to this
+  component, appropriate for a compact page-ending action)
+
+TYPOGRAPHY
+Heading:
+- Georgia, Times New Roman, Times, serif
+- 26px
+- weight 400
+- line-height 39px
+- color #111111
+- uses `!important` on family/size/weight/line-height/color, for the
+  same reason documented in the Teacher/Bio and Page Header standards:
+  Avada's default h2 style otherwise overrides it with a much larger,
+  heavier, non-Georgia treatment
+
+Body:
+- Georgia, Times New Roman, Times, serif
+- 16px
+- line-height 26px
+- color #111111 (reused unchanged from the approved body baseline; full
+  #111111 rather than the muted #444444 supporting-line color, since
+  this is the CTA's primary message, not a de-emphasized aside)
+
+Button:
+- Georgia, Times New Roman, Times, serif
+- 16px
+- weight 400
+- line-height 20px
+- padding: 14px 32px (sized for a comfortable tap target; measured
+  height 50px at desktop and both mobile widths)
+- background #111111, color #ffffff, border 1px solid #111111,
+  border-radius: 0 (no gradient, no shadow, no radius, matching the
+  restrained styling direction)
+- text-decoration: none
+
+BUTTON HOVER / FOCUS BEHAVIOR
+- hover: background/border lighten to #333333 (color change only, no
+  transition/animation property used)
+- focus: `.thesis-cta-button:focus` applies a visible 2px solid #111111
+  outline with 2px offset. Plain `:focus` was used instead of
+  `:focus-visible` so the indicator is guaranteed to show for any focus
+  method (keyboard or otherwise), not only the browser's own
+  keyboard-only heuristic
+- KNOWN TEST-ENVIRONMENT LIMITATION: this session's automated browser
+  window did not hold OS-level document focus (`document.hasFocus()`
+  was `false`), so `:focus` could not be visually/computed-style
+  verified end-to-end in this session even though `document.activeElement`
+  correctly reflected the focused link and the CSS rule was confirmed
+  present with correct specificity and values via the page's
+  `document.styleSheets`. This is a known limitation of headless/shared
+  browser automation, not a defect in the rule itself. Recommend a
+  manual keyboard-Tab check in a normal (non-automated) browser window
+  before relying on this as fully confirmed.
+
+WORD WRAPPING
+- word-break: normal
+- overflow-wrap: normal (default; no explicit rule needed)
+
+MOBILE (375px and 320px, verified in browser)
+- CTA box shrinks to the available content width (300px at 375px
+  viewport, 260px at 320px viewport), no horizontal overflow
+- button remains a comfortable tap target at both widths (measured
+  height 50px at 375px, 70px at 320px where the button label wraps to
+  two lines because the button text no longer fits one line at that
+  narrower width — this wrap is expected and does not cause overflow)
+
+REUSABLE CLASSES
+- thesis-cta
+- thesis-cta-heading
+- thesis-cta-body
+- thesis-cta-button
+
+CALL-TO-ACTION SECTION RULE
+
+Apply this pattern only to the single test instance on the Lessons page
+for now. Do not roll this out to other pages, rebuild the full Lessons
+landing page, or change the test wording/destination until explicitly
+authorized by a future Request.
+
+8. TEACHER PHOTO GALLERY SECTION — APPROVED
+
+PURPOSE
+Provide one reusable, restrained photo-grid component that a teacher's
+existing Teacher/Bio block can optionally be followed by, to display a
+small set of real existing photos (3-6 preferred; fewer is acceptable
+when fewer real photos exist — never fabricate or duplicate images to
+fill the grid). Verified once on Hannah Howell's Teacher/Bio block
+(Piano & Keyboards page) as the single representative test instance.
+
+STRUCTURE
+- container div: .thesis-teacher-gallery
+- grid wrapper: .thesis-teacher-gallery-grid
+- one .thesis-teacher-gallery-item per photo (wraps a single img; no
+  anchor/link, since click-to-enlarge is not provided — see LIGHTBOX
+  below)
+- placed directly below the teacher's existing .thesis-teacher-row
+  block, still inside that teacher's outer id block
+
+DESKTOP GEOMETRY
+- gallery max-width: 786px (matches the approved Teacher/Bio row width)
+- columns: 3 (CSS grid, equal-width tracks; fewer photos simply leave
+  unused trailing track(s) — no distortion, no forced stretching)
+- gap: 16px
+- each grid item: aspect-ratio 1 / 1 (square)
+- img: width 100%, height 100%, object-fit: cover, display: block
+  (crops for display only; does not modify the source file or
+  attachment metadata)
+
+CAPTIONS
+- optional class defined for future use: .thesis-teacher-gallery-caption
+  (Georgia, "Times New Roman", Times, serif; 13px; italic; line-height
+  18px; color #444444; margin 6px 0 0)
+- omit entirely when no real caption text exists for a photo (do not
+  invent captions) — omitted in the verified test instance because no
+  real caption text exists for the two photos used
+
+LIGHTBOX / CLICK-TO-ENLARGE — N/A (documented, not implemented)
+Avada ships a native lightbox (fusion-lightbox.js / jquery.ilightbox.js,
+bound via data-rel="iLightbox[...]" on elements under jQuery("body")).
+Verified by inspecting the live rendered Lessons page output that the
+lightbox script and its supporting variables are not enqueued on these
+hand-written thesis-* custom-content pages. Reusing it here would
+require manually enqueuing additional Avada JS/CSS on pages that
+otherwise carry none of Avada's builder overhead, adding runtime
+complexity that conflicts with the smallest-safe-change approach and
+the constraint against adding a plugin. Standard therefore defines a
+static, non-lightbox grid. Click/tap enlargement may be reconsidered
+only if a future Request confirms Avada's lightbox assets are already
+loaded on the target page.
+
+MOBILE (375px and 320px, verified in browser)
+- @media (max-width: 767px): grid columns become 2
+- 375px viewport: item width measured 142px, no horizontal overflow
+- 320px viewport: item width measured 122px, no horizontal overflow
+- images remain fully visible and legible at both widths
+
+REUSABLE CLASSES
+- thesis-teacher-gallery
+- thesis-teacher-gallery-grid
+- thesis-teacher-gallery-item
+- thesis-teacher-gallery-caption (optional, only when real captions exist)
+
+TEACHER PHOTO GALLERY RULE
+
+Apply this pattern only to the single verified test instance (Hannah
+Howell, Piano & Keyboards page) for now. Do not roll this out to any
+other teacher or page until explicitly authorized by a future Request.
+
+9. GREEN SOLID PILL BUTTON — APPROVED
+
+PURPOSE
+One reusable action-button treatment for newspaper-style article
+containers (e.g. the Home page's Synced Pattern sections). This is
+distinct from the black rectangular `.thesis-cta-button` (item 7),
+which is reserved for the single page-ending CTA box.
+
+MECHANISM (SOURCE OF TRUTH)
+An Avada Builder `fusion_button` shortcode, reusing one fixed attribute
+template with only the `link` and button text varying. This was chosen
+over a sitewide Avada Global Option or a new Global Element:
+
+- Avada's Theme Options button defaults (`button_border_radius`,
+  `button_gradient_top_color`, etc.) are the default style for every
+  Avada button sitewide, including menus and unrelated pages. Changing
+  them would restyle buttons far outside the Home page and is out of
+  scope for this standard.
+- A new Avada Global Element was not created because only the link and
+  label vary per instance; a fixed shortcode attribute template already
+  gives one dependable, copy-exact source of truth without adding new
+  builder architecture.
+- No new CSS file or class was added. `fusion_button` with
+  `color="custom"` already renders identically wherever used, inside
+  Avada Builder rows or embedded as a `wp:html` shortcode block inside
+  native Gutenberg content (proven: this pattern already renders inside
+  the Gutenberg Gallery section of Pattern 20440).
+
+REQUIRED TEMPLATE
+[fusion_button link="<exact existing destination URL>" target="_self"
+color="custom" gradient_colors="#6cbf3f|#6cbf3f"
+gradient_hover_colors="#5aa932|#5aa932" accent_color="#ffffff"
+accent_hover_color="#ffffff" type="flat"
+border_radius_top_left="999px" border_radius_top_right="999px"
+border_radius_bottom_right="999px" border_radius_bottom_left="999px"
+size="medium" stretch="default" alignment="center"
+margin_top="10px"]LABEL[/fusion_button]
+
+- background #6cbf3f, hover #5aa932, text #ffffff
+- fully rounded corners (999px)
+- Avada's `size="medium"` supplies ~12-13px vertical / ~24-29px
+  horizontal padding and ~600 font-weight text, matching the
+  thumb-friendly target size and typography already required
+- keyboard focus and contrast follow Avada's own button behavior; no
+  overrides needed
+
+USAGE RULE
+- Reuse an existing, unambiguous destination already used elsewhere on
+  the page or site. Do not invent a new URL, page, or business decision
+  to justify adding a button.
+- If a section has no clear existing destination (e.g. a dated event
+  page, or copy referencing more than one possible action with no
+  existing link), leave that section unchanged rather than guessing.
+
+VERIFIED INSTANCES
+- Lessons starting now (Home Pattern 20440) — original reference,
+  "FACULTY" -> /faculty/
+- Open House (Home Pattern 20440) — no button (event date, no single
+  clear destination)
+- Amherst Block Party (Home Pattern 20440) — no button (event date, no
+  page destination)
+- Gallery (Home Pattern 20440) — added "GALLERY" -> /gallery/, reusing
+  the same destination as the section's existing "See more..." link
+- Scholarships (Home Pattern 20440) — no button (no dedicated
+  scholarship/donation page exists; two different asks — "please ask"
+  and "consider a donation" — with no single existing link to reuse)
+
+GREEN SOLID PILL BUTTON RULE
+
+Apply only where an unambiguous existing destination already exists.
+Do not add a button merely so every section has one, and do not convert
+a Gutenberg section to Avada Builder solely to add this button — the
+shortcode already renders correctly inside Gutenberg content.
+
+SIMPLE PROMO / CARD SECTION
+Intended for:
+- short calls to action
+- event promos
+- gallery links
+- compact informational cards
+
+Define only if needed after reviewing actual site content.
+
+STANDARDIZATION SEQUENCE
+
+1. Finalize and verify the Home page.
+2. Preserve this document as the approved Home image/text standard.
+3. Define the Text-Only standard.
+4. Define the Teacher/Bio standard.
+5. Define the Lesson Card standard.
+6. Define any additional pattern only if actual site content requires it.
+7. Classify remaining public pages by approved standard.
+8. Apply standards site-wide only after each required pattern is defined.
+
+DO NOT
+
+- invent a new layout per page
+- use legacy layout tables
+- use floated images for two-column layout
+- duplicate CSS unnecessarily
+- apply the Home image/text dimensions to long-form text or teacher bios without a separate standard
