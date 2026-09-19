@@ -1,0 +1,75 @@
+0919-1608-Copilot-REPLY-Expand-And-Correct-Project-Experience-Catalog.txt
+
+Implemented against:
+docs/0919-1608-Copilot-REQUEST-Expand-And-Correct-Project-Experience-Catalog.txt
+
+Documentation-only task, scoped to WordPress/Avada/plugin bugs per follow-up
+instruction ("just the wp bugs"). No PHP, JS, CSS, WordPress content, database
+records, or Avada settings were modified.
+
+REVIEW
+
+- Original entries reviewed: 34 (all).
+- Entries corrected/annotated with an Evidence line: 9 (entries 4, 9, 10, 11,
+  12, 13, 17, 18, 26).
+- Entries qualified as OBSERVED — CAUSE NOT PROVEN: 3 (entry 21, Amelia/RBAdmin
+  import mapping; entry 26, log-file size; entry 27, the former entries 27-29
+  on cache invalidation/orphaned relationships/student-booking status — merged
+  into one entry and marked as describing the separate RBAdmin scheduling
+  system, not confirmed redbarnmusic.org code, per this repo's Project
+  Boundary rule).
+- Entries combined: former 27, 28, 29 merged into one entry (new 27) since all
+  three describe the same out-of-scope RBAdmin system and repeating the
+  qualification three times added no distinct lesson.
+- No entries deleted.
+
+ENTRIES ADDED (5, new numbers 35-39)
+
+35. An unrelated content change can silently break a JS DOM-adjacency
+    assumption (Faculty filter `.nextElementSibling` bug).
+36. Extracting inline admin JS into a shared file can break load-order and
+    screen-scoping assumptions (icon-preview-modal DOMContentLoaded bug;
+    duplicate "Add" button from merged per-screen scripts).
+37. Avada boolean-mapped theme options bypass the generic option filter
+    (social sharing box / author info box).
+38. A nonce scoped to a record ID needs a placeholder value for "create new"
+    (Faculty IDOR hardening, create-vs-edit nonce).
+39. An admin list table's "Page X of Y" reads a separate per-page option from
+    the query itself (Instruments IWT pagination fix).
+
+MAIN EVIDENCE SOURCES
+
+- mu-plugins/rbm-interior-page-title-anchor.php
+- mu-plugins/rbm-disable-post-meta.php
+- plugins/rbm-faculty/includes/rbm-teachers.php
+- plugins/rbm-faculty/assets/js/rbm-faculty.js
+- plugins/rbm-instruments/includes/rbm-lessons.php
+- plugins/rbm-instruments/includes/rbm-lesson-form.php
+- docs/0919-1150-Copilot-REPLY-Verify-Faculty-And-Sign-Up-Workflows.txt
+- docs/archive/2026-09/0917-1141-Copilot-REPLY-Extract-Inline-JS-CSS-From-RBM-Plugins.txt
+- docs/archive/2026-09/0911-0830-Copilot-REPLY-Harden-Faculty-Module-Rbm-Faculty.txt
+- docs/0919-1305/1315/1348/1354-* (slug checker, Global/Custom URL modes)
+- CHANGELOG.md; commit e0cffaa
+
+INSUFFICIENT EVIDENCE / NOT INCLUDED
+
+- The original "1.35 GB error log" figure could not be re-confirmed from any
+  file in docs/ or git history in this pass; the entry is kept but the
+  specific number was removed and marked OBSERVED — CAUSE NOT PROVEN rather
+  than repeated as fact.
+- Deeper verification of the remaining ~20 general/process entries (database
+  vs. files, freeze packages, ZIP hygiene, admin menu slugs, plugin bootstrap
+  crashes, etc.) was not performed beyond a light pass, per the instruction to
+  keep this pass scoped to WordPress bugs and conserve effort. They were left
+  worded as before; no unsupported causal claims were identified in them
+  during review.
+
+GIT
+
+- Files changed: docs/0919-1605-WordPress-Avada-Project-Experience-Catalog.txt,
+  docs/0919-1608-Copilot-REPLY-Expand-And-Correct-Project-Experience-Catalog.txt
+- Branch: 0904-1425-avada-safe-check
+- Commit/push recorded after this doc is saved (see below).
+
+Confirmed: no runtime code, WordPress data, settings, or deployment state
+changed.

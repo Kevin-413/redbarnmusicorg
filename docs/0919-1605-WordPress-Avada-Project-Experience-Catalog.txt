@@ -1,0 +1,519 @@
+0919-1605-WordPress-Avada-Project-Experience-Catalog.txt
+
+RED BARN MUSIC
+WORDPRESS, AVADA, LOCAL, FORMINATOR, AND PLUGIN EXPERIENCE CATALOG
+
+PURPOSE
+
+This is a retrospective catalog of practical lessons encountered while building
+and rebuilding the Red Barn Music WordPress websites and plugins over roughly
+13 months.
+
+It is not an ongoing reporting requirement, governance document, or complete
+technical manual. Its purpose is to preserve useful experience that would
+otherwise remain scattered across conversations, Copilot REQUEST/REPLY files,
+plans, standards, procedures, changelogs, screenshots, and troubleshooting
+notes.
+
+The catalog emphasizes problems that were surprising, difficult to diagnose,
+easy to repeat, or only proved through direct testing.
+
+CURRENT CATALOG
+
+1. WORDPRESS CONTENT MAY LIVE IN THE DATABASE, NOT IN THE THEME FILES
+
+Copying an Avada Child folder does not move the whole website. Pages, Avada
+Builder content, Synced Patterns, menus, widgets, theme options, Forminator
+forms, plugin settings, custom-post records, and attachment records may live in
+the WordPress database.
+
+Practical lesson:
+Before deployment, distinguish file changes from database-only changes. A Git
+commit or FTP copy may be necessary but still incomplete.
+
+
+2. A COMPLETE FREEZE MUST INCLUDE THE DATABASE
+
+A plugin ZIP or child-theme ZIP is not a complete rollback point for an
+Avada-based website. The database may contain the presentation state needed to
+reproduce the site.
+
+Practical lesson:
+Use a complete Local export or equivalent full-site backup when freezing a
+verified website state. Keep the Git commit/branch record with the freeze.
+
+
+3. DO NOT REPLACE A LIVE DATABASE CASUALLY
+
+The Local database can contain correct Avada page work while the LIVE database
+contains newer submissions, users, settings, or business records.
+
+Practical lesson:
+Use selective migration or a documented deployment manifest. A full Local-to-
+LIVE database replacement can overwrite Forminator submissions and other live
+data.
+
+
+4. AVADA BUILDER STILL USES FUSION IDENTIFIERS
+
+Avada Builder was formerly Fusion Builder. Current Avada continues to use
+fusion_* shortcodes, classes, functions, and identifiers.
+
+Practical lesson:
+The word "fusion" does not prove that code is obsolete. Confirm whether it is
+required by current Avada before removing or renaming it.
+
+Evidence: mu-plugins/rbm-disable-post-meta.php (uses fusion_post_metadata_markup
+and option_fusion_options against the current, active Avada install).
+
+
+5. SOME THESIS-PREFIXED CLASSES ARE CURRENT RED BARN COMPONENTS
+
+Classes including thesis-page-header, thesis-page-title, thesis-page-intro,
+and thesis-metrics-title use historical naming but are documented and actively
+used as approved Red Barn components.
+
+Practical lesson:
+Names alone do not determine whether markup is legacy. Check current STANDARD
+and PROCEDURE documents and active consumers before cleanup.
+
+
+6. GUTENBERG AND AVADA CAN COEXIST IN ONE SHARED STRUCTURE
+
+Home post 20046 and redirect post 255 share the Gutenberg Synced Pattern
+"Home Body (Synced)," post 20440. That pattern can contain both Gutenberg
+blocks and Avada Builder sections.
+
+Practical lesson:
+Do not convert valid Gutenberg content merely to make the entire page use one
+builder. Convert only when maintainability, responsiveness, accessibility, or
+editing safety materially improves.
+
+
+7. A SYNCED PATTERN MUST REMAIN ONE SHARED RECORD
+
+Home and post 255 intentionally reference the same Pattern 20440 while keeping
+their page-specific headings outside it.
+
+Practical lesson:
+Duplicating a synced pattern into separate copies defeats synchronization and
+creates content drift. Verify the pattern reference after database edits.
+
+
+8. TEMPORARY DATABASE TESTS CAN CREATE UNEXPECTED DUPLICATES
+
+During synchronization testing, the Home pattern content was found split into
+a duplicate post while the intended pattern retained only a stray reference.
+The source content was recovered and restored.
+
+Practical lesson:
+After temporary database or synchronization tests, verify the actual record
+IDs, content length, references, and rendered output. Do not assume that a
+successful-looking edit affected the intended database object.
+
+
+9. AVADA HEADER BUILDER MAY PASS A MENU ID INSTEAD OF A THEME LOCATION
+
+The interior-page anchor feature initially checked only theme_location. Avada's
+actual Header Builder rendering called wp_nav_menu() using a direct menu ID, so
+the filter silently did nothing.
+
+Practical lesson:
+When filtering Avada navigation, resolve both theme_location and direct menu ID.
+Direct HTML/browser testing is required; code inspection alone did not expose
+this difference.
+
+Evidence: mu-plugins/rbm-interior-page-title-anchor.php
+(rbm_page_title_anchor_menu_ids(), rbm_page_title_anchor_nav_menu_links()).
+
+
+10. AVADA FOOTER TEXT WIDGETS MAY BYPASS widget_text_content
+
+Instrumentation showed that WordPress core's widget_text_content filter did not
+fire for the relevant Avada footer widgets.
+
+Practical lesson:
+widget_display_callback did fire and could modify the widget content before
+output. Verify hooks against the actual Avada rendering path instead of assuming
+that a normal WordPress widget filter runs.
+
+Evidence: mu-plugins/rbm-interior-page-title-anchor.php
+(rbm_page_title_anchor_footer_widgets(), hooked to widget_display_callback).
+
+
+11. ANCHOR LINKS REQUIRE BOTH A FRAGMENT AND A REAL DESTINATION
+
+An ordinary page URL does not automatically skip a banner. The link must include
+a fragment such as #page-title, and the rendered destination must contain the
+matching id="page-title" element.
+
+Practical lesson:
+Test the final address bar, rendered HTML, and click-through behavior. Typing or
+bookmarking a URL without the fragment will still load the normal top of page
+unless separate page-load behavior is implemented.
+
+Evidence: mu-plugins/rbm-interior-page-title-anchor.php
+(rbm_output_interior_page_title_anchor(), rbm_page_title_anchor_should_append()).
+
+
+12. TWO SCROLLING SYSTEMS CAN CAUSE A VISIBLE BOUNCE
+
+Avada's bundled fusion-scroll-to-anchor.js intercepts link clicks, rewrites the
+URL hash to a non-existent #_<id> to suppress the browser's native anchor jump,
+then plays its own eased scroll animation and swaps the hash back afterward.
+Combined with the site's own native #page-title anchor + scroll-margin-top, this
+produced a visible slide-then-bounce (scrollY overshooting before correcting).
+Loading the same URL directly in the address bar (bypassing click interception)
+showed no bounce, isolating the cause to click-time interception.
+
+Practical lesson:
+Use one positioning method for #page-title. A capture-phase document click
+listener that calls stopPropagation() for #page-title links reliably wins over
+Avada's bubble-phase handler (capture always precedes bubble) and lets the
+native jump + scroll-margin-top proceed alone, without needing to patch Avada's
+minified script.
+
+Evidence: mu-plugins/rbm-interior-page-title-anchor.php
+(rbm_page_title_anchor_disable_smooth_scroll()); CHANGELOG.md entry
+"fix #page-title anchor slide-then-bounce"; commit e0cffaa.
+
+
+13. STICKY HEADERS REQUIRE AN ANCHOR OFFSET
+
+Without an offset, an anchor destination can land underneath the sticky header
+or WordPress admin bar.
+
+Practical lesson:
+Use a verified scroll-margin-top, scroll-padding-top, or equivalent single
+offset system. Test logged-in and logged-out views at desktop and mobile sizes.
+
+Evidence: mu-plugins/rbm-interior-page-title-anchor.php
+(rbm_interior_page_title_anchor_style(), #page-title { scroll-margin-top }).
+
+
+14. OLD TEACHER-SPECIFIC ANCHORS WERE NOT THE NEW PAGE-TITLE SYSTEM
+
+Legacy lesson pages used teacher-specific fragments such as
+#TeacherName-INSTRUMENT. Those navigation structures were intentionally removed.
+
+Practical lesson:
+Do not restore old compatibility anchors when building the standard interior-
+page #page-title behavior. They solve different problems.
+
+
+15. VISUAL SUCCESS DOES NOT PROVE A LINK WORKFLOW
+
+A button may render correctly while its dropdown, URL parameters, teacher
+context, instrument context, or Forminator prefill behavior fails.
+
+Practical lesson:
+Evidence: docs/0919-1305-Copilot-REQUEST-Add-Instrument-Slug-Duplicate-Checker.txt;
+docs/0919-1315-Copilot-REPLY-Add-Instrument-Slug-Duplicate-Checker.txt;
+plugins/rbm-instruments/includes/rbm-lesson-form.php
+(rbm_msch_lesson_find_slug_conflict()).
+
+
+18. GLOBAL AND CUSTOM URL VALUES NEED AN EXPLICIT MODE
+
+An individual record may need to use the global Sign Up URL or retain its own
+custom URL. Merely copying values makes it difficult to remember which behavior
+was intended.
+
+Practical lesson:
+Use an explicit Global/Custom mode with a clear default and carefully defined
+reset/clear behavior. Distinguish "use a blank global value" from "delete the
+saved custom value."
+
+Evidence: docs/0919-1348-Copilot-REPLY-Add-Global-Sign-Up-URL-Reset.txt;
+docs/0919-1354-Copilot-REPLY-Add-Clear-All-Custom-Sign-Up-URLs.txt;
+plugins/rbm-instruments/includes/rbm-lessons-display-settings.php.nt context must be deliberately preserved through every
+link. Do not assume WordPress or Avada carries query parameters forward.
+
+
+17. SLUGS ARE DATA CONTRACTS, NOT JUST LABELS
+
+Instrument/category slugs can affect URLs, filtering, sign-up behavior, data
+matching, and form prefill. Duplicate or inconsistent slugs create failures that
+may not be visible from the display name.
+
+Practical lesson:
+Validate duplicates on save and make relevant slug/URL modes visible in admin
+lists. Preserve canonical values used by existing workflows.
+
+
+18. GLOBAL AND CUSTOM URL VALUES NEED AN EXPLICIT MODE
+
+An individual record may need to use the global Sign Up URL or retain its own
+custom URL. Merely copying values makes it difficult to remember which behavior
+was intended.
+
+Practical lesson:
+Use an explicit Global/Custom mode with a clear default and carefully defined
+reset/clear behavior. Distinguish "use a blank global value" from "delete the
+saved custom value."
+
+
+19. FORM FIELD IDS MAY DIFFER BETWEEN LOCAL AND LIVE
+
+Forminator field IDs and form IDs verified in Local cannot automatically be
+assumed to match LIVE.
+
+Practical lesson:
+Package reusable logic separately from environment-specific IDs. Record every
+ID that must be verified during deployment.
+
+
+20. FORM EXPORTS REQUIRE SOURCE METADATA
+
+CSV data without form name/ID, submission ID, submission time, export time,
+source filename, and record count is difficult to audit or reconcile later.
+
+Practical lesson:
+Preserve source metadata when importing Forminator submissions or other
+prospect/student data.
+
+
+21. IMPORT FIELD AUTO-DETECTION IS NOT ENOUGH
+
+Forminator exports use varied field names. Automatic mapping can leave
+important fields set to "Do Not Import" or map similarly named values
+incorrectly.
+
+Practical lesson:
+Provide a visible mapping/preview step and verify representative records before
+the full import.
+
+OBSERVED — CAUSE NOT PROVEN. The Amelia/RBAdmin side of this mapping is a
+separate related system, not redbarnmusic.org's own codebase; per this repo's
+Project Boundary, RBAdmin specifics are not asserted here.
+Evidence: docs/archive/2026-09/0912-1306-PLAN-Add-Teacher-Field-To-Forminator-And-Automap-To-RBAdmin.txt.
+
+
+22. A PLUGIN MAY CRASH WORDPRESS BECAUSE OF ITS BOOTSTRAP, NOT ITS FEATURE
+
+Past failures included missing root-level shims, duplicate bootstrap/header
+files, namespace/path mismatches, duplicate class declarations, incompatible PHP
+syntax, stray extensions such as .php.txt, and files with BOM or output before
+<?php.
+
+Practical lesson:
+When activation crashes WordPress, first test the plugin entry point, required
+files, paths, namespaces, PHP version, and logs. Deleting the plugin folder may
+restore WordPress but does not identify the cause.
+
+
+23. DUPLICATE PLUGIN FOLDERS CAN LOAD THE WRONG COPY
+
+Renamed or backup plugin folders left under wp-content/plugins can still be
+discovered by WordPress and create confusion about which version is active.
+
+Practical lesson:
+Keep rollback ZIPs outside the active plugins directory. Use one stable active
+folder name and verify the loaded version/build identifier.
+
+
+24. DEFINE CALLS AND BOOTSTRAPS MUST BE GUARDED
+
+Repeated loading can cause constant-redefinition warnings or duplicate startup
+behavior.
+
+Practical lesson:
+Guard constants and canonicalize initialization. Avoid multiple entry points
+that each attempt to boot the same code.
+
+
+25. WORDPRESS ADMIN MENU SLUGS MUST MATCH EXACTLY
+
+Custom-post submenu placement and admin pages can fail or appear in unexpected
+locations when parent slugs, page slugs, registration order, or show_in_menu
+values disagree.
+
+Practical lesson:
+Centralize menu registration and verify that CPTs exist before attaching
+submenus. Avoid duplicate admin_menu hooks for the same feature.
+
+
+26. LARGE LOG FILES CAN MAKE LOCAL WORDPRESS APPEAR BROKEN
+
+A PHP error log grew large enough to cause Local page loading to become
+unusable. Removing the oversized log restored performance.
+
+Practical lesson:
+Check Local's PHP and WordPress logs when pages become inexplicably slow or fail
+to load. Correct the underlying repeated error and rotate/clear oversized logs.
+
+OBSERVED — CAUSE NOT PROVEN. No specific filename, size, or date was located in
+the current docs/git history for this pass; retained from prior working
+knowledge of the project rather than a re-verified record. If encountered
+again, record the log path and size in a Reply doc.
+
+
+27. CACHE INVALIDATION, ORPHANED RELATIONSHIPS, AND STUDENT/BOOKING STATUS
+(RBADMIN-RELATED — NOT REDBARNMUSIC.ORG'S OWN CODE)
+
+These three related lessons (grid caches must be invalidated on write; a
+booking whose student record cannot be resolved must not block a real
+schedule slot; deactivating a student must not silently reactivate an old
+booking) describe the separate RBAdmin scheduling system, not code present in
+this repository.
+
+OBSERVED — CAUSE NOT PROVEN for this repository. Per this repo's Project
+Boundary ("Do not import RBAdmin architecture ... unless current
+redbarnmusic.org files explicitly prove they apply"), these are retained only
+as a pointer to related-system experience, not asserted as redbarnmusic.org
+behavior. The only confirmed redbarnmusic.org connection is that Forminator
+submissions are mapped toward RBAdmin.
+Evidence: docs/archive/2026-09/0912-1306-PLAN-Add-Teacher-Field-To-Forminator-And-Automap-To-RBAdmin.txt;
+docs/0919-1220-PLAN-Teacher-Week-Add-Edit-And-Pending-Approval.txt (Phase 1,
+"Cache/transient invalidation" listed as an inspection item, not a completed
+finding).
+
+
+30. PRODUCTION ZIPS AND DEVELOPMENT CHECKPOINTS SERVE DIFFERENT PURPOSES
+
+A development checkpoint may include docs, CHANGELOG, tests, and diagnostic
+material. A production plugin ZIP should contain only one correctly named
+top-level plugin folder and required runtime files.
+
+Practical lesson:
+Build a production ZIP from the exact verified Git source. Exclude .git,
+.github, docs, logs, tests/results, backups, scripts/tools, node_modules,
+.DS_Store, temporary fixtures, old ZIPs, and duplicate entry points unless a
+runtime dependency is explicitly required.
+
+
+31. ZIP CONTENT AND FILE PERMISSIONS MUST BE VERIFIED
+
+A ZIP can exist and still be unusable because the top-level folder, bootstrap,
+runtime files, or permissions are wrong.
+
+Practical lesson:
+Inspect the archive listing and test installation/activation in a clean or
+controlled WordPress environment before calling it production-ready.
+
+
+32. GIT DOES NOT CAPTURE EVERY WORDPRESS CHANGE
+
+Git records repository files, but not automatically the active database state,
+Avada Builder edits, widget content, menus, form configuration, or uploads.
+
+Practical lesson:
+Pair Git evidence with database exports, deployment manifests, and full-site
+freezes at meaningful verified milestones.
+
+
+33. DIRECT TESTING CAN DISPROVE PLAUSIBLE CODE ASSUMPTIONS
+
+The Avada menu-ID and footer-widget hook issues looked correct during code
+review but failed in actual rendering.
+
+Practical lesson:
+For hooks, filters, URLs, JavaScript, responsive behavior, and form workflows,
+direct instrumentation and browser testing are evidence—not optional ceremony.
+
+
+34. DO NOT EXPAND A FIX MERELY BECAUSE RELATED CLEANUP IS AVAILABLE
+
+Broad cleanup can remove active dependencies or obscure the cause of a narrow
+problem.
+
+Practical lesson:
+Use bounded changes, preserve unrelated working-tree modifications, and stop
+when the verified problem is solved. Broader migrations deserve their own
+evidence and rollback boundary.
+
+
+35. AN UNRELATED CONTENT CHANGE CAN SILENTLY BREAK A JS DOM-ADJACENCY ASSUMPTION
+
+The Faculty "Choose Instrument" filter located the teacher grid via
+`wrap.nextElementSibling`. An earlier, unrelated change (adding a Sign Up
+paragraph between the filter and the grid) inserted a new sibling, so the
+filter's DOM lookup silently resolved to the wrong element and stopped
+filtering, with no console error.
+
+Practical lesson:
+Do not assume a sibling/child DOM relationship stays stable as unrelated
+content is added later. Scope a lookup to a stable named container (e.g.
+`wrap.closest('#teachers').querySelector(...)`) instead of walking a fixed
+number of DOM steps.
+
+Evidence: docs/0919-1150-Copilot-REPLY-Verify-Faculty-And-Sign-Up-Workflows.txt;
+plugins/rbm-faculty/assets/js/rbm-faculty.js.
+
+
+36. EXTRACTING INLINE ADMIN JS INTO A SHARED FILE CAN BREAK LOAD-ORDER AND
+SCREEN-SCOPING ASSUMPTIONS THAT WERE INVISIBLE WHILE INLINE
+
+Moving several previously-separate inline `<script>` blocks into one shared
+enqueued admin file surfaced two defects that browser-testing (not code
+review) caught:
+- A click handler for a Media-Library-style preview modal ran at script-load
+  time, before markup printed by a separate `admin_footer-{screen}` hook
+  existed in the DOM in some load orders, so clicking silently did nothing.
+- Two near-identical "move the Add button into the header row" scripts (one
+  per screen) were merged into one file and both then ran on each other's
+  screen, because they matched generic markup (e.g. `.wp-heading-inline`)
+  present on both admin list screens, producing a duplicate button.
+
+Practical lesson:
+Wrap any handler that depends on markup from a different PHP hook inside
+`DOMContentLoaded`. When merging previously per-screen inline scripts into one
+file, scope each block with an explicit `body` class check (e.g.
+`post-type-x` vs `taxonomy-y`), not just a shared enqueue condition.
+
+Evidence: docs/archive/2026-09/0917-1141-Copilot-REPLY-Extract-Inline-JS-CSS-From-RBM-Plugins.txt.
+
+
+37. AVADA BOOLEAN-MAPPED THEME OPTIONS BYPASS THE GENERIC OPTION FILTER
+
+Avada theme options that are boolean-mapped (e.g. the social sharing box)
+return early inside Avada's own option getter before the general
+`fusion_get_option`-style filter chain runs, so a filter targeting that
+generic chain has no effect on them.
+
+Practical lesson:
+For a boolean-mapped Avada option, filter the raw stored option array itself
+(`add_filter('option_fusion_options', ...)`) instead of the generic option
+filter. A separate, unrelated page-option override hook was needed for
+author-info-box visibility for the same reason.
+
+Evidence: mu-plugins/rbm-disable-post-meta.php.
+
+
+38. A NONCE SCOPED TO A RECORD ID NEEDS A PLACEHOLDER VALUE FOR "CREATE NEW"
+
+Scoping a nonce action string to a record ID (e.g. `'rbm_save_teacher_meta_' .
+$post_id`) closes an IDOR/CSRF gap on edit, but a "create new" form has no
+real ID yet. A save handler shared between create and edit (hooked to
+`save_post_msch_teacher`, which fires with the just-assigned real ID even on
+create) must accept either the real-ID-scoped nonce or an explicit
+placeholder nonce (e.g. `_0`), or saving silently fails on create only.
+
+Practical lesson:
+When adding per-record nonce scoping to an existing create+edit form, test
+create explicitly — edits keep working, so a create-only regression is easy
+to miss. This is safe because the earlier submit handler already validated
+the submitted ID's nonce/capability before calling
+`wp_insert_post()`/`wp_update_post()`.
+
+Evidence: docs/archive/2026-09/0911-0830-Copilot-REPLY-Harden-Faculty-Module-Rbm-Faculty.txt;
+plugins/rbm-faculty/includes/rbm-teachers.php (rbm_save_teacher_meta()).
+
+
+39. AN ADMIN LIST TABLE'S "PAGE X OF Y" READS A SEPARATE PER-PAGE OPTION FROM
+THE QUERY ITSELF
+
+Forcing `posts_per_page => -1` on the underlying `pre_get_posts` query does
+not by itself fix WordPress admin list-table pagination text. The list table
+computes "Page X of Y" from the `edit_{post_type}_per_page` option/filter,
+independent of the actual query args.
+
+Practical lesson:
+When an admin view is intentionally unpaginated, also filter
+`edit_{post_type}_per_page` (e.g. return a high number for that view) or the
+displayed page count will stay misleading even though every record is
+already being shown.
+
+Evidence: plugins/rbm-instruments/includes/rbm-lessons.php
+(rbm_msch_lesson_filter_iwt_view(), rbm_msch_lesson_iwt_unpaginated_per_page()).
+
