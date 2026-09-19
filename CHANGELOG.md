@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-09-19 (fix #page-title anchor slide-then-bounce)
+- Root cause found via instrumented click testing: Avada's own `fusion-scroll-to-anchor.js`
+  intercepts every link click, rewrites the URL hash to a non-existent `#_<id>` (so the browser's
+  native anchor jump never fires), then on the destination page animates an eased ~700ms scroll to
+  the real target and swaps the hash back afterward — visibly overshooting before correcting, which
+  is the reported "slide then bounce." A direct address-bar load of the same `#page-title` URL was
+  confirmed clean (no rewrite, no animation, instant native jump), isolating the cause to Avada's
+  click-time interception rather than the anchor/CSS itself.
+- `mu-plugins/rbm-interior-page-title-anchor.php`: added `rbm_page_title_anchor_disable_smooth_scroll()`
+  (hooked to `wp_footer`), a capture-phase `click` listener scoped to links containing `#page-title`
+  that calls `stopPropagation()` before Avada's own bubble-phase delegated handler can see the
+  event — capture always precedes bubble regardless of script load order, so this reliably wins
+  without needing to locate or modify Avada's minified handler. Native navigation and the browser's
+  own instant anchor jump (governed by the existing `scroll-margin-top`) proceed unaffected.
+- No banners, titles, or page structure were touched; `scroll-margin-top` unchanged.
+- Verified stable (scrollY identical from ~150ms to ~850ms post-navigation, hash stays `#page-title`,
+  never `#_page-title`) across: main nav, footer "Quick Links"/"Connect", mobile bottom bar; About,
+  Faculty, Instruments, Contact; desktop, 375px, and 320px; logged-in (with admin bar) and logged-
+  out. Confirmed no duplicate `#page-title` elements on any tested page.
+
+## 2026-09-19 (extend #page-title anchor to Teacher profile links)
+- `plugins/rbm-faculty/includes/rbm-teachers.php`: Teacher profile links now also carry the
+  `#page-title` landing anchor. `rbm_msch_teacher_card_html()` appends it to the shared card/View
+  Profile link (after any `?instrument=` query context, so it stays a fragment, not a query arg) —
+  covers the Faculty grid, filtered results, and the standalone `[rbm_teacher]` shortcode, since
+  all three render through this one function. `rbm_msch_teacher_post_nav_arrow()` also appends it
+  to the Teacher profile page's own Previous/Next links (other Teacher pages). Reuses the shared
+  `rbm_page_title_anchor_should_append()` safety check from `mu-plugins/rbm-interior-page-title-
+  anchor.php` (guarded by `function_exists()`) instead of duplicating the exclusion logic.
+  Verified: card/View Profile links, instrument-filtered card links, and Previous/Next links all
+  carry `#page-title`; a real click-through landed correctly below the header with no console
+  errors.
+
 ## 2026-09-19 (wire #page-title anchor into site navigation)
 - `mu-plugins/rbm-interior-page-title-anchor.php`: the existing `#page-title` anchor (added
   previously but never linked to) is now appended to real internal navigation links: the main/
@@ -13,6 +46,96 @@
   functions.php`: the 3 real links in the mobile bottom quick-action bar (Lessons/Sign Up/Contact)
   now append `#page-title` directly. Verified via direct HTML fetch and a real click-through: Home
   link and the external Facebook link are unaffected; homepage still has no `#page-title` element.
+
+## 2026-09-19 (Faculty page: Choose Instrument and Sign Up share one row)
+- `plugins/rbm-faculty/includes/rbm-teachers.php` (`rbm_msch_teachers_shortcode()`, compact mode):
+  on the unfiltered Faculty view, the "Choose Instrument" select and "Sign Up" button are now
+  wrapped in one `.msch-teacher-controls-row` flex container (Choose Instrument left, Sign Up
+  right) instead of stacking in separate blocks. The filtered-results view is unchanged — it never
+  showed Choose Instrument alongside Sign Up, so there was no second row to combine there.
+  `plugins/rbm-faculty/assets/css/rbm-faculty.css`: new responsive rules for `.msch-teacher-
+  controls-row` — same row down to 481px, stacks (Choose Instrument above Sign Up, both full width)
+  at 480px and narrower. Verified no overlap or clipping at 1280/768/480/375/320px; existing filter
+  behavior, Sign Up URLs/query params, and prefill context unchanged.
+
+## 2026-09-19 (Instruments We Teach list: show all records, fix misleading page count)
+- `plugins/rbm-instruments/includes/rbm-lessons.php`: the Instruments We Teach admin list view
+  only skipped pagination when the Status filter was "Active" (drag-and-drop scope); under
+  "All"/"Inactive" it fell back to the default per-page limit and cut off any records beyond it.
+  `rbm_msch_lesson_filter_iwt_view()` now always sets `posts_per_page => -1` for this view
+  regardless of Status filter. Also added `rbm_msch_lesson_iwt_unpaginated_per_page()` (filters
+  `edit_msch_lesson_per_page`) so the "Page X of Y" display — which WordPress calculates from a
+  separate Screen Options value, not the actual query limit — no longer shows a misleading extra
+  page when every matching row is already on the one page. Read-only list-display change; no
+  Instrument data affected.
+
+## 2026-09-19 (Instruments list: Slug and URL Mode columns)
+- Implemented docs/0919-1441-Copilot-REQUEST-Add-Slug-And-URL-Mode-Columns.txt. Added read-only
+  "Slug" and "URL Mode" columns to the Instruments admin list (`plugins/rbm-instruments/includes/
+  rbm-lessons.php`), positioned Icon | Title | Status | Display Order | Category | **Slug | URL
+  Mode** | IWT | Instruments We Teach. Slug shows the exact saved `post_name` (monospace, em dash
+  if blank) and is sortable ascending/descending. URL Mode shows a small "Global"/"Custom" badge
+  using the same safe-upgrade default rule as the Edit Instrument form. No Teachers column was
+  added (explicitly out of scope). Both headings have a small accessible info-icon popover (hover,
+  keyboard focus, and click/tap all reveal it; Escape or moving focus away dismisses it) explaining
+  Slug vs. URL Mode, added to `assets/css/rbm-instruments-admin.css` and `assets/js/rbm-instruments-
+  admin.js`. Read-only, admin-only — no stored data, public page, Faculty, Sign-Up, or Forminator
+  behavior changed. See docs/0919-1441-Copilot-REPLY-Add-Slug-And-URL-Mode-Columns.txt.
+
+## 2026-09-19 (permanent Clear All Custom Sign Up URLs control)
+- Implemented docs/0919-1354-Copilot-REQUEST-Add-Clear-All-Custom-Sign-Up-URLs.txt. Added a new,
+  destructive "Clear All Custom URLs" button to `plugins/rbm-instruments/includes/rbm-lessons-
+  display-settings.php`, styled with WordPress's `button-link-delete` destructive-action class and
+  kept in its own `<form>`/nonce, fully separate from "Save Changes" and "Reset All to Global URL".
+  New handler `rbm_clear_all_custom_signup_urls()` permanently `delete_post_meta()`s every
+  Instrument's and Teacher's `_msch_lesson_signup_url`/`_msch_teacher_signup_url` (only when
+  non-empty, so the reported count reflects real changes and a repeat run safely reports 0/0), sets
+  every record's mode meta to `'global'`, and never touches the `rbm_msch_global_signup_url` option.
+  Confirmed on Local: Cancel makes zero DB changes; Confirm deletes the saved custom URL entirely
+  (switching a cleared record back to "Custom URL" shows a genuinely empty field, not a stale
+  value); Global Sign Up URL setting unaffected; front-end Sign Up links still resolve correctly.
+  See docs/0919-1354-Copilot-REPLY-Add-Clear-All-Custom-Sign-Up-URLs.txt.
+
+## 2026-09-19 (Global Sign Up URL reset control repositioned near the field)
+- Implemented docs/0919-1348-Copilot-REQUEST-Add-Global-Sign-Up-URL-Reset.txt. The existing "Set
+  All Records to Global" bulk action (`plugins/rbm-instruments/includes/rbm-lessons-display-
+  settings.php`, `rbm_set_all_signup_records_global()`, added under docs/0919-1126-...) already did
+  what this request needed, so rather than duplicate it, it was moved to sit directly after the
+  Global Sign Up URL field (instead of its own separate section further down the page), relabeled
+  "Reset All to Global URL" with the requested confirmation wording, and its handler now only
+  counts/reports Instrument and Teacher records whose mode actually changed (previously always
+  reported the full record count regardless of prior state) so repeating the reset safely reports
+  0/0 once nothing is left in Custom mode. Still preserves every saved Custom URL. No change to
+  meta keys, individual record editing, URL construction, or Forminator prefilling. See
+  docs/0919-1348-Copilot-REPLY-Add-Global-Sign-Up-URL-Reset.txt.
+
+## 2026-09-19 (Instrument slug duplicate checker and warning popup)
+- Implemented docs/0919-1305-Copilot-REQUEST-Add-Instrument-Slug-Duplicate-Checker.txt. Added an
+  editable Slug field to the Add/Edit Instrument form (`plugins/rbm-instruments/includes/rbm-
+  lesson-form.php`) and authoritative server-side duplicate-slug validation in
+  `rbm_save_lesson_form_submit()`: before any `wp_insert_post()`/`wp_update_post()` call, a new
+  `rbm_msch_lesson_find_slug_conflict()` checks other non-trashed Instruments for the same slug
+  (excluding the record being edited). A conflict blocks the save entirely — no record is created,
+  updated, or WordPress-suffixed (e.g. `piano-2`) — and the submitted values plus the conflicting
+  Instrument's title/ID/status/slug/edit link are stored in a short-lived per-user transient, then
+  redirected back to the same form so it redisplays everything with a warning: an always-visible
+  `.notice.notice-error` (no-JS fallback) plus a native `<dialog>` modal (opened via
+  `plugins/rbm-instruments/assets/js/rbm-instruments-admin.js`) offering "Edit Existing Instrument"
+  (new tab) and "Return and Change Slug" (closes the dialog, focuses the Slug field). No Override/
+  Save Anyway action exists. Confirmed no image-filename-to-slug coupling exists in this code, so
+  replacing an Instrument's image never touches its slug. Does not repair the existing Piano/
+  Upright Piano records. See docs/0919-1308-Copilot-REPLY-Add-Instrument-Slug-Duplicate-Checker.txt.
+
+## 2026-09-19 (fix Faculty page Choose Instrument filter regression)
+- Fixed docs/0919-1135-Copilot-REQUEST-Verify-Faculty-And-Sign-Up-Workflows.txt: the Faculty page's
+  green "Choose Instrument" select stopped filtering Teacher cards after the Sign Up CTA `<p>` was
+  inserted between it and the card grid (docs/0919-0141-...). `plugins/rbm-faculty/assets/js/rbm-
+  faculty.js` assumed the grid was the filter's immediate next sibling; it now looks up the
+  `.thesis-lesson-card-grid` within the enclosing `#teachers` container instead, so it no longer
+  breaks when other markup sits between them. Verified: instrument filtering works on desktop and
+  mobile widths with no console errors; Faculty → Category → Teacher → Sign Up and Global/Custom
+  Sign Up URL resolution were spot-checked and are unaffected. See docs/0919-1135-Copilot-REPLY-
+  Verify-Faculty-And-Sign-Up-Workflows.txt.
 
 ## 2026-09-19 (Universal Avada Home pilot - shared green pill button standard)
 - Implemented docs/0919-1003-Copilot-REQUEST-Implement-Universal-Avada-Home-Pilot.txt. Added one

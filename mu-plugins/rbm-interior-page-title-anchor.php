@@ -33,6 +33,36 @@ function rbm_interior_page_title_anchor_style() {
     echo '<style>#page-title{scroll-margin-top:92px;}</style>';
 }
 
+// docs/0919-Copilot-REQUEST-Fix-Page-Title-Anchor-Bounce.txt: Avada's own fusion-scroll-to-anchor.js
+// intercepts the click on any link (registered as a bubble-phase delegated handler), rewrites the
+// hash to a non-existent "#_<id>" so the browser's native jump never fires, then on the destination
+// page animates an eased scroll to the real target and swaps the hash back afterward — visible as a
+// slide-then-bounce, since the animation overshoots before the corrective step. A direct address-
+// bar load of the same #page-title URL was confirmed clean (no rewrite, no animation, instant native
+// jump), so the fix only needs to stop Avada's click-time interception for these specific links,
+// not touch scrolling anywhere else. A capture-phase listener runs before any bubble-phase delegated
+// handler regardless of script load order, so this reliably wins the race without needing to find
+// or modify Avada's own minified handler.
+add_action('wp_footer', 'rbm_page_title_anchor_disable_smooth_scroll');
+function rbm_page_title_anchor_disable_smooth_scroll() {
+    if (is_admin()) {
+        return;
+    }
+    ?>
+    <script>
+    document.addEventListener('click', function (e) {
+        var link = e.target && e.target.closest ? e.target.closest('a[href*="#page-title"]') : null;
+        if (!link) {
+            return;
+        }
+        // Stops Avada's own click handler (and anything else) from seeing this click at all;
+        // native browser navigation + native anchor jump still proceed normally afterward.
+        e.stopPropagation();
+    }, true);
+    </script>
+    <?php
+}
+
 // Shared safety check: only append #page-title to a same-site, non-Home, plain page link. Skips
 // external/mailto/tel links and anything that already carries its own fragment (e.g. a future
 // #teachers-style deep link), so this never overrides a more specific existing contract.
