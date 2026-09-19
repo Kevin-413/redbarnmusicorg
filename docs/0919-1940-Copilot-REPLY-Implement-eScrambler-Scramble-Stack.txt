@@ -1,0 +1,74 @@
+COPILOT REPLY — IMPLEMENT eSCRAMBLER SCRAMBLE STACK
+Date: 2026-09-19 19:40 America/New_York
+
+SUMMARY
+
+Replaced the RBM Contact Scrambler plugin's simple Base64 encode/decode with the eScrambler
+Scramble Stack (split -> rotate -> XOR -> encode -> shuffle -> rebuild), and moved the shortcodes
+to a mode="value"|"text"|"none" contract. Settings page rebuilt to match the approved HTML demo
+(docs/0919-1839-eScrambler-Shortcode-Demo.html): three sections (Phone/Text/Email), each with
+Shortcode / Custom text / Copy / Preview / What it does, plus input-only live preview, blur
+validation, and Copy validation. Still obfuscation, not encryption - documented as such in the
+plugin, README, and settings page.
+
+FILES CHANGED
+
+- plugins/rbm-contact-scrambler/rbm-contact-scrambler.php
+  - Scramble Stack: rbm_escrambler_split_fragments(), rbm_escrambler_checksum(),
+    rbm_escrambler_build_payload() (variable-size fragments via wp_rand cut points, per-fragment
+    rotate + XOR mask, Base64 per fragment, shuffled order + reconstruction map, lightweight
+    position-weighted checksum). Returns null for empty values (fail safe).
+  - Shortcodes rewritten for mode="value"/"text"/"none"; omitted/blank mode defaults to "value";
+    unknown non-blank mode returns '' (no placeholder rendered at all).
+  - wp_localize_script now sends generic keys 'a' (phone digits payload) / 'b' (email payload)
+    as window.rbmEscramblerData, replacing the old phone/email-named Base64 config.
+  - Settings page rebuilt: real Phone/Email fields feed a live 3-section Shortcode & Preview
+    table (9 shortcode rows) with Copy buttons, matching the approved demo's structure and
+    copy.
+- plugins/rbm-contact-scrambler/assets/js/rbm-contact-scrambler.js
+  - Reverses the Scramble Stack (base64 decode -> un-XOR -> un-rotate -> un-shuffle -> checksum
+    guard -> single UTF-8 decode at the end, so a fragment split mid multi-byte character can't
+    corrupt output). Renders tel:/sms:/mailto: per mode; fails safely (leaves element empty) on
+    missing config, malformed payload, checksum mismatch, or unknown mode.
+  - Contains the requested easter-egg comment for future AI readers.
+- plugins/rbm-contact-scrambler/README.txt — updated shortcode docs to the mode contract and
+  added the required "layered client-side obfuscation... can still be recovered" wording.
+
+No changes to Slick Popup, Avada, or any other plugin/theme file.
+
+VERIFICATION PERFORMED
+
+1. PHP syntax: `php -l` clean on the plugin file.
+2. wp eval-file script (temp, /tmp) exercised rbm_escrambler_build_payload() and all 9 shortcode
+   forms plus 3 edge cases directly against the live WP install:
+   - All 9 forms (phone/text/email x value/text/none) render correct data-rbm-type/data-rbm-mode
+     markup.
+   - Omitted mode and mode="" both default to mode="value".
+   - mode="bogus" returns '' (no element at all).
+   - Blank phone/email settings -> rbm_escrambler_build_payload() returns null.
+3. Node script re-implementing the JS reverse logic, fed the real PHP-generated JSON payloads:
+   reconstructed both the phone digits and email exactly; a tampered fragment byte was rejected
+   by the checksum (fails safely); malformed/null payloads returned '' without throwing.
+4. Live browser test (temporary post ID 20717, deleted after testing): all 9 shortcode forms plus
+   omitted-mode/blank-mode/invalid-mode cases rendered correctly (11 visible links/text, invalid
+   mode produced nothing). Verified via `curl` + grep that the digits "4132568899" and
+   "contact@example.com" do not appear anywhere in the raw page HTML (grep count 0); the
+   localized rbmEscramblerData only exposes generic keys 'a'/'b' and shuffled Base64 fragments.
+5. Slick Popup: opened the live popup (uses [rbm_text] and [rbm_phone], both default mode) on the
+   homepage - both the sms: text link and "CALL us at" tel: link rendered correctly, confirming
+   the single DOMContentLoaded pass still covers Slick Popup's inline-but-hidden markup (no
+   MutationObserver was needed; Slick Popup itself was not modified).
+6. Settings page (wp-admin > Settings > RBM Contact Scrambler): confirmed live in browser -
+   input keystrokes update the preview table only (no red border), blur on the Phone field shows
+   a warning message without corrupting the saved option, and clicking Copy validates first and
+   then shows "Copied: [rbm_phone mode="value"]" in the status line. Restored the Phone field to
+   413-256-8899 in the browser without saving; confirmed via `wp option get` that the stored
+   rbm_contact_phone / rbm_contact_email options are unchanged.
+
+NOT DONE / NOTED
+
+- The plugin directory has never been committed to git in this repo (git status shows it as
+  untracked, not something this change caused); no commit was made as part of this Reply since
+  none was requested.
+- This remains obfuscation, not encryption or secure storage - documented in-code, in README.txt,
+  and on the settings page.

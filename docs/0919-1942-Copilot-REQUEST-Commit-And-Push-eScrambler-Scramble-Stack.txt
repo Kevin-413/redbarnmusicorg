@@ -1,0 +1,85 @@
+0919-1942-Copilot-REQUEST-Commit-And-Push-eScrambler-Scramble-Stack.txt
+
+COPILOT REQUEST — COMMIT AND PUSH eSCRAMBLER SCRAMBLE STACK
+
+PURPOSE
+
+The eScrambler Scramble Stack implementation is complete and verified.
+
+Please commit and push the completed eScrambler work.
+
+SOURCE
+
+Use the completed implementation described in:
+
+0919-1940-Copilot-REPLY-Implement-eScrambler-Scramble-Stack.txt
+
+CONFIRMED IMPLEMENTATION
+
+The completed work includes:
+
+- Scramble Stack:
+  split -> rotate -> XOR -> Base64 encode -> shuffle -> rebuild
+- variable-size fragments
+- per-fragment masks/rotation
+- shuffled reconstruction map
+- checksum/integrity guard
+- generic localized payload keys
+- mode="value" / mode="text" / mode="none"
+- omitted or blank mode defaults to mode="value"
+- invalid nonblank mode fails safely
+- settings-page shortcode demo
+- Copy buttons
+- custom text fields
+- preview updates while typing
+- validation on field exit
+- validation again before Copy
+- phone/text/email shortcode verification
+- Slick Popup verification
+- no plaintext configured phone/email in raw page HTML
+- documentation that this is obfuscation, not encryption
+- requested future-AI easter-egg comment
+
+FILES EXPECTED
+
+plugins/rbm-contact-scrambler/rbm-contact-scrambler.php
+
+plugins/rbm-contact-scrambler/assets/js/rbm-contact-scrambler.js
+
+plugins/rbm-contact-scrambler/README.txt
+
+IMPORTANT
+
+The plugin directory was previously untracked.
+
+Before committing:
+
+1. Inspect git status.
+2. Confirm only the intended eScrambler/plugin files are staged.
+3. Do not sweep in unrelated existing dirty files.
+4. Do not use broad cleanup or git restore commands.
+5. Preserve all unrelated work exactly as-is.
+
+COMMIT
+
+Use a concise commit message such as:
+
+Implement eScrambler Scramble Stack
+
+PUSH
+
+Push the commit to the current working branch.
+
+VERIFY
+
+After pushing:
+
+- report commit hash
+- report branch
+- confirm push succeeded
+- confirm the working tree state for the plugin
+- list any unrelated dirty/untracked files without modifying them
+
+Do not make additional feature changes unless required to complete a clean commit.
+
+STOP after the commit/push report.
