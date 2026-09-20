@@ -1,0 +1,160 @@
+0907-1031-STANDARD-Avada-Page-Container-Width.txt
+
+2026-09-20 UPDATE — Home superseded to Option B (Right Sidebar)
+
+Home (post 20046) no longer uses Option A (No Sidebar). Home is now
+Option B — With Sidebar (right position), using the reusable child-theme
+template "RBM Standard Page — Right Sidebar" described below. This
+supersedes the "Home (post 20046) also uses this option [No Sidebar]"
+statement under OPTION A and the "Home: converted to Standard Page — No
+Sidebar" line under VERIFICATION further down — both are left in place
+below as history of the prior state, not the current one. Root cause of
+why Live's Home did not match this: Live's Home page was still assigned
+Avada's legacy `100-width.php` page template, which both stretches
+`#content` to 100% width and skips the `avada_after_content` hook (so no
+sidebar can render), regardless of any sidebar settings. Do not reuse
+`100-width.php` for any page that should follow this standard.
+
+RBM STANDARD PAGE TEMPLATES (child theme, `templates/` folder)
+
+Two selectable Page Attributes templates now provide both options from
+code, independent of each page's saved Avada Sidebars postmeta or the
+site's global Sidebars Theme Option:
+- "RBM Standard Page — No Sidebar" (`templates/rbm-standard-page-no-
+  sidebar.php`) — Option A, enforced.
+- "RBM Standard Page — Right Sidebar" (`templates/rbm-standard-page-
+  right-sidebar.php`) — Option B, right position, enforced.
+Both `require()` Avada's own unmodified `page.php` for all markup/hooks;
+neither duplicates parent-theme template code. The sidebar variant
+requires a widget area registered with ID `avada-custom-sidebar-sidebar`
+(Avada's "Sidebar", via Multiple Sidebars) to exist and contain widgets
+on whichever site uses it; if that widget area is missing/empty, it
+fails safe to the No Sidebar layout rather than showing a blank column.
+Implementation: `themes/Avada-Child-Theme/functions.php`
+(`RBM_STD_PAGE_*` constants/filters) and the two template files above.
+Use these templates (not the raw `pages_sidebar` postmeta / Sidebars
+metabox) for any page that must reliably match this standard.
+
+PURPOSE
+
+Defines the single native Avada site/container-width system that Header,
+main page content, Sidebar-enabled pages, and Footer all share. There is
+ONE Standard Page format, with an optional sidebar (see STANDARD PAGE
+MODEL below) — not a set of separate page types. Supersedes any earlier
+assumption that all content pages use the same inner layout (in
+particular, the earlier assumption that Policies was the sidebar example
+— corrected below).
+
+OUTER SITE CONTAINER
+
+- Native Avada Theme Options setting: `site_width` (fusion_options key),
+  changed from `1200px` to `960px`.
+- This single global value drives every native (`hundred_percent="no"`)
+  Fusion Builder container/row site-wide: the Header Layout Section's two
+  rows, standard (non-100-width) page content, Sidebar-enabled pages, and
+  the Footer widget/copyright rows — none of these have a per-container
+  width override, so they all automatically inherit this one value.
+- No custom CSS was added to achieve this; it is a single native Theme
+  Options field change, verified to cascade correctly (see VERIFICATION).
+- Full-width sections/pages that intentionally use `hundred_percent="yes"`
+  (e.g. Home's existing full-bleed sections, page-template-100-width
+  pages) are unaffected by this value, by design — they are not part of
+  the shared 960px system and were not touched.
+
+STANDARD PAGE MODEL
+
+There is ONE Standard Page. Content components (text, cards, forms,
+galleries, teacher bios, CTA blocks, calendars, tables, images, etc.) are
+parts of a page, not separate page formats.
+
+Shared foundation:
+- native Avada default page template
+- global `site_width` = 960px (fusion_options key, changed from 1200px)
+- shared Header and Footer
+- responsive Avada layout behavior
+
+OPTION A — NO SIDEBAR
+- Native Avada per-page "Sidebars" metabox setting `pages_sidebar` = `''`.
+- Page content uses the full 960px Standard Page width.
+- Policies (post 13197) uses this option (corrected from a leftover
+  `pages_sidebar="Sidebar"` misconfiguration to `''`).
+- Home (post 20046) also uses this option: converted from the
+  `100-width.php` template to `default`. A pre-existing, unrelated
+  child-theme file (`wp-content/themes/Avada-Child-Theme/style.css`)
+  contained obsolete `body.page-id-20046` 897px width overrides and dead
+  `.rbm-home-shell` / `.rbm-*` rules from a discarded design that
+  predated this standard, plus corrupted CSS fragments — confirmed unused
+  anywhere in current post content and retired. Home is not a separate
+  page type; it is a Standard Page without sidebar containing richer
+  content.
+- Lessons currently still uses the legacy `page-template-100-width`
+  template as an existing implementation detail (unchanged by this
+  standard); it is not a distinct page format, just a page pending the
+  same template alignment Home already received.
+
+OPTION B — WITH SIDEBAR
+- As of 2026-09-20, enforced via the "RBM Standard Page — Right Sidebar"
+  child-theme template (see UPDATE at top of this document) rather than
+  relying solely on the native per-page `pages_sidebar` metabox setting.
+  Native per-page setting for reference: `pages_sidebar` = `"Sidebar"`,
+  `default_sidebar_pos="right"` unless explicitly changed.
+- Sidebar column width is `sidebar_width` (native Theme Options,
+  currently `24%`), a percentage of `site_width` — so it scales
+  automatically with the 960px container (24% of 960px ≈ 230px sidebar
+  column, remainder ≈ content column, native Avada gutter between).
+  Content and sidebar remain within the same 960px outer width.
+- On mobile, main content comes first and the sidebar stacks below.
+- Home (post 20046) uses this option, via the RBM Standard Page — Right
+  Sidebar template.
+- The existing "root-cause" Avada widget-framework timing fix
+  (child theme `redbarn_fix_sidebar_rendering_timing()`, re-running
+  `set_sidebar_body_classes()` / `add_sidebars()` at `wp` priority 21)
+  remains in place and applies generically to any page that enables the
+  native sidebar; the RBM Standard Page templates build on top of it.
+
+HEADER ALIGNMENT
+
+- The Header Layout Section (post 20417) uses native
+  `[fusion_builder_container hundred_percent="no"]` rows with no explicit
+  width attribute on either row — both the branding row and the sticky
+  nav row already inherit `site_width` automatically. No header-specific
+  change was needed beyond the global `site_width` update; the banner
+  (`max_width="750px"`) and menu item spacing are unchanged from the prior
+  Request and remain compatible (750px banner fits inside the 960px
+  container with room to spare).
+
+FOOTER ALIGNMENT
+
+- The Footer widget/copyright rows are native (`hundred_percent="no"`,
+  not overridden), so they also already inherit `site_width` automatically.
+  No footer-specific change was needed.
+
+VERIFICATION (1440px unless noted)
+
+- Global `site_width`: 1200px -> 960px (confirmed via `fusion_options`).
+- Header branding/nav rows: inherit the new width automatically (no
+  overflow, banner and nav unchanged, sticky nav unchanged, 8-item menu
+  unchanged).
+- Lessons (Standard Page, no sidebar): content column measured at
+  960px wide — matches the new site width exactly.
+- Policies (Standard Page, no sidebar): `pages_sidebar` corrected to `''`;
+  content column measured at 960px wide (matches Lessons); no sidebar rendered;
+  body content unchanged (verified via accessibility snapshot — Tuition,
+  Withdrawals, Missed Lessons, Weather sections all present and
+  unmodified).
+- Home: converted to Standard Page — No Sidebar (`default` template);
+  main content row and both footer rows measured at 960px, matching
+  Header/Policies/About; obsolete `.rbm-*` / `body.page-id-20046` 897px
+  override retired from the child-theme stylesheet; body content
+  (quote/columns blocks) unchanged; no horizontal overflow.
+- Footer: row measured at 960px wide — matches the new site width.
+- Mobile 375px / 320px: no horizontal overflow on Home, Lessons, or
+  Policies; Mobile Bottom Action Bar unchanged (3 buttons); mobile menu
+  unaffected.
+
+CONTENT SAFETY
+
+- No menu structure, Faculty page, Home/Lessons/Policies body content,
+  cards, CTA, Footer content, or Mobile Bottom Action Bar text/markup was
+  changed. The only content-adjacent change was Policies' sidebar
+  metabox setting (layout classification, not body content).

@@ -34,6 +34,112 @@ function redbarn_fix_sidebar_rendering_timing() {
 add_action( 'wp', 'redbarn_fix_sidebar_rendering_timing', 21 );
 
 /**
+ * RBM Standard Page templates ("templates/rbm-standard-page-no-sidebar.php"
+ * and "templates/rbm-standard-page-right-sidebar.php").
+ *
+ * These two selectable Page Attributes templates enforce Avada's standard
+ * shared site-width layout, and, for the sidebar variant, the "Sidebar"
+ * widget area in the right position — deterministically from code,
+ * regardless of a page's own saved Avada Sidebars settings (pages_sidebar /
+ * default_sidebar_pos postmeta) or the site's global Sidebars Theme
+ * Option. Root cause this replaces: Avada's legacy "100% Width" page
+ * template (100-width.php) both stretches #content to 100% and skips the
+ * avada_after_content hook entirely, so a page using it can never show a
+ * matching-width column or a sidebar no matter what its settings say.
+ * Both templates require() Avada's own unmodified page.php for all actual
+ * markup/hooks; nothing here duplicates parent-theme template code.
+ *
+ * REQUIRED for the Right Sidebar template: a widget area registered with
+ * the ID in RBM_STD_PAGE_SIDEBAR_ID must exist and contain widgets on
+ * whichever site uses this template (Avada shows it as "Sidebar" under
+ * Appearance > Widgets, via Avada's Multiple Sidebars feature). If that
+ * widget area is missing or empty, this fails safe: the page silently
+ * renders as the No Sidebar layout instead of a blank/broken column.
+ *
+ * Both templates are fully optional and selected per-page via Page
+ * Attributes like any other template — including Home, which must have
+ * one of them assigned explicitly; there is no automatic sidebar/width
+ * override for any specific page.
+ */
+define( 'RBM_STD_PAGE_NO_SIDEBAR_TPL', 'templates/rbm-standard-page-no-sidebar.php' );
+define( 'RBM_STD_PAGE_RIGHT_SIDEBAR_TPL', 'templates/rbm-standard-page-right-sidebar.php' );
+define( 'RBM_STD_PAGE_SIDEBAR_ID', 'avada-custom-sidebar-sidebar' );
+
+function rbm_std_page_is_right_sidebar_template() {
+	return is_page_template( RBM_STD_PAGE_RIGHT_SIDEBAR_TPL );
+}
+
+function rbm_std_page_is_no_sidebar_template() {
+	return is_page_template( RBM_STD_PAGE_NO_SIDEBAR_TPL );
+}
+
+function rbm_std_page_right_sidebar_active() {
+	return rbm_std_page_is_right_sidebar_template() && is_active_sidebar( RBM_STD_PAGE_SIDEBAR_ID );
+}
+
+add_filter(
+	'avada_has_sidebar',
+	function ( $has_sidebar ) {
+		if ( rbm_std_page_is_no_sidebar_template() ) {
+			return false;
+		}
+		if ( rbm_std_page_is_right_sidebar_template() ) {
+			return rbm_std_page_right_sidebar_active();
+		}
+		return $has_sidebar;
+	}
+);
+
+add_filter(
+	'avada_has_double_sidebars',
+	function ( $has_double ) {
+		if ( rbm_std_page_is_no_sidebar_template() || rbm_std_page_is_right_sidebar_template() ) {
+			return false;
+		}
+		return $has_double;
+	}
+);
+
+add_filter(
+	'avada_sidebar_context',
+	function ( $sidebar, $page_id, $nr, $global ) {
+		if ( 1 !== $nr ) {
+			return $sidebar;
+		}
+		if ( rbm_std_page_is_no_sidebar_template() ) {
+			return '';
+		}
+		if ( rbm_std_page_right_sidebar_active() ) {
+			return [ RBM_STD_PAGE_SIDEBAR_ID ];
+		}
+		return $sidebar;
+	},
+	10,
+	4
+);
+
+/**
+ * Avada's own sidebar setup resolves the ACTUAL rendered widget-area ID
+ * and position from the page's saved postmeta (not from the
+ * avada_sidebar_context filter above, which only drives the has-sidebar
+ * body class / has_sidebar() detection). Re-assert the intended widget
+ * area + right position directly after redbarn_fix_sidebar_rendering_timing()
+ * re-runs Avada's sidebar setup at priority 21.
+ */
+function rbm_std_page_enforce_sidebar_widget_area() {
+	if ( ! rbm_std_page_right_sidebar_active() || ! function_exists( 'AWB_Widget_Framework' ) ) {
+		return;
+	}
+	$framework = AWB_Widget_Framework();
+	if ( ! isset( $framework->sidebars ) || ! is_array( $framework->sidebars ) ) {
+		return;
+	}
+	$framework->sidebars['sidebar_1'] = RBM_STD_PAGE_SIDEBAR_ID;
+	$framework->sidebars['position']  = 'right';
+}
+add_action( 'wp', 'rbm_std_page_enforce_sidebar_widget_area', 22 );
+
+/**
  * Mobile-only 4-button bottom action bar (Site Frame Plan, mobile bottom
  * action bar). Real destinations only: Lessons landing page, the site's
  * current Lessons Inquiry sign-up flow, the Contact page, and a Menu
