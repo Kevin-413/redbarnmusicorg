@@ -1,0 +1,58 @@
+COPILOT REPLY — FORMAT RBM CONTACT SCRAMBLER SETTINGS PAGE TO MATCH APPROVED DEMO
+Date: 2026-09-19 20:05 America/New_York
+
+SUMMARY
+
+Reformatted the wp-admin Settings > RBM Contact Scrambler page to match the approved demo layout.
+No changes to the Scramble Stack engine, shortcode parsing, mode behavior, validation rules, copy
+logic, Slick Popup, frontend rendering, stored settings, or plugin folder/name. Plugin stays
+"rbm-contact-scrambler".
+
+FILES CHANGED
+
+- plugins/rbm-contact-scrambler/rbm-contact-scrambler.php
+  - rbm_contact_scrambler_render_settings_page() only (settings-page markup/CSS, no other
+    functions touched):
+    - Added native <h2> section headings: "Configured Values", "Validation", "Shortcodes &
+      Preview" (replaced the <hr> divider).
+    - Validation box now uses WordPress's native `.notice` classes (notice-info by default,
+      toggled to notice-warning/notice-success after validate() runs) instead of a custom gray
+      box, so it looks like a stock wp-admin notice.
+    - Mode notes rewritten as compact numbered footnotes (matching the approved demo's
+      "<sup>1</sup> ..." style) instead of two prose paragraphs.
+    - Removed the em dash ("&mdash;") placeholders in blank Custom Text/Copy cells; those cells
+      are now simply empty.
+    - Section header rows and repeated column-heading rows kept (unchanged structurally), tightened
+      spacing/typography to feel more native.
+    - Custom-text field width trimmed to 160px (matches the approved demo) and table capped at
+      1100px max-width, consistent with the demo's compact readable layout.
+  - The one JS addition is purely cosmetic: 3 lines in the existing validate() function that
+    toggle the notice's CSS class (info/warning/success) based on the same hasError value that
+    already existed - no validation condition, message text, or trigger (input/blur/copy) changed.
+
+VERIFICATION PERFORMED
+
+1. `php -l` clean on the edited file.
+2. Re-ran the existing wp eval-file shortcode/payload check (docs script from the prior Reply):
+   all 9 shortcode forms, omitted/blank/invalid mode defaults, and blank-settings fail-safe
+   behavior are byte-identical to before this change - confirming shortcode parsing/mode logic
+   was not touched.
+3. Live browser check of wp-admin > Settings > RBM Contact Scrambler:
+   - Configured Values / Validation / Shortcodes & Preview sections render with h2 headings, all
+     three grouped tables (PHONE NUMBER SCRAMBLES / TEXT MESSAGE SCRAMBLES / EMAIL SCRAMBLES) show
+     repeated column headers and no em dashes in blank cells.
+   - Copy button validated first, then copied "[rbm_phone mode="value"]" and showed "Copied: ...";
+     the validation box switched from notice-info to notice-success ("No errors detected.").
+   - Editing a custom-text field live-updated both the shown shortcode and its preview link/text
+     (input event only, no error styling while typing).
+   - Clicked "Save Contact Settings" - native "Settings saved." notice appeared; confirmed via
+     `wp option get` that rbm_contact_phone/rbm_contact_email are unchanged (413-256-8899 /
+     contact@example.com).
+   - No console errors captured on page load (Playwright console listener, page reload).
+4. Slick Popup and frontend shortcode rendering were not touched by this change (only the
+   admin-only render function was edited); not re-verified in browser this pass since no related
+   code was modified.
+
+NOT DONE
+
+- No git commit/push performed for this formatting-only change; not requested this pass.

@@ -165,11 +165,13 @@ function rbm_contact_scrambler_render_settings_page() {
 	?>
 	<div class="wrap">
 		<h1>RBM Contact Scrambler</h1>
-		<p>Single source of truth for <code>[rbm_phone]</code>, <code>[rbm_text]</code>, and <code>[rbm_email]</code> anywhere shortcodes are supported (pages/posts, Avada footer widgets, Slick Popup content, etc.). Contact values are obfuscated client-side with the <strong>eScrambler Scramble Stack</strong> (split &rarr; rotate &rarr; XOR &rarr; encode &rarr; shuffle &rarr; rebuild) rather than shown in the page source as plain Base64.</p>
+		<p>One phone number and one email address, stored once here, and reused everywhere by <code>[rbm_phone]</code>, <code>[rbm_text]</code>, and <code>[rbm_email]</code> (pages/posts, Avada footer widgets, Slick Popup content, etc.). Values are obfuscated client-side with the <strong>eScrambler Scramble Stack</strong> (split &rarr; rotate &rarr; XOR &rarr; encode &rarr; shuffle &rarr; rebuild) rather than shown in the page source as plain Base64.</p>
 		<p class="description">eScrambler uses layered client-side obfuscation to make automated harvesting and casual source inspection more difficult. Publicly displayed contact information can still be recovered by a determined visitor or automated browser.</p>
+
+		<h2>Configured Values</h2>
 		<form method="post" action="options.php">
 			<?php settings_fields( 'rbm_contact_scrambler_group' ); ?>
-			<table class="form-table">
+			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><label for="rbm_contact_phone">Phone Number</label></th>
 					<td>
@@ -188,33 +190,35 @@ function rbm_contact_scrambler_render_settings_page() {
 			<?php submit_button( 'Save Contact Settings' ); ?>
 		</form>
 
-		<hr>
-
-		<div id="rbm-escrambler-validation" class="rbm-escrambler-validation" aria-live="polite">
-			<strong>Validation</strong>
+		<h2>Validation</h2>
+		<div id="rbm-escrambler-validation" class="notice notice-info inline rbm-escrambler-validation" aria-live="polite">
 			<div id="rbm-escrambler-validation-messages"><p>Click any Copy button to validate the settings used by that shortcode.</p></div>
 		</div>
 
 		<h2>Shortcodes &amp; Preview</h2>
 		<div class="rbm-escrambler-mode-notes">
-			<p><code>mode="value"</code> = clickable configured value. <code>mode="text"</code> = clickable custom label (requires <code>text="..."</code>). <code>mode="none"</code> = plain text, no link.</p>
-			<p>An omitted <code>mode</code> or <code>mode=""</code> defaults to <code>mode="value"</code> at runtime.</p>
+			<p><sup>1</sup> <code>mode="value"</code> = clickable value.</p>
+			<p><sup>2</sup> <code>mode="text"</code> = clickable custom label.</p>
+			<p><sup>3</sup> <code>mode="none"</code> = plain text only.</p>
+			<p><sup>4</sup> A blank <code>mode=""</code> defaults to <code>mode="value"</code>.</p>
+			<p><sup>5</sup> A shortcode without any <code>mode=</code> also defaults to <code>mode="value"</code>.</p>
 		</div>
 
 		<style>
-			.rbm-escrambler-validation { max-width: 760px; margin: 0 0 24px; padding: 12px 14px; border: 1px solid #dcdcde; background: #f6f7f7; }
-			.rbm-escrambler-validation p { margin: 5px 0; }
-			.rbm-escrambler-validation-ok { font-weight: 700; }
-			.rbm-escrambler-validation-warning { font-weight: 700; color: #b32d2e; }
+			.rbm-escrambler-validation { max-width: 760px; margin: 0 0 24px; padding: 4px 12px 12px; }
+			.rbm-escrambler-validation p { margin: 0.8em 0; }
+			.rbm-escrambler-validation-ok { font-weight: 600; }
+			.rbm-escrambler-validation-warning { font-weight: 600; }
 			.rbm-escrambler-field-error { border-color: #b32d2e !important; box-shadow: 0 0 0 1px #b32d2e !important; }
-			.rbm-escrambler-mode-notes { color: #50575e; font-size: 13px; margin-bottom: 10px; }
-			.rbm-escrambler-table { max-width: 1100px; border-collapse: collapse; margin-top: 8px; margin-bottom: 28px; background: #fff; }
-			.rbm-escrambler-table th, .rbm-escrambler-table td { border: 1px solid #dcdcde; padding: 12px; vertical-align: top; text-align: left; }
+			.rbm-escrambler-mode-notes { color: #50575e; font-size: 12px; max-width: 1100px; margin: 4px 0 14px; }
+			.rbm-escrambler-mode-notes p { margin: 2px 0; }
+			.rbm-escrambler-table { max-width: 1100px; border-collapse: collapse; margin-top: 4px; margin-bottom: 28px; background: #fff; }
+			.rbm-escrambler-table th, .rbm-escrambler-table td { border: 1px solid #dcdcde; padding: 10px 12px; vertical-align: top; text-align: left; }
 			.rbm-escrambler-table th { background: #f0f0f1; }
 			.rbm-escrambler-table code { font-size: 13px; white-space: nowrap; }
 			.rbm-escrambler-table .rbm-escrambler-preview a { font-weight: 600; }
-			.rbm-escrambler-custom-text { width: 180px; }
-			.rbm-escrambler-section-label td { background: #f0f0f1; font-weight: 700; }
+			.rbm-escrambler-custom-text { width: 160px; }
+			.rbm-escrambler-section-label td { background: #f0f0f1; font-weight: 600; font-size: 13px; letter-spacing: 0.02em; }
 		</style>
 
 		<?php
@@ -259,7 +263,7 @@ function rbm_contact_scrambler_render_settings_page() {
 					</tr>
 					<tr>
 						<td><code>[<?php echo esc_html( $section['shortcode'] ); ?> mode="value"]</code></td>
-						<td>&mdash;</td>
+						<td></td>
 						<td><button type="button" class="button" data-rbm-escrambler-copy='[<?php echo esc_attr( $section['shortcode'] ); ?> mode="value"]'>Copy</button></td>
 						<td class="rbm-escrambler-preview"><a href="#" id="rbm-escrambler-<?php echo esc_attr( $key ); ?>-value-preview"><?php echo esc_html( $key === 'email' ? $email : $phone ); ?></a></td>
 						<td><?php echo esc_html( $section['value_desc'] ); ?></td>
@@ -273,7 +277,7 @@ function rbm_contact_scrambler_render_settings_page() {
 					</tr>
 					<tr>
 						<td><code>[<?php echo esc_html( $section['shortcode'] ); ?> mode="none"]</code></td>
-						<td>&mdash;</td>
+						<td></td>
 						<td><button type="button" class="button" data-rbm-escrambler-copy='[<?php echo esc_attr( $section['shortcode'] ); ?> mode="none"]'>Copy</button></td>
 						<td id="rbm-escrambler-<?php echo esc_attr( $key ); ?>-none-preview"><?php echo esc_html( $key === 'email' ? $email : $phone ); ?></td>
 						<td><?php echo esc_html( $section['none_desc'] ); ?></td>
@@ -341,6 +345,12 @@ function rbm_contact_scrambler_render_settings_page() {
 			}
 
 			document.getElementById( 'rbm-escrambler-validation-messages' ).innerHTML = messages.join( '' );
+
+			// Cosmetic only: match native WP notice colors to the same messages/rules above.
+			var box = document.getElementById( 'rbm-escrambler-validation' );
+			box.classList.remove( 'notice-info', 'notice-warning', 'notice-success' );
+			box.classList.add( hasError ? 'notice-warning' : ( messages.length && messages[0].indexOf( 'validation-ok' ) === -1 ? 'notice-warning' : 'notice-success' ) );
+
 			return ! hasError;
 		}
 
