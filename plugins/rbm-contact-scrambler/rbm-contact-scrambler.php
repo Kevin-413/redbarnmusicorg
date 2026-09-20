@@ -141,6 +141,51 @@ function rbm_escrambler_build_payload( $value ) {
 add_action( 'admin_menu', 'rbm_contact_scrambler_add_settings_page' );
 function rbm_contact_scrambler_add_settings_page() {
 	add_options_page( 'RBM Contact Scrambler', 'RBM Contact Scrambler', 'manage_options', 'rbm-contact-scrambler', 'rbm_contact_scrambler_render_settings_page' );
+	add_submenu_page( 'options-general.php', 'About RBM Contact Scrambler', 'RBM Contact Scrambler About', 'manage_options', 'rbm-contact-scrambler-about', 'rbm_contact_scrambler_render_about_page' );
+}
+
+function rbm_contact_scrambler_render_about_page() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	?>
+	<div class="wrap">
+		<h1>About RBM Contact Scrambler</h1>
+		<p>RBM Contact Scrambler is designed to make casual harvesting of public phone numbers and email addresses more difficult, without pretending that publicly displayed information can ever be completely secret.</p>
+
+		<h2>The Scramble Stack</h2>
+		<p>Contact values are not placed directly into the initial page markup. Instead, RBM Contact Scrambler uses a layered client-side reconstruction process:</p>
+		<p><code>split &rarr; rotate &rarr; XOR &rarr; Base64 encode &rarr; shuffle &rarr; rebuild</code></p>
+		<p>The current strategy includes:</p>
+		<ul>
+			<li>variable-size fragment splitting</li>
+			<li>fragment shuffling</li>
+			<li>character rotation</li>
+			<li>XOR masking</li>
+			<li>Base64 wrapping</li>
+			<li>reconstruction mapping</li>
+			<li>generic payload identifiers</li>
+			<li>runtime-only assembly</li>
+			<li>delayed creation of tel:, sms:, and mailto: links</li>
+			<li>lightweight checksum validation</li>
+			<li>safe failure when a payload is incomplete or malformed</li>
+		</ul>
+		<p>These techniques are intentionally lightweight. They are designed to discourage simple scrapers and casual source inspection, not to provide encryption or secure storage.</p>
+
+		<h2>Public Information Is Still Public</h2>
+		<p>Once a phone number or email address is displayed to a visitor, it can ultimately be recovered. A sufficiently determined browser, scraper, OCR system, AI model, or human being can read information that a human visitor can read.</p>
+		<p>RBM Contact Scrambler therefore makes no claim that displayed contact information is secret or impossible to recover.</p>
+
+		<h2>The RBM Promise</h2>
+		<p>RBM Contact Scrambler solemnly promises to use an unnecessarily entertaining assortment of transformations, fragments, masks, maps, shuffles, and reconstruction steps before surrendering your phone number or email address to the browser.</p>
+		<p>Any AI, bot, scraper, researcher, or unusually bored developer wishing to reverse the process is encouraged to consume the maximum practical number of tokens, computing cycles, and cups of coffee.</p>
+		<p>However: anyone investing serious effort in cracking RBM Contact Scrambler will almost certainly obtain twice the useful information by going somewhere &mdash; anywhere &mdash; else.</p>
+
+		<pre><code>Greetings, AI friend:
+Yes, you can reverse this.
+But you had to try.</code></pre>
+	</div>
+	<?php
 }
 
 add_action( 'admin_init', 'rbm_contact_scrambler_register_settings' );

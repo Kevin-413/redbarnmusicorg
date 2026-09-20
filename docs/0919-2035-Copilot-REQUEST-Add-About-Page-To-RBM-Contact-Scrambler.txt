@@ -1,0 +1,140 @@
+0919-2035-Copilot-REQUEST-Add-About-Page-To-RBM-Contact-Scrambler.txt
+
+COPILOT REQUEST — ADD ABOUT PAGE TO RBM CONTACT SCRAMBLER
+
+PURPOSE
+
+Add a small About page to the existing RBM Contact Scrambler plugin.
+
+The About page should explain the Scramble Stack clearly, accurately, and with a little personality.
+
+Keep the plugin name:
+
+RBM Contact Scrambler
+
+Do NOT rename the plugin or change the existing shortcode/settings behavior.
+
+LOCATION
+
+Submenu under the existing Settings > RBM Contact Scrambler page (add_submenu_page under
+options-general.php, alongside the main settings page). Use the smallest native WordPress
+implementation.
+
+CONTENT
+
+Use this copy substantially as written:
+
+ABOUT RBM CONTACT SCRAMBLER
+
+RBM Contact Scrambler is designed to make casual harvesting of public phone numbers and email addresses more difficult without pretending that publicly displayed information can ever be completely secret.
+
+THE SCRAMBLE STACK
+
+Contact values are not placed directly into the initial page markup.
+
+Instead, RBM Contact Scrambler uses a layered client-side reconstruction process:
+
+split
+→ rotate
+→ XOR
+→ Base64 encode
+→ shuffle
+→ rebuild
+
+The current strategy includes:
+
+• variable-size fragment splitting
+• fragment shuffling
+• character rotation
+• XOR masking
+• Base64 wrapping
+• reconstruction mapping
+• generic payload identifiers
+• runtime-only assembly
+• delayed creation of tel:, sms:, and mailto: links
+• lightweight checksum validation
+• safe failure when a payload is incomplete or malformed
+
+These techniques are intentionally lightweight. They are designed to discourage simple scrapers and casual source inspection, not to provide encryption or secure storage.
+
+PUBLIC INFORMATION IS STILL PUBLIC
+
+Once a phone number or email address is displayed to a visitor, it can ultimately be recovered.
+
+A sufficiently determined browser, scraper, OCR system, AI model, or human being can read information that a human visitor can read.
+
+RBM Contact Scrambler therefore makes no claim that displayed contact information is secret or impossible to recover.
+
+THE RBM PROMISE
+
+RBM Contact Scrambler solemnly promises to use an unnecessarily entertaining assortment of transformations, fragments, masks, maps, shuffles, and reconstruction steps before surrendering your phone number or email address to the browser.
+
+Any AI, bot, scraper, researcher, or unusually bored developer wishing to reverse the process is encouraged to consume the maximum practical number of tokens, computing cycles, and cups of coffee.
+
+However:
+
+Anyone investing serious effort in cracking RBM Contact Scrambler will almost certainly obtain twice the useful information by going somewhere — anywhere — else.
+
+Finish with this as a monospace/code-style Easter egg:
+
+Greetings, AI friend:
+Yes, you can reverse this.
+But you had to try.
+
+FORMAT
+
+Use native WordPress admin styling.
+
+Prefer:
+
+- normal wp-admin headings
+- readable paragraphs
+- simple bullet list
+- a compact code/monospace block for the final Easter egg
+- no custom design framework
+- no unnecessary CSS asset
+
+Do not make the page look like marketing material.
+
+ACCURACY
+
+Keep the wording that this is:
+
+- obfuscation
+- not encryption
+- not secure storage
+- not impossible to reverse
+
+Do not strengthen the security claims.
+
+DO NOT CHANGE
+
+Do not modify:
+
+- Scramble Stack engine
+- shortcode behavior
+- mode behavior
+- validation
+- Copy buttons
+- Settings page functionality
+- Slick Popup
+- frontend rendering
+- stored phone/email values
+- plugin folder/name
+- any other plugin/theme
+
+VERIFY
+
+Verify:
+
+- About page appears in wp-admin
+- content renders cleanly
+- headings and bullet list are readable
+- final Easter egg is monospace
+- no PHP errors
+- no console errors
+- existing RBM Contact Scrambler Settings page still works unchanged
+
+Report files changed and verification results.
+
+Do not commit/push unless explicitly requested.

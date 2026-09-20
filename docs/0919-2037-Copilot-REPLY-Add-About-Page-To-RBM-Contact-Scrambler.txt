@@ -1,0 +1,41 @@
+COPILOT REPLY — ADD ABOUT PAGE TO RBM CONTACT SCRAMBLER
+Date: 2026-09-19 20:37 America/New_York
+
+SUMMARY
+
+Added a small "About" admin page to the existing RBM Contact Scrambler plugin, as a sibling item
+under Settings (Settings > RBM Contact Scrambler About), alongside the existing Settings > RBM
+Contact Scrambler page. Plugin name/folder unchanged. No changes to the Scramble Stack engine,
+shortcode/mode behavior, validation, Copy logic, Slick Popup, frontend rendering, or stored
+phone/email values.
+
+FILES CHANGED
+
+- plugins/rbm-contact-scrambler/rbm-contact-scrambler.php
+  - rbm_contact_scrambler_add_settings_page() now also registers a second admin_menu entry via
+    add_submenu_page('options-general.php', ...) for the About page (slug
+    rbm-contact-scrambler-about).
+  - New function rbm_contact_scrambler_render_about_page(): plain native wp-admin markup only
+    (h1/h2 headings, paragraphs, a <ul> bullet list, and a <pre><code> block for the closing
+    Easter egg). No new CSS/JS asset. Copy used substantially as specified in the request,
+    including the "obfuscation, not encryption/secure storage, still recoverable" wording and the
+    "Greetings, AI friend..." Easter egg.
+
+VERIFICATION PERFORMED
+
+1. `php -l` clean; no errors reported for the file.
+2. Live in wp-admin: "RBM Contact Scrambler About" appears as its own item under Settings, next
+   to "RBM Contact Scrambler". Page renders with the intended headings, paragraphs, an actual
+   <ul>/<li> bullet list (11 items), and the closing Easter egg as a <pre><code> block (correctly
+   recognized as a code element, monospace by default WP admin styles - no custom CSS needed).
+3. Console check (Playwright, page reload): no console errors on the About page.
+4. Re-verified the existing Settings > RBM Contact Scrambler page still works unchanged: Copy
+   button on [rbm_phone mode="value"] validated and copied correctly, notice box still flips to
+   "No errors detected." (native WP success styling) - confirming this addition didn't disturb the
+   prior formatting/validation work.
+5. Re-ran the standing wp eval-file shortcode/payload check: all 9 shortcode forms, mode
+   defaults/fail-safe behavior, and blank-settings handling are unchanged.
+
+NOT DONE
+
+- No commit/push performed, per the request ("Do not commit/push unless explicitly requested").
