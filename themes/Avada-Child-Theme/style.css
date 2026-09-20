@@ -19,3 +19,24 @@ Text Domain:  Avada
 	text-align: center;
 }
 
+/*
+ * Desktop header centering (Header Layout Section / fusion-tb-header).
+ * Avada's saved header content left-aligns the banner column and the
+ * top-level menu row (--awb-justify-content default: flex-start); this
+ * overrides both to center, scoped to the header only and only above the
+ * theme's own desktop-menu breakpoint (data-breakpoint="1024" on the
+ * .awb-menu element) so mobile header/menu behavior is untouched.
+ */
+@media (min-width: 1025px) {
+	.fusion-tb-header .fusion-builder-row-1 .fusion-column-wrapper {
+		justify-content: center;
+	}
+	.fusion-tb-header .fusion-builder-row-1 .fusion-image-element {
+		text-align: center !important;
+	}
+	.fusion-tb-header .awb-menu {
+		--awb-justify-content: center;
+	}
+}
+
+
