@@ -5,6 +5,11 @@ function theme_enqueue_styles() {
 }
 add_action( 'wp_enqueue_scripts', 'theme_enqueue_styles', 20 );
 
+// Phone/text click-to-call links are now handled by the standalone rbm-contact-scrambler plugin
+// (docs/0918-1649-Copilot-REQUEST-Build-Standalone-Contact-Scrambler-Plugin.txt), which superseded
+// this child theme's rbm_phone_number option + js/rbm-phone-links.js + .rbm-phone-link/.rbm-text-
+// link placeholders. See that plugin for [rbm_phone]/[rbm_text]/[rbm_email].
+
 function avada_lang_setup() {
 	$lang = get_stylesheet_directory() . '/languages';
 	load_child_theme_textdomain( 'Avada', $lang );
@@ -107,3 +112,94 @@ add_action( 'wp_footer', 'redbarn_mobile_bottom_action_bar', 20 );
 function rbm_test_site_notice() {
 	echo '<div class="rbm-test-site-notice"><strong>We’re testing our new website!</strong> If you notice anything confusing or broken, please use the <strong>Suggestions</strong> button at the bottom and let us know. Thank you!</div>';
 }
+
+/**
+ * Forminator Lessons Inquiry — Adult Student Name Sync
+ *
+ * PURPOSE
+ * When "An Adult Student" is selected in Forminator field `radio-1`,
+ * keep Student Name (`name-1`) synchronized with Parent / Guardian Name
+ * (`name-2`). For parent/minor submissions, the two name fields remain
+ * independent.
+ *
+ * CURRENT FORMINATOR FIELD MAP
+ * - `radio-1` = "I am..." choice
+ * - `name-1`  = Student Name
+ * - `name-2`  = Parent / Guardian Name
+ *
+ * FUTURE DEVELOPER NOTES
+ * 1. If the Forminator form is rebuilt, duplicated, or its field IDs change,
+ *    update the three selectors below to match the new Forminator field names.
+ * 2. The Adult option is detected first by checking whether the selected radio
+ *    value contains the word "adult". A label-text fallback is included in case
+ *    Forminator stores a different internal value.
+ * 3. Keep this behavior limited to Adult Student submissions. Do not copy the
+ *    Parent / Guardian Name into Student Name for under-18 students.
+ * 4. The script dispatches both `input` and `change` events after copying the
+ *    value so Forminator's own validation/conditional logic can see the update.
+ * 5. If this logic is later moved into a dedicated JS file or plugin, remove
+ *    this footer-injected version to avoid running the sync twice.
+ * 6. After any change, test both workflows:
+ *      - Adult Student: name-2 should populate and stay synced to name-1.
+ *      - Parent of Student: name-1 and name-2 should remain independent.
+ *
+ * This is intentionally a small child-theme helper; it does not modify
+ * Forminator plugin files.
+ */
+function redbarn_forminator_adult_student_name_sync() {
+	?>
+	<script>
+	( function () {
+		function isAdultStudentSelected() {
+			var selected = document.querySelector( 'input[name="radio-1"]:checked' );
+
+			if ( ! selected ) {
+				return false;
+			}
+
+			if ( String( selected.value ).toLowerCase().indexOf( 'adult' ) !== -1 ) {
+				return true;
+			}
+
+			var label = selected.closest( 'label' );
+			return !! ( label && label.textContent.toLowerCase().indexOf( 'adult student' ) !== -1 );
+		}
+
+		function syncAdultStudentName() {
+			if ( ! isAdultStudentSelected() ) {
+				return;
+			}
+
+			var parentName  = document.querySelector( 'input[name="name-2"]' );
+			var studentName = document.querySelector( 'input[name="name-1"]' );
+
+			if ( ! parentName || ! studentName ) {
+				return;
+			}
+
+			if ( studentName.value === parentName.value ) {
+				return;
+			}
+
+			studentName.value = parentName.value;
+			studentName.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+			studentName.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}
+
+		document.addEventListener( 'change', function ( event ) {
+			if ( event.target.matches( 'input[name="radio-1"]' ) ) {
+				syncAdultStudentName();
+			}
+		} );
+
+		document.addEventListener( 'input', function ( event ) {
+			if ( event.target.matches( 'input[name="name-2"]' ) ) {
+				syncAdultStudentName();
+			}
+		} );
+	} )();
+	</script>
+	<?php
+}
+add_action( 'wp_footer', 'redbarn_forminator_adult_student_name_sync', 30 );
+
