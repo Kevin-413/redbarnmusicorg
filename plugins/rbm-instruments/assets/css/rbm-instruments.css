@@ -1,0 +1,172 @@
+/* Front-end styles for the [msch_lessons] Instruments page and [rbm_instrument_category] shortcode.
+ * Extracted from inline <style> blocks in includes/rbm-lessons.php (docs/0917-1053-PLAN-Extract-
+ * Inline-JS-CSS-From-RBM-Plugins.txt). Selectors/rules unchanged from their inline originals.
+ */
+.msch-lessons-actions-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:stretch;
+    gap:16px;
+    margin:0 0 1.5em;
+}
+.msch-lessons-actions-row .msch-lesson-filter{
+    margin:0;
+}
+.msch-lessons-actions-row .msch-lesson-filter-select{
+    width:100%;
+    height:50px;
+    box-sizing:border-box;
+    text-align:center;
+}
+.msch-lessons-signup-button{
+    height:50px;
+    margin:0;
+    box-sizing:border-box;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    font-weight:600;
+    font-family:inherit;
+    line-height:1.2;
+    padding:12px 24px;
+    border-radius:999px;
+    text-decoration:none;
+}
+@media (max-width:600px){
+    .msch-lessons-actions-row{
+        grid-template-columns:1fr;
+    }
+}
+/* Choose Instrument pill Show/Hide (docs/0913-1010-...): driven by a modifier class on .msch-lessons
+ * instead of an inline PHP-interpolated rule, so this file stays fully static. */
+.msch-lessons--pill-hide .msch-lesson-filter{display:none;margin:0 0 1.5em;}
+.msch-lessons--pill-show .msch-lesson-filter{display:block;margin:0 0 1.5em;}
+.msch-lesson-filter-select{
+    font-size:18px;
+    font-weight:600;
+    font-family:inherit;
+    line-height:1.2;
+    padding:12px 24px;
+    border:none;
+    border-radius:999px;
+    background:#6cbf3f;
+    color:#ffffff;
+    cursor:pointer;
+    box-shadow:none;
+    max-width:100%;
+    transition:background-color 0.15s ease;
+}
+.msch-lesson-filter-select:hover,
+.msch-lesson-filter-select:focus{
+    background:#5aa932;
+    outline:none;
+}
+.msch-lesson-category-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:4px;
+    margin:0 0 1.5em;
+}
+.msch-lesson-tiles-wrap[hidden]{
+    display:none;
+}
+.msch-lesson-category-grid[hidden]{
+    display:none;
+}
+.msch-lesson-direct-display-grid[hidden]{
+    display:none;
+}
+.msch-lesson-tiles-header{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    margin:0 0 1em;
+    text-align:center;
+}
+.msch-lesson-tiles-category-name{
+    font-size:20px;
+    font-weight:700;
+}
+.msch-lesson-tiles-nav{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+.msch-lesson-tiles-nav button{
+    font-size:14px;
+    font-weight:600;
+    font-family:inherit;
+    padding:8px 16px;
+    border:1px solid #6cbf3f;
+    border-radius:999px;
+    background:#fff;
+    color:#5aa932;
+    cursor:pointer;
+}
+.msch-lesson-tiles-nav button:hover,
+.msch-lesson-tiles-nav button:focus-visible{
+    background:#eef7e6;
+    outline:none;
+}
+.msch-lesson-tiles-nav button:disabled{
+    opacity:0.45;
+    cursor:not-allowed;
+}
+.msch-lesson-tiles-category-name:empty{
+    display:none;
+}
+
+/* Category tile (icon/name/hover/active/placeholder) — shared by the full Instruments-page category
+ * grid and the standalone [rbm_instrument_category] shortcode. */
+.msch-lesson-category-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:6px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#fff;
+    cursor:pointer;
+    font:inherit;
+    color:inherit;
+    text-align:center;
+}
+.msch-lesson-category-card:hover,
+.msch-lesson-category-card:focus-visible{
+    border-color:#6cbf3f;
+    outline:none;
+}
+.msch-lesson-category-card.is-active{
+    background:#eef7e6;
+    border-color:#6cbf3f;
+}
+.msch-lesson-category-card.is-active .msch-lesson-category-name{
+    font-weight:700;
+    text-decoration:underline;
+}
+.msch-lesson-category-icon img{
+    max-width:220px;
+    height:auto;
+    display:block;
+}
+.msch-lesson-category-icon--placeholder{
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background:#f0f0f0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:56px;
+    font-weight:700;
+    color:#888;
+}
+.msch-lesson-category-name{
+    font-size:20px;
+    font-weight:600;
+}

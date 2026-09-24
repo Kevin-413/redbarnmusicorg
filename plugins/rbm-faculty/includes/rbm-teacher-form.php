@@ -70,6 +70,16 @@ function rbm_render_teacher_form_page() {
     $short_bio   = $post ? $post->post_excerpt : '';
     $long_bio    = $post ? $post->post_content : '';
     $website     = $teacher_id ? get_post_meta($teacher_id, '_msch_website', true) : '';
+    // docs/0919-1126-Copilot-REQUEST-Add-Global-And-Custom-Sign-Up-URL-Modes.txt: safe-upgrade
+    // rule for a pre-existing record with no saved mode yet — a non-empty custom Sign Up URL is
+    // treated as Custom (there is no pre-existing per-Teacher URL today, so this only matters going
+    // forward); otherwise Global. A brand-new record has no URL, so it defaults to Global.
+    $signup_url  = $teacher_id ? get_post_meta($teacher_id, '_msch_teacher_signup_url', true) : '';
+    $signup_mode = $teacher_id ? get_post_meta($teacher_id, '_msch_teacher_signup_mode', true) : '';
+    if ($signup_mode !== 'global' && $signup_mode !== 'custom') {
+        $signup_mode = ($signup_url !== '') ? 'custom' : 'global';
+    }
+    $global_signup_url = rbm_faculty_global_signup_url();
     $memo        = $teacher_id ? get_post_meta($teacher_id, '_msch_admin_memo', true) : '';
     $email       = $teacher_id ? get_post_meta($teacher_id, '_msch_email', true) : '';
     $phone       = $teacher_id ? get_post_meta($teacher_id, '_msch_phone', true) : '';
@@ -94,7 +104,10 @@ function rbm_render_teacher_form_page() {
         <?php if (isset($_GET['saved'])) : ?>
             <div class="updated"><p>Teacher saved.</p></div>
         <?php endif; ?>
-        <p><button type="submit" form="rbm-teacher-form" class="button button-primary">Save Teacher</button></p>
+        <?php if ($teacher_id) : ?>
+            <?php rbm_faculty_render_copy_shortcode_field('Teacher Shortcode', '[rbm_teacher id="' . $teacher_id . '"]', 'rbm-teacher-shortcode-field'); ?>
+        <?php endif; ?>
+        <p><button type="submit" form="rbm-teacher-form" class="button button-primary">Save Teacher</button> <a href="<?php echo esc_url(admin_url('edit.php?post_type=msch_teacher')); ?>" class="button">Cancel</a></p>
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="rbm-teacher-form" style="max-width:640px;">
             <input type="hidden" name="action" value="rbm_save_teacher_form">
             <input type="hidden" name="teacher_id" value="<?php echo esc_attr($teacher_id); ?>">
@@ -181,6 +194,25 @@ function rbm_render_teacher_form_page() {
                 <input type="url" id="rbm_msch_website" name="rbm_msch_website" class="widefat" value="<?php echo esc_attr($website); ?>" placeholder="https://">
             </p>
 
+            <p>
+                <strong>Sign Up Link</strong><br>
+                <label><input type="radio" name="rbm_teacher_signup_mode" value="global" <?php checked($signup_mode, 'global'); ?>> Use global URL</label><br>
+                <label><input type="radio" name="rbm_teacher_signup_mode" value="custom" <?php checked($signup_mode, 'custom'); ?>> Use custom URL</label>
+            </p>
+            <p>
+                <strong>Global URL:</strong>
+                <?php if ($global_signup_url !== '') : ?>
+                    <a href="<?php echo esc_url($global_signup_url); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($global_signup_url); ?></a>
+                <?php else : ?>
+                    <em>Not set — configure on the Instruments Page Display settings page.</em>
+                <?php endif; ?>
+            </p>
+            <p>
+                <label for="rbm_msch_teacher_signup_url"><strong>Custom URL</strong></label><br>
+                <input type="url" id="rbm_msch_teacher_signup_url" name="rbm_msch_teacher_signup_url" class="widefat" value="<?php echo esc_attr($signup_url); ?>" placeholder="https://">
+                <span class="description">Only used when "Use custom URL" is selected above. Switching to Global does not erase this saved value.</span>
+            </p>
+
             <div>
                 <p><strong>Admin Info</strong></p>
                 <p>
@@ -201,7 +233,7 @@ function rbm_render_teacher_form_page() {
                 </p>
             </div>
 
-            <p><?php submit_button('Save Teacher', 'primary', 'submit', false); ?></p>
+            <p><?php submit_button('Save Teacher', 'primary', 'submit', false); ?> <a href="<?php echo esc_url(admin_url('edit.php?post_type=msch_teacher')); ?>" class="button">Cancel</a></p>
         </form>
     </div>
     <?php
@@ -254,4 +286,20 @@ function rbm_save_teacher_form_submit() {
 
     wp_safe_redirect(admin_url('edit.php?post_type=msch_teacher&page=rbm-teacher-form&teacher_id=' . (int) $teacher_id . '&saved=1'));
     exit;
+}
+
+// Read-only Copy Shortcode control (docs/0917-1034-Copilot-REQUEST-Implement-Reusable-RBM-
+// Shortcodes-And-Copy-Buttons.txt) — same copy-to-clipboard pattern as the existing Instruments ->
+// Settings "Copy List" control. The clipboard JS lives in assets/js/rbm-faculty-admin.js, enqueued
+// by rbm_teacher_media_picker_assets() in rbm-teachers.php (docs/0917-1053-PLAN-Extract-Inline-
+// JS-CSS-From-RBM-Plugins.txt).
+function rbm_faculty_render_copy_shortcode_field($label, $shortcode, $field_id) {
+    ?>
+    <p>
+        <strong><?php echo esc_html($label); ?></strong><br>
+        <input type="text" id="<?php echo esc_attr($field_id); ?>" class="widefat" readonly onclick="this.select();" value="<?php echo esc_attr($shortcode); ?>" style="max-width:360px;font-family:monospace;">
+        <button type="button" class="button rbm-copy-shortcode" data-copy-target="<?php echo esc_attr($field_id); ?>">Copy Shortcode</button>
+        <span class="rbm-copy-shortcode-status" style="margin-left:8px;"></span>
+    </p>
+    <?php
 }

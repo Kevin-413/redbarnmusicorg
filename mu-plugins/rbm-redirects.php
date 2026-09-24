@@ -4,6 +4,11 @@ add_action("template_redirect", function() {
         wp_redirect(home_url("/lessons-inquiry/"), 301);
         exit;
     }
+    // Legacy Contact Form 7 student registration page, retired (docs/0922).
+    if (isset($_SERVER["REQUEST_URI"]) && strpos($_SERVER["REQUEST_URI"], "/reg/") === 0) {
+        wp_redirect(home_url("/lessons-inquiry/"), 301);
+        exit;
+    }
     // Legacy instrument-group page retirement (docs/0911-0914): Piano.
     if (isset($_SERVER["REQUEST_URI"]) && strpos($_SERVER["REQUEST_URI"], "/piano-at-the-red-barn/") === 0) {
         wp_redirect(home_url("/lessons/?category=piano"), 301);

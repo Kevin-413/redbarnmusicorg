@@ -8,14 +8,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Enabled by default on local/development/staging; disabled on production unless a wp-config.php
-// constant explicitly overrides it in either direction (per PLAN's "explicit override required").
+// Public testing period has wrapped up: Suggestions button, activity logging, and session
+// cookies are all off site-wide. A wp-config.php constant can still force it back on
+// (e.g. define('RBM_TEST_MONITOR_ENABLED', true);) if testing resumes.
 function rbm_test_monitor_is_enabled() {
     if (defined('RBM_TEST_MONITOR_ENABLED')) {
         return (bool) RBM_TEST_MONITOR_ENABLED;
     }
-    $env = function_exists('wp_get_environment_type') ? wp_get_environment_type() : 'production';
-    return in_array($env, ['local', 'development', 'staging'], true);
+    return false;
 }
 
 function rbm_test_monitor_activity_table() {

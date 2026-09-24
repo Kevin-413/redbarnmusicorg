@@ -46,6 +46,47 @@ body.single-msch_teacher .single-navigation a[rel="next"]::after {
     outline:none;
 }
 
+/* Choose Instrument + Sign Up on one row (docs/0919-...-Move-Sign-Up-Into-Choose-Instrument-Row):
+   Choose Instrument left, Sign Up right; stacks on narrow widths where both can't fit safely. */
+.msch-teacher-controls-row{
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin:0 0 1.5em;
+}
+.msch-teacher-controls-row .msch-teacher-filter,
+.msch-teacher-controls-row .msch-teacher-signup-cta{
+    margin:0;
+}
+.msch-teacher-controls-row .msch-teacher-signup-cta{
+    margin-left:auto;
+}
+@media (max-width:480px){
+    .msch-teacher-controls-row{
+        flex-wrap:wrap;
+    }
+    .msch-teacher-controls-row .msch-teacher-filter,
+    .msch-teacher-controls-row .msch-teacher-signup-cta{
+        flex:1 1 100%;
+    }
+    .msch-teacher-controls-row .msch-teacher-signup-cta{
+        margin-left:0;
+    }
+    .msch-teacher-controls-row .msch-teacher-signup-cta .thesis-cta-button{
+        display:block;
+        width:100%;
+        min-width:0;
+        text-align:center;
+        box-sizing:border-box;
+    }
+    .msch-teacher-controls-row .msch-teacher-filter-select{
+        width:100%;
+        box-sizing:border-box;
+    }
+}
+
 /* docs/0918-1532-...: filtered Faculty results anchor, so the sticky Avada header (measured
    63px) does not cover the heading when a visitor lands via #teachers. +12px over the initial
    80px so the heading text no longer clips under the header. */

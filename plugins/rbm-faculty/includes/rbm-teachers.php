@@ -84,12 +84,99 @@ function rbm_msch_teacher_maybe_flush_rewrite_rules() {
 // Prominent-Sign-Up-Placement-And-Flow.txt): reuses the existing _msch_lesson_signup_url meta,
 // already set to the same value on every published Instrument, instead of hardcoding another
 // '/lessons-inquiry/' string in this plugin. Falls back to the Lessons Inquiry page itself if no
-// Instrument/meta value is found. No instrument/teacher context is passed yet (later phase).
-function rbm_msch_signup_url() {
-    static $url = null;
-    if ($url !== null) {
-        return $url;
+// Instrument/meta value is found.
+//
+// docs/0919-0154-Copilot-REQUEST-Add-Context-Aware-Sign-Up-Prefill.txt (corrected in
+// docs/0919-0212-...-And-0919-0224-...): optionally carries the visitor's Instrument/Teacher
+// context as a small, stable URL query-string contract (?instrument=<msch_lesson slug>&
+// teacher=<msch_teacher slug>) so /lessons-inquiry/ can prefill the current Forminator form
+// (id 20709, "RBM Lesson Inquiry") existing "Preferred Instrument" (select-1) / "Preferred
+// Teacher" (textarea-2) fields. This is the Forminator inquiry-only "Preferred Instrument"
+// field — separate from, and never written back to, any registered/teacher-assignment
+// Instrument data. instrument_slug is only ever passed for a specific Instrument (never a
+// broad Category), so Category-only visits correctly leave Preferred Instrument blank.
+function rbm_msch_signup_url($instrument_slug = '', $teacher_slug = '') {
+    // docs/0919-1126-Copilot-REQUEST-Add-Global-And-Custom-Sign-Up-URL-Modes.txt: the base URL now
+    // depends on which specific Teacher/Instrument record (if any) this call is for, so it can no
+    // longer be cached once per request the way the old single shared lookup was.
+    $base_url = rbm_msch_signup_resolve_base_url($instrument_slug, $teacher_slug);
+    $args = [];
+    if ($instrument_slug !== '') {
+        $args['instrument'] = sanitize_title($instrument_slug);
     }
+    if ($teacher_slug !== '') {
+        $args['teacher'] = sanitize_title($teacher_slug);
+    }
+    return empty($args) ? $base_url : add_query_arg($args, $base_url);
+}
+
+// docs/0919-1126-Copilot-REQUEST-Add-Global-And-Custom-Sign-Up-URL-Modes.txt: resolves the base
+// URL from the specific Teacher's, then the specific Instrument's, own explicit Global/Custom mode
+// before falling back to the prior "any published Instrument's Sign Up URL" safety net below, so a
+// missing/empty result never leaves the Sign Up button truly blank.
+function rbm_msch_signup_resolve_base_url($instrument_slug = '', $teacher_slug = '') {
+    if ($teacher_slug !== '') {
+        $teachers = get_posts([
+            'post_type'      => 'msch_teacher',
+            'name'           => sanitize_title($teacher_slug),
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+        ]);
+        if (!empty($teachers)) {
+            $url = rbm_faculty_teacher_signup_url($teachers[0]->ID);
+            if ($url !== '') {
+                return $url;
+            }
+        }
+    }
+    if ($instrument_slug !== '') {
+        $lessons = get_posts([
+            'post_type'      => 'msch_lesson',
+            'name'           => sanitize_title($instrument_slug),
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+        ]);
+        // function_exists() guard: rbm-instruments owns this resolver and must stay independently
+        // activatable (no fatal call if that plugin is deactivated).
+        if (!empty($lessons) && function_exists('rbm_msch_lesson_resolve_signup_url')) {
+            $url = rbm_msch_lesson_resolve_signup_url($lessons[0]->ID);
+            if ($url !== '') {
+                return $url;
+            }
+        }
+    }
+    $global_url = rbm_faculty_global_signup_url();
+    if ($global_url !== '') {
+        return $global_url;
+    }
+    return rbm_msch_signup_base_url();
+}
+
+// Reads the same shared option rbm-instruments' Settings page writes (get_option() directly, no
+// cross-plugin function call, so this plugin works standalone if rbm-instruments is deactivated).
+function rbm_faculty_global_signup_url() {
+    return get_option('rbm_msch_global_signup_url', '');
+}
+
+// Resolves a single Teacher's Sign Up URL per its explicit Global/Custom mode
+// (_msch_teacher_signup_mode). Safe-upgrade rule for a pre-existing record with no saved mode yet:
+// a non-empty existing _msch_teacher_signup_url is treated as Custom; otherwise Global.
+function rbm_faculty_teacher_signup_url($teacher_id) {
+    $custom = get_post_meta($teacher_id, '_msch_teacher_signup_url', true);
+    $mode = get_post_meta($teacher_id, '_msch_teacher_signup_mode', true);
+    if ($mode !== 'global' && $mode !== 'custom') {
+        $mode = ($custom !== '') ? 'custom' : 'global';
+    }
+    if ($mode === 'custom' && $custom !== '') {
+        return $custom;
+    }
+    return rbm_faculty_global_signup_url();
+}
+
+// Legacy safety net (docs/0919-0141-Copilot-REQUEST-Implement-Prominent-Sign-Up-Placement-And-
+// Flow.txt): only reached now when neither a specific Teacher/Instrument record nor the Global
+// Sign Up URL setting resolves to a usable URL, so a Sign Up button is never left truly blank.
+function rbm_msch_signup_base_url() {
     $lessons = get_posts([
         'post_type'      => 'msch_lesson',
         'post_status'    => 'publish',
@@ -98,18 +185,53 @@ function rbm_msch_signup_url() {
     foreach ($lessons as $lesson) {
         $signup_url = get_post_meta($lesson->ID, '_msch_lesson_signup_url', true);
         if (!empty($signup_url)) {
-            $url = $signup_url;
-            return $url;
+            return $signup_url;
         }
     }
     $page = get_posts(['post_type' => 'page', 'name' => 'lessons-inquiry', 'posts_per_page' => 1]);
-    $url = !empty($page) ? get_permalink($page[0]) : home_url('/lessons-inquiry/');
-    return $url;
+    return !empty($page) ? get_permalink($page[0]) : home_url('/lessons-inquiry/');
+}
+
+// docs/0919-0154-Copilot-REQUEST-Add-Context-Aware-Sign-Up-Prefill.txt (corrected in
+// docs/0919-0212-.../0919-0224-...): translates ?teacher=<slug> into its canonical Teacher
+// display name on the Lesson Inquiry page only, filling the current Forminator form's own
+// existing "Preferred Teacher" field (textarea-2, form id 20709). Forminator's own native
+// Prefill already handles "Preferred Instrument" (select-1) directly, since that field's option
+// values are already the same canonical msch_lesson slugs — no translation step is needed there.
+// Invalid/unknown/unpublished slugs are silently ignored (field is simply left as the visitor
+// can fill in themselves).
+add_action('wp_footer', 'rbm_msch_signup_prefill_teacher_name');
+function rbm_msch_signup_prefill_teacher_name() {
+    if (!is_page('lessons-inquiry') || empty($_GET['teacher'])) {
+        return;
+    }
+    $teacher_slug = sanitize_title(wp_unslash($_GET['teacher']));
+    $matched = get_posts([
+        'post_type'      => 'msch_teacher',
+        'name'           => $teacher_slug,
+        'post_status'    => 'publish',
+        'posts_per_page' => 1,
+    ]);
+    if (empty($matched)) {
+        return;
+    }
+    $teacher_name = get_the_title($matched[0]);
+    ?>
+    <script>
+    (function () {
+        var field = document.querySelector('textarea[name="textarea-2"]');
+        if (field && !field.value) {
+            field.value = <?php echo wp_json_encode($teacher_name); ?>;
+        }
+    })();
+    </script>
+    <?php
 }
 
 // --- Public single-Teacher profile page (canonical /teacher/<slug>/) ---
 // Reuses Avada's own single.php (its fallback template for post types with no dedicated template)
 // by filtering the_content(), so no new template file or template_include hook is needed.
+
 // Renders photo + instruments + long bio + optional website via existing helpers/data only.
 
 // Appends the optional "Teaches" meta to the profile page title only (post_title itself is untouched).
@@ -131,6 +253,14 @@ function rbm_msch_teacher_post_nav_arrow($output) {
     if (!is_singular('msch_teacher') || $output === '') {
         return $output;
     }
+    // Interior-page landing anchor: these are also links to other Teacher profile pages.
+    $output = preg_replace_callback('#href="([^"]+)"#', function ($matches) {
+        $href = $matches[1];
+        if (function_exists('rbm_page_title_anchor_should_append') && rbm_page_title_anchor_should_append($href)) {
+            $href .= '#page-title';
+        }
+        return 'href="' . $href . '"';
+    }, $output);
     if (strpos($output, 'rel="prev"') !== false) {
         return str_replace('>Previous<', '>&lt; Previous<', $output);
     }
@@ -150,10 +280,27 @@ function rbm_msch_teacher_single_content($content) {
     $bio_html = ($long_bio !== '') ? wpautop(wp_kses_post($long_bio)) : '';
     $website = get_post_meta($teacher_id, '_msch_website', true);
     rbm_faculty_enqueue_frontend_style();
+    // docs/0919-0916-...: preserves an incoming ?instrument= (carried from an Instrument-filtered
+    // Teacher card) into this profile's own Sign Up link, but only if it's an exact published
+    // Instrument slug - never inferred from the Teacher's own assigned Instruments/Categories.
+    $instrument_context = '';
+    if (!empty($_GET['instrument'])) {
+        $instrument_slug = sanitize_title(wp_unslash($_GET['instrument']));
+        $valid_instrument = get_posts([
+            'post_type'      => 'msch_lesson',
+            'name'           => $instrument_slug,
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+        ]);
+        if (!empty($valid_instrument)) {
+            $instrument_context = $instrument_slug;
+        }
+    }
+    $teacher_signup_url = rbm_msch_signup_url($instrument_context, get_post($teacher_id)->post_name);
 
     ob_start();
     ?>
-    <p class="msch-teacher-signup-top"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
+    <p class="msch-teacher-signup-top"><a class="thesis-cta-button" href="<?php echo esc_url($teacher_signup_url); ?>">Sign Up</a></p>
     <div class="thesis-teacher-row">
         <div class="thesis-teacher-photo">
             <?php echo rbm_msch_render_portrait_photo($teacher_id, 'medium'); ?>
@@ -171,7 +318,7 @@ function rbm_msch_teacher_single_content($content) {
             <?php endif; ?>
         </div>
     </div>
-    <p class="msch-teacher-signup-bottom"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
+    <p class="msch-teacher-signup-bottom"><a class="thesis-cta-button" href="<?php echo esc_url($teacher_signup_url); ?>">Sign Up</a></p>
     <?php
     return ob_get_clean();
 }
@@ -300,6 +447,16 @@ function rbm_save_teacher_meta($post_id) {
 
     if (isset($_POST['rbm_msch_website'])) {
         update_post_meta($post_id, '_msch_website', esc_url_raw(wp_unslash($_POST['rbm_msch_website'])));
+    }
+    // docs/0919-1126-Copilot-REQUEST-Add-Global-And-Custom-Sign-Up-URL-Modes.txt: the custom URL
+    // field is always saved as-is (never cleared based on mode), so switching back to Custom later
+    // recovers whatever was last saved here.
+    if (isset($_POST['rbm_teacher_signup_mode'])) {
+        $signup_mode = ($_POST['rbm_teacher_signup_mode'] === 'custom') ? 'custom' : 'global';
+        update_post_meta($post_id, '_msch_teacher_signup_mode', $signup_mode);
+    }
+    if (isset($_POST['rbm_msch_teacher_signup_url'])) {
+        update_post_meta($post_id, '_msch_teacher_signup_url', esc_url_raw(wp_unslash($_POST['rbm_msch_teacher_signup_url'])));
     }
     if (isset($_POST['rbm_msch_card_photo_id'])) {
         $card_photo_id = (int) $_POST['rbm_msch_card_photo_id'];
@@ -989,6 +1146,9 @@ function rbm_msch_teachers_shortcode($atts) {
     // Category's name.
     $rbm_is_filtered = ($rbm_filter_instrument_id || $rbm_filter_category_slug !== '');
     $rbm_teachers_heading = '';
+    // Preserves the visitor's original specific-Instrument choice for Sign Up context even when
+    // teachers came from the Category fallback (docs/0919-0154-...) - never the fallback Category.
+    $rbm_filter_instrument_slug = $rbm_filter_instrument_id ? get_post($rbm_filter_instrument_id)->post_name : '';
     if ($rbm_filter_instrument_id) {
         $rbm_teachers_heading = get_the_title($rbm_filter_instrument_id) . ' Teachers';
     } elseif ($rbm_filter_category_slug !== '') {
@@ -1005,21 +1165,23 @@ function rbm_msch_teachers_shortcode($atts) {
         <h2 class="msch-teacher-results-heading"><?php echo esc_html($rbm_teachers_heading); ?></h2>
     <?php endif; ?>
     <?php if ($rbm_is_filtered) : ?>
-        <p class="msch-teacher-signup-cta"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
-    <?php endif; ?>
-    <?php if (!$rbm_is_filtered && !empty($filter_terms)) : ?>
-        <div class="msch-teacher-filter">
-            <select id="<?php echo esc_attr($filter_id); ?>" class="msch-teacher-filter-select" aria-label="Filter Faculty by instrument">
-                <option value="" disabled selected>Choose Instrument</option>
-                <option value="all">All Faculty</option>
-                <?php foreach ($filter_terms as $slug => $name) : ?>
-                    <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($name); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+        <p class="msch-teacher-signup-cta"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url($rbm_filter_instrument_slug)); ?>">Sign Up</a></p>
     <?php endif; ?>
     <?php if (!$rbm_is_filtered) : ?>
-        <p class="msch-teacher-signup-cta"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
+        <div class="msch-teacher-controls-row">
+        <?php if (!empty($filter_terms)) : ?>
+            <div class="msch-teacher-filter">
+                <select id="<?php echo esc_attr($filter_id); ?>" class="msch-teacher-filter-select" aria-label="Filter Faculty by instrument">
+                    <option value="" disabled selected>Choose Instrument</option>
+                    <option value="all">All Faculty</option>
+                    <?php foreach ($filter_terms as $slug => $name) : ?>
+                        <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($name); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        <?php endif; ?>
+            <p class="msch-teacher-signup-cta"><a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a></p>
+        </div>
     <?php endif; ?>
     <?php if ($rbm_is_filtered) : ?>
         <?php if ($rbm_fallback_note !== '') : ?>
@@ -1029,7 +1191,7 @@ function rbm_msch_teachers_shortcode($atts) {
     <?php endif; ?>
     <div class="thesis-lesson-card-grid">
         <?php foreach ($teachers as $teacher) : ?>
-            <?php echo rbm_msch_teacher_card_html($teacher); ?>
+            <?php echo rbm_msch_teacher_card_html($teacher, $rbm_filter_instrument_slug); ?>
         <?php endforeach; ?>
     </div>
     </div><!-- #teachers -->
@@ -1039,14 +1201,29 @@ function rbm_msch_teachers_shortcode($atts) {
 
 // Single Teacher-card renderer, shared by the [msch_teachers] compact grid above and the
 // standalone [rbm_teacher] shortcode below (docs/0917-1034-Copilot-REQUEST-Implement-Reusable-
-// RBM-Shortcodes-And-Copy-Buttons.txt) — exactly one Teacher-card template.
-function rbm_msch_teacher_card_html($teacher) {
+// RBM-Shortcodes-And-Copy-Buttons.txt) — exactly one Teacher-card template. $instrument_slug
+// (docs/0919-0154-...) is only ever the current Faculty-filtered Instrument context, if any -
+// never invented when the card is used standalone (e.g. [rbm_teacher]).
+function rbm_msch_teacher_card_html($teacher, $instrument_slug = '') {
     $instruments = get_the_terms($teacher->ID, 'msch_instrument');
     $instrument_slugs = (is_array($instruments) && !is_wp_error($instruments))
         ? wp_list_pluck($instruments, 'slug')
         : [];
     $teaches = trim((string) get_post_meta($teacher->ID, '_msch_teaches', true));
     $profile_url = get_permalink($teacher->ID);
+    // docs/0919-0916-...: carries the same already-validated Instrument context one hop further,
+    // so it survives into the Teacher profile page's own Sign Up link (see
+    // rbm_msch_teacher_single_content()) instead of being lost on click-through.
+    if ($instrument_slug !== '') {
+        $profile_url = add_query_arg('instrument', sanitize_title($instrument_slug), $profile_url);
+    }
+    // Interior-page landing anchor (mu-plugins/rbm-interior-page-title-anchor.php): reuses the
+    // same shared safety check as the site's nav menu/footer links, appended after the query
+    // string above so it stays a URL fragment, not a query argument.
+    if (function_exists('rbm_page_title_anchor_should_append') && rbm_page_title_anchor_should_append($profile_url)) {
+        $profile_url .= '#page-title';
+    }
+    $card_signup_url = rbm_msch_signup_url($instrument_slug, $teacher->post_name);
     ob_start();
     ?>
     <div class="thesis-lesson-card thesis-teacher-card" data-msch-instruments="<?php echo esc_attr(implode(',', $instrument_slugs)); ?>">
@@ -1059,7 +1236,7 @@ function rbm_msch_teacher_card_html($teacher) {
         </a>
         <div class="thesis-teacher-card-actions">
             <a class="thesis-teacher-card-view-profile" href="<?php echo esc_url($profile_url); ?>">View Profile</a>
-            <a class="thesis-cta-button" href="<?php echo esc_url(rbm_msch_signup_url()); ?>">Sign Up</a>
+            <a class="thesis-cta-button" href="<?php echo esc_url($card_signup_url); ?>">Sign Up</a>
         </div>
     </div>
     <?php

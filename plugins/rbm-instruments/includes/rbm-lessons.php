@@ -125,23 +125,22 @@ function rbm_msch_lesson_disable_months_dropdown($disable, $post_type) {
 }
 add_action('admin_head-edit.php', 'rbm_msch_lesson_hide_tablenav_bar');
 function rbm_msch_lesson_hide_tablenav_bar() {
-    if (($_GET['post_type'] ?? '') !== 'msch_lesson') {
-        return;
-    }
-    ?>
-    <style>
-        .tablenav .actions { display: none !important; }
-        .wp-list-table .column-date { white-space: nowrap; width: 160px; }
-        .wp-list-table .column-rbm_iwt_dot { width: 40px; text-align: center; }
-    </style>
-    <?php
+    // No-op: styling now lives in assets/css/rbm-instruments-admin.css (see
+    // rbm_instruments_admin_assets() below), scoped by the body.post-type-msch_lesson class WP
+    // already adds on this screen. Kept as a stub so the admin_head-edit.php hook registration
+    // above stays a single source of truth if this ever needs a runtime-only exception again.
 }
 
 // Clickable Icon column thumbnail preview (docs/0914-Copilot-REQUEST-Add-Instrument-Thumbnail-
 // Preview.txt): a small, self-contained overlay (no new library) — opens the same image already
 // shown as the thumbnail, capped at 500px so it's never shown at full original size, closes via its
 // own button, clicking outside it, or Escape. Never touches the image/attachment/alt text data.
+// Shared with the Categories list (edit-tags.php) icon column (docs/0916-Copilot-REQUEST-Category-
+// Media-Library-Images.txt) — same post_type=msch_lesson scoping keeps Faculty's own Instruments
+// list unaffected. Markup only — the open/close JS lives in assets/js/rbm-instruments-admin.js
+// (docs/0917-1053-PLAN-Extract-Inline-JS-CSS-From-RBM-Plugins.txt).
 add_action('admin_footer-edit.php', 'rbm_msch_lesson_icon_preview_modal');
+add_action('admin_footer-edit-tags.php', 'rbm_msch_lesson_icon_preview_modal');
 function rbm_msch_lesson_icon_preview_modal() {
     if (($_GET['post_type'] ?? '') !== 'msch_lesson') {
         return;
@@ -153,114 +152,66 @@ function rbm_msch_lesson_icon_preview_modal() {
             <button type="button" id="rbm-icon-preview-close" aria-label="Close preview" style="position:absolute;top:-16px;right:-16px;width:32px;height:32px;border-radius:50%;border:none;background:#fff;color:#111;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.4);">&times;</button>
         </div>
     </div>
-    <script>
-    (function () {
-        var overlay = document.getElementById('rbm-icon-preview-overlay');
-        var img = document.getElementById('rbm-icon-preview-img');
-        function openPreview(src) {
-            img.src = src;
-            overlay.style.display = 'flex';
-        }
-        function closePreview() {
-            overlay.style.display = 'none';
-            img.src = '';
-        }
-        document.addEventListener('click', function (e) {
-            var trigger = e.target.closest('.rbm-icon-preview-trigger');
-            if (trigger) {
-                openPreview(trigger.getAttribute('data-full-src'));
-                return;
-            }
-            if (e.target === overlay || e.target.id === 'rbm-icon-preview-close') {
-                closePreview();
-            }
-        });
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && overlay.style.display !== 'none') {
-                closePreview();
-            }
-        });
-    })();
-    </script>
     <?php
 }
 
-// Edit Category page (term.php): relabel the heading from "Edit Instrument" to "Edit Category"
-// only when reached from the Lessons entry point; the taxonomy's own labels stay "Instrument" so
-// Faculty's own Edit screen (which shares this taxonomy) is unaffected.
-add_action('admin_head-term.php', 'rbm_lessons_relabel_edit_term_heading');
-function rbm_lessons_relabel_edit_term_heading() {
-    $screen = get_current_screen();
-    if (!$screen || $screen->taxonomy !== 'msch_instrument' || ($_GET['post_type'] ?? '') !== 'msch_lesson') {
-        return;
+// Body classes driving the conditional bits of assets/js/rbm-instruments-admin.js (Edit Category
+// heading/Save-button relabel, disabled Add Instrument form), replacing per-screen inline <script>
+// blocks that used to carry these same PHP conditionals directly. Same Lessons-entry-point scoping
+// as before in both cases.
+add_filter('admin_body_class', 'rbm_lessons_admin_body_classes');
+function rbm_lessons_admin_body_classes($classes) {
+    $pagenow = $GLOBALS['pagenow'] ?? '';
+    $is_lessons_entry_point = (($_GET['taxonomy'] ?? '') === 'msch_instrument' && ($_GET['post_type'] ?? '') === 'msch_lesson');
+    if ($pagenow === 'term.php' && $is_lessons_entry_point) {
+        $classes .= ' rbm-relabel-edit-category';
     }
-    ?>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var heading = document.querySelector('.wrap h1');
-        if (heading && heading.textContent.trim() === 'Edit Instrument') {
-            heading.textContent = 'Edit Category';
-        }
-        if (document.title.indexOf('Edit Instrument') === 0) {
-            document.title = document.title.replace('Edit Instrument', 'Edit Category');
-        }
-    });
-    </script>
-    <?php
+    if ($pagenow === 'edit-tags.php' && $is_lessons_entry_point) {
+        // Add Instrument needs a responsive image-upload step we haven't built yet; disable just
+        // the Lessons entry point's Add form until that's ready (Faculty's own is untouched).
+        $classes .= ' rbm-add-instrument-disabled';
+    }
+    return $classes;
 }
 
 // Categories screen (docs/0910-0444-...): move the native "Add Instrument" box to the bottom of
 // the page and add a jump link at the top, so the term list isn't pushed below the fold. Applies
 // to the shared msch_instrument taxonomy screen regardless of entry point (Lessons or Faculty).
+// Styling/behavior now live in assets/css/assets/js/rbm-instruments-admin.css|js (enqueued by
+// rbm_instruments_admin_assets() below); this function no longer prints anything itself.
 add_action('admin_head-edit-tags.php', 'rbm_instrument_page_move_add_form_to_bottom');
 function rbm_instrument_page_move_add_form_to_bottom() {
-    $screen = get_current_screen();
-    if (!$screen || $screen->taxonomy !== 'msch_instrument') {
+    // Intentionally empty — see comment above. Kept as a documented no-op rather than removing the
+    // hook outright, in case a future runtime-only exception is needed here again.
+}
+
+// Centralized admin asset loader for rbm-instruments (docs/0917-1053-PLAN-Extract-Inline-JS-CSS-
+// From-RBM-Plugins.txt): the Instruments list, the Categories taxonomy screens (shared with
+// Faculty for the layout/list styling only — see rbm_instrument_page_move_add_form_to_bottom()
+// above), the standalone Instrument form, and the Page Display settings page. Never enqueued
+// globally across wp-admin.
+add_action('admin_enqueue_scripts', 'rbm_instruments_admin_assets');
+function rbm_instruments_admin_assets() {
+    $pagenow = $GLOBALS['pagenow'] ?? '';
+    $post_type = $_GET['post_type'] ?? '';
+    $page = sanitize_key(wp_unslash($_GET['page'] ?? ''));
+    $is_lessons_list = ($pagenow === 'edit.php' && $post_type === 'msch_lesson' && $page === '');
+    $is_category_list = ($pagenow === 'edit-tags.php' && ($_GET['taxonomy'] ?? '') === 'msch_instrument');
+    $is_category_edit = ($pagenow === 'term.php' && ($_GET['taxonomy'] ?? '') === 'msch_instrument' && $post_type === 'msch_lesson');
+    $is_lesson_form = ($page === 'rbm-lesson-form');
+    $is_display_settings = ($page === 'rbm-lessons-display-settings');
+    if (!$is_lessons_list && !$is_category_list && !$is_category_edit && !$is_lesson_form && !$is_display_settings) {
         return;
     }
-    // Add Instrument needs a responsive image-upload step we haven't built yet; disable just the
-    // Lessons entry point's Add form until that's ready (Faculty's own Add Instrument is untouched).
-    $disable_add_form = (($_GET['post_type'] ?? '') === 'msch_lesson');
-    ?>
-    <style>
-        #col-container { display: flex; flex-direction: column; }
-        #col-container #col-left, #col-container #col-right { float: none; width: 100%; }
-        #col-container #col-left { order: 2; margin-top: 20px; }
-        #col-container #col-right { order: 1; }
-        <?php if ($disable_add_form): ?>
-        #col-left form#addtag { opacity: 0.5; pointer-events: none; }
-        <?php endif; ?>
-        /* Bulk Actions is disabled on this list (see bulk_actions-edit-msch_instrument); hide the now-empty tablenav bar. */
-        .tablenav .actions { display: none !important; }
-    </style>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var heading = document.querySelector('.wp-heading-inline');
-        if (heading && !document.getElementById('rbm-jump-to-add-instrument')) {
-            var link = document.createElement('a');
-            link.id = 'rbm-jump-to-add-instrument';
-            link.href = '#col-left';
-            link.className = 'page-title-action';
-            link.textContent = 'Add Instrument';
-            heading.insertAdjacentElement('afterend', link);
-        }
-        <?php if ($disable_add_form): ?>
-        var addHeading = document.querySelector('#col-left h2');
-        if (addHeading && addHeading.textContent.indexOf('INACTIVE FEATURE') === -1) {
-            addHeading.textContent = addHeading.textContent + ' - INACTIVE FEATURE';
-        }
-        var addSubmit = document.querySelector('#col-left form#addtag #submit');
-        if (addSubmit) {
-            addSubmit.disabled = true;
-        }
-        <?php endif; ?>
-        // Moving #col-left (the Add Tag form) to the bottom via CSS order puts WP core's own
-        // auto-focus of its #tag-name field below the fold, causing the page to jump on load.
-        window.scrollTo(0, 0);
-    });
-    </script>
-    <?php
+    $css_path = RBM_LESSONS_DIR . '/assets/css/rbm-instruments-admin.css';
+    $js_path = RBM_LESSONS_DIR . '/assets/js/rbm-instruments-admin.js';
+    wp_enqueue_style('rbm-instruments-admin', RBM_LESSONS_URL . 'assets/css/rbm-instruments-admin.css', [], file_exists($css_path) ? filemtime($css_path) : false);
+    wp_enqueue_script('rbm-instruments-admin', RBM_LESSONS_URL . 'assets/js/rbm-instruments-admin.js', ['jquery'], file_exists($js_path) ? filemtime($js_path) : false, true);
+    if ($is_lesson_form || $is_category_edit) {
+        wp_enqueue_media();
+    }
 }
+
 
 // One-time add of the 2 approved new category terms; never touches existing terms.
 add_action('init', 'rbm_seed_lesson_category_terms', 20);
@@ -324,6 +275,19 @@ function rbm_msch_lesson_admin_columns($columns) {
             $new_columns['rbm_display_order'] = 'Display Order';
         }
         if ($key === 'rbm_categories') {
+            // docs/0919-1441-Copilot-REQUEST-Add-Slug-And-URL-Mode-Columns.txt: read-only, admin-
+            // only columns; Slug is the saved post_name, URL Mode mirrors the same Global/Custom
+            // default rule used by the Edit Instrument form (rbm-lesson-form.php).
+            $new_columns['rbm_slug'] = 'Slug' . rbm_msch_lesson_column_info_icon(
+                'rbm-info-tip-slug',
+                'What is Slug?',
+                'The Instrument identifier used in public links and passed to the Sign-Up form, for example instrument=piano.'
+            );
+            $new_columns['rbm_url_mode'] = 'URL Mode' . rbm_msch_lesson_column_info_icon(
+                'rbm-info-tip-url-mode',
+                'What is URL Mode?',
+                "Global uses the shared Sign-Up page URL. Custom uses this Instrument's individual Sign-Up URL. The Instrument slug identifies which Instrument is sent to the selected Sign-Up page when applicable."
+            );
             // Narrow status dot (docs/0914-Copilot-REQUEST-Add-IWT-Status-Dot-Column.txt) sits
             // immediately before the Add/Remove action column — read-only, doesn't affect membership.
             $new_columns['rbm_iwt_dot'] = 'IWT';
@@ -333,6 +297,18 @@ function rbm_msch_lesson_admin_columns($columns) {
     return $new_columns;
 }
 
+// Small accessible info icon beside a column heading: visible on hover/focus via CSS (assets/css/
+// rbm-instruments-admin.css) and toggleable by click/tap plus Escape/focus-out dismissal via JS
+// (assets/js/rbm-instruments-admin.js) — no tooltip library, no native title-attribute-only text.
+function rbm_msch_lesson_column_info_icon($tip_id, $label, $text) {
+    return sprintf(
+        ' <span class="rbm-info-icon-wrap"><button type="button" class="rbm-info-icon" aria-describedby="%1$s" aria-label="%2$s">i</button><span class="rbm-info-tip" id="%1$s" role="tooltip">%3$s</span></span>',
+        esc_attr($tip_id),
+        esc_attr($label),
+        esc_html($text)
+    );
+}
+
 // Removes The SEO Framework's per-post SEO score column from this list (docs/0914-Copilot-REQUEST-
 // Replace-SEO-Column-With-IWT-Membership-Column.txt) — Instruments aren't indexed content the way
 // blog posts are, so that column is unused here. TSF registers it via the screen-based columns
@@ -340,6 +316,9 @@ function rbm_msch_lesson_admin_columns($columns) {
 // runs after TSF's own priority-10 registration so its column key is always present to remove.
 add_filter('manage_msch_lesson_posts_columns', 'rbm_msch_lesson_remove_seo_column', 20);
 add_filter('manage_edit-msch_lesson_columns', 'rbm_msch_lesson_remove_seo_column', 20);
+// Same SEO column also appears on the shared msch_instrument taxonomy's Categories list (TSF hooks
+// manage_edit-{taxonomy}_columns at priority 1); Categories aren't indexed content either.
+add_filter('manage_edit-msch_instrument_columns', 'rbm_msch_lesson_remove_seo_column', 20);
 function rbm_msch_lesson_remove_seo_column($columns) {
     unset($columns['tsf-seo-bar-wrap']);
     return $columns;
@@ -366,17 +345,37 @@ function rbm_msch_lesson_admin_column_content($column, $post_id) {
         return;
     }
     if ($column === 'rbm_icon') {
-        $icon_url = rbm_msch_lesson_catalog_image_url(get_post_meta($post_id, '_msch_lesson_image_filename', true));
-        if ($icon_url === '') {
+        $attachment_id = (int) get_post_meta(
+            $post_id,
+            '_msch_lesson_image_attachment_id',
+            true
+        );
+
+        $preview_url = $attachment_id
+            ? wp_get_attachment_image_url($attachment_id, 'medium')
+            : false;
+
+        if (!$attachment_id || !$preview_url) {
             echo '&#8212;';
             return;
         }
-        // Clickable thumbnail opens a larger (not full-size) preview in a simple overlay (docs/0914-
-        // Copilot-REQUEST-Add-Instrument-Thumbnail-Preview.txt); see rbm_msch_lesson_icon_preview_modal().
-        printf(
-            '<button type="button" class="rbm-icon-preview-trigger" data-full-src="%1$s" style="padding:0;border:0;background:none;cursor:zoom-in;" title="Click to preview"><img src="%1$s" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:4px;"></button>',
-            esc_url($icon_url)
+
+        $thumb_html = wp_get_attachment_image(
+            $attachment_id,
+            'thumbnail',
+            false,
+            [
+                'alt'   => '',
+                'style' => 'width:32px;height:32px;object-fit:cover;border-radius:4px;',
+            ]
         );
+
+        printf(
+            '<button type="button" class="rbm-icon-preview-trigger" data-full-src="%1$s" style="padding:0;border:0;background:none;cursor:zoom-in;" title="Click to preview">%2$s</button>',
+            esc_url($preview_url),
+            $thumb_html
+        );
+
         return;
     }
     if ($column === 'rbm_categories') {
@@ -425,6 +424,27 @@ function rbm_msch_lesson_admin_column_content($column, $post_id) {
         echo ($order === '') ? '&#8212;' : esc_html($order);
         return;
     }
+    if ($column === 'rbm_slug') {
+        $slug = get_post_field('post_name', $post_id);
+        echo ($slug === '') ? '&#8212;' : '<code>' . esc_html($slug) . '</code>';
+        return;
+    }
+    if ($column === 'rbm_url_mode') {
+        // Same safe-upgrade default as rbm-lesson-form.php: a missing/invalid saved mode falls back
+        // to Custom if an individual URL is already saved, otherwise Global.
+        $mode = get_post_meta($post_id, '_msch_lesson_signup_mode', true);
+        if ($mode !== 'global' && $mode !== 'custom') {
+            $custom_url = get_post_meta($post_id, '_msch_lesson_signup_url', true);
+            $mode = ($custom_url !== '') ? 'custom' : 'global';
+        }
+        $is_global = ($mode === 'global');
+        printf(
+            '<span class="rbm-url-mode-badge" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;color:#fff;background:%s;">%s</span>',
+            $is_global ? '#2271b1' : '#996800',
+            $is_global ? 'Global' : 'Custom'
+        );
+        return;
+    }
     if ($column !== 'rbm_status') {
         return;
     }
@@ -465,6 +485,7 @@ function rbm_msch_lesson_sortable_columns($columns) {
     $columns['rbm_status'] = 'rbm_status';
     $columns['rbm_categories'] = 'taxonomy-msch_instrument';
     $columns['rbm_display_order'] = 'rbm_display_order';
+    $columns['rbm_slug'] = 'rbm_slug';
     $columns['rbm_iwt_dot'] = 'rbm_iwt_dot';
     return $columns;
 }
@@ -478,6 +499,9 @@ function rbm_msch_lesson_custom_orderby($orderby, $query) {
     $order = strtoupper((string) $query->get('order')) === 'DESC' ? 'DESC' : 'ASC';
     if ($query->get('orderby') === 'rbm_status') {
         return "{$wpdb->posts}.post_status {$order}";
+    }
+    if ($query->get('orderby') === 'rbm_slug') {
+        return "{$wpdb->posts}.post_name {$order}";
     }
     if ($query->get('orderby') === 'taxonomy-msch_instrument') {
         // Title tiebreaker keeps ties within a Category alphabetical instead of arbitrary JOIN order.
@@ -693,55 +717,19 @@ function rbm_msch_lesson_view_by_control() {
             <span id="rbm-add-instrument-slot"></span>
         </div>
     </div>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var addBtn = document.querySelector('.wrap .page-title-action');
-        var slot = document.getElementById('rbm-add-instrument-slot');
-        if (addBtn && slot) {
-            addBtn.className = 'button';
-            slot.appendChild(addBtn);
-        }
-    });
-    </script>
     <?php
+    // Instruments-list-specific jump-link move + drag-sort are handled by
+    // assets/js/rbm-instruments-admin.js (enqueued in rbm_instruments_admin_assets()); only the
+    // small per-request AJAX config for drag-sort needs to come from PHP.
     if ($drag_enabled) :
         wp_enqueue_script('jquery-ui-sortable');
-        ?>
-        <script>
-        jQuery(function ($) {
-            var $list = $('#the-list');
-            $list.sortable({
-                items: '> tr',
-                handle: '.rbm-drag-handle',
-                axis: 'y',
-                update: function () {
-                    var ids = $list.children('tr').map(function () {
-                        return parseInt($(this).attr('id').replace('post-', ''), 10);
-                    }).get();
-                    $.post(ajaxurl, {
-                        action: 'rbm_save_lesson_display_order',
-                        nonce: '<?php echo esc_js(wp_create_nonce('rbm_drag_lesson_display_order')); ?>',
-                        ids: ids,
-                        view: '<?php echo esc_js($view); ?>',
-                        category: '<?php echo esc_js($current_category); ?>',
-                        status: '<?php echo esc_js($status_filter); ?>'
-                    })
-                        .done(function (r) {
-                            if (!r || !r.success) {
-                                location.reload();
-                                return;
-                            }
-                            $list.children('tr').each(function (i) {
-                                $(this).find('.column-rbm_display_order').text(i + 1);
-                            });
-                            $('<div class="notice notice-success is-dismissible"><p>Display order saved.</p></div>').insertAfter('.wp-heading-inline').delay(2000).fadeOut(300, function () { $(this).remove(); });
-                        })
-                        .fail(function () { location.reload(); });
-                }
-            });
-        });
-        </script>
-        <?php
+        wp_add_inline_script('rbm-instruments-admin', 'document.addEventListener("DOMContentLoaded",function(){window.rbmInitDragSort("#the-list","post-",' . wp_json_encode([
+            'action'   => 'rbm_save_lesson_display_order',
+            'nonce'    => wp_create_nonce('rbm_drag_lesson_display_order'),
+            'view'     => $view,
+            'category' => $current_category,
+            'status'   => $status_filter,
+        ]) . ');});');
     endif;
 }
 
@@ -1038,13 +1026,25 @@ function rbm_msch_lesson_filter_iwt_view($query) {
         ];
     }
     $query->set('tax_query', $iwt_tax_query);
+    // Instruments We Teach always shows every matching row on one page, regardless of the Status
+    // filter — previously this only happened in the Active-only drag-and-drop scope below, so an
+    // All/Inactive Status filter still paginated at the default per-page count.
+    $query->set('posts_per_page', -1);
     if ($status_filter === 'active') {
-        // Drag-and-drop scope: show every reorderable row on one page, already in the order it
-        // persists (docs/0913-1512-Copilot-REQUEST-Add-Drag-And-Drop-...).
-        $query->set('posts_per_page', -1);
+        // Drag-and-drop scope: already showing every row above; also lock the order it persists in
+        // (docs/0913-1512-Copilot-REQUEST-Add-Drag-And-Drop-...).
         $query->set('orderby', 'rbm_display_order');
         $query->set('order', 'ASC');
     }
+}
+
+// WP_List_Table computes its "Page X of Y" pagination display from the Screen Options per-page
+// value, not from the actual posts_per_page=-1 set above, so without this it can still show a
+// misleading "Page 1 of 2" even though every matching row is already on the one page. Scoped to
+// the Instruments We Teach view only.
+add_filter('edit_msch_lesson_per_page', 'rbm_msch_lesson_iwt_unpaginated_per_page');
+function rbm_msch_lesson_iwt_unpaginated_per_page($per_page) {
+    return (rbm_msch_lesson_current_view() === 'iwt') ? 9999 : $per_page;
 }
 
 // Instruments (Categories) list: replace the default "Description" column (unused for this
@@ -1083,11 +1083,32 @@ function rbm_msch_instrument_admin_column_content($content, $column_name, $term_
         return '<span class="dashicons dashicons-menu rbm-drag-handle" style="cursor:move;" title="Drag to reorder"></span>';
     }
     if ($column_name === 'rbm_icon') {
+        // Media Library attachment is now the canonical Category image (docs/0916-Copilot-REQUEST-
+        // Category-Media-Library-Images.txt); the legacy plugin-owned icon file is only a fallback
+        // for Categories not yet migrated.
+        $attachment_id = rbm_msch_category_image_attachment_id($term_id);
+        if ($attachment_id && wp_attachment_is_image($attachment_id)) {
+            $preview_url = wp_get_attachment_image_url($attachment_id, 'medium');
+            $thumb_html = wp_get_attachment_image($attachment_id, 'thumbnail', false, [
+                'alt'   => '',
+                'style' => 'width:32px;height:32px;object-fit:cover;border-radius:4px;',
+            ]);
+            if ($preview_url && $thumb_html) {
+                return sprintf(
+                    '<button type="button" class="rbm-icon-preview-trigger" data-full-src="%1$s" style="padding:0;border:0;background:none;cursor:zoom-in;" title="Click to preview">%2$s</button>',
+                    esc_url($preview_url),
+                    $thumb_html
+                );
+            }
+        }
         $icon_url = rbm_msch_category_icon_url(get_term_meta($term_id, '_msch_category_icon_filename', true));
         if ($icon_url === '') {
             return '&#8212;';
         }
-        return '<img src="' . esc_url($icon_url) . '" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:4px;">';
+        return sprintf(
+            '<button type="button" class="rbm-icon-preview-trigger" data-full-src="%1$s" style="padding:0;border:0;background:none;cursor:zoom-in;" title="Click to preview"><img src="%1$s" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:4px;"></button>',
+            esc_url($icon_url)
+        );
     }
     if ($column_name === 'rbm_display_order') {
         $order = get_term_meta($term_id, '_msch_category_display_order', true);
@@ -1197,48 +1218,16 @@ function rbm_msch_category_status_filter_control() {
             <span id="rbm-add-instrument-slot"></span>
         </div>
     </div>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var addLink = document.getElementById('rbm-jump-to-add-instrument');
-        var slot = document.getElementById('rbm-add-instrument-slot');
-        if (addLink && slot) {
-            addLink.className = 'button';
-            slot.appendChild(addLink);
-        }
-    });
-    </script>
     <?php
+    // Jump-link move + drag-sort are handled by assets/js/rbm-instruments-admin.js (enqueued in
+    // rbm_instruments_admin_assets()); only the small per-request AJAX config for drag-sort needs
+    // to come from PHP.
     if ($reset_enabled) :
         wp_enqueue_script('jquery-ui-sortable');
-        ?>
-        <script>
-        jQuery(function ($) {
-            var $list = $('#the-list');
-            $list.sortable({
-                items: '> tr',
-                handle: '.rbm-drag-handle',
-                axis: 'y',
-                update: function () {
-                    var ids = $list.children('tr').map(function () {
-                        return parseInt($(this).attr('id').replace('tag-', ''), 10);
-                    }).get();
-                    $.post(ajaxurl, { action: 'rbm_save_category_display_order', nonce: '<?php echo esc_js(wp_create_nonce('rbm_drag_category_display_order')); ?>', ids: ids })
-                        .done(function (r) {
-                            if (!r || !r.success) {
-                                location.reload();
-                                return;
-                            }
-                            $list.children('tr').each(function (i) {
-                                $(this).find('.column-rbm_display_order').text(i + 1);
-                            });
-                            $('<div class="notice notice-success is-dismissible"><p>Display order saved.</p></div>').insertAfter('.wp-heading-inline').delay(2000).fadeOut(300, function () { $(this).remove(); });
-                        })
-                        .fail(function () { location.reload(); });
-                }
-            });
-        });
-        </script>
-        <?php
+        wp_add_inline_script('rbm-instruments-admin', 'document.addEventListener("DOMContentLoaded",function(){window.rbmInitDragSort("#the-list","tag-",' . wp_json_encode([
+            'action' => 'rbm_save_category_display_order',
+            'nonce'  => wp_create_nonce('rbm_drag_category_display_order'),
+        ]) . ');});');
     endif;
 }
 
@@ -1422,37 +1411,8 @@ function rbm_msch_category_is_active($term_id) {
     ]));
 }
 
-// --- Lesson Tile Image catalog (plugin-owned folder, not the Media Library — see
-// docs/0909-1356-Copilot-REQUEST-Move-Lessons-Tile-Images-To-Plugin-Catalog-Folder.txt) ---
-
-// Alphabetical list of image filenames currently present in rbm-lessons/assets/images/.
-function rbm_msch_lesson_catalog_images() {
-    $dir = RBM_LESSONS_DIR . '/assets/images/';
-    if (!is_dir($dir)) {
-        return [];
-    }
-    $allowed_exts = ['png', 'jpg', 'jpeg', 'webp'];
-    $files = [];
-    foreach (scandir($dir) as $file) {
-        if ($file === '.' || $file === '..' || strpos($file, '.') === 0 || !is_file($dir . $file)) {
-            continue; // skip hidden/system files and subdirectories
-        }
-        if (in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), $allowed_exts, true)) {
-            $files[] = $file;
-        }
-    }
-    sort($files, SORT_STRING | SORT_FLAG_CASE);
-    return $files;
-}
-
-// Public URL for a catalog filename; '' if the filename isn't currently a valid catalog image.
-function rbm_msch_lesson_catalog_image_url($filename) {
-    $filename = basename((string) $filename);
-    if ($filename === '' || !in_array($filename, rbm_msch_lesson_catalog_images(), true)) {
-        return '';
-    }
-    return RBM_LESSONS_URL . 'assets/images/' . rawurlencode($filename);
-}
+// Instrument tile images now come from the Media Library (_msch_lesson_image_attachment_id);
+// see rbm_msch_lesson_card_html() below and includes/rbm-lesson-image-migration.php.
 
 // Custom Image Alt Text if set, otherwise a safe SEO/accessibility fallback built from the lesson title.
 function rbm_msch_lesson_image_alt($lesson_id, $title) {
@@ -1463,8 +1423,30 @@ function rbm_msch_lesson_image_alt($lesson_id, $title) {
     return trim((string) $title) . ' lessons at Red Barn Music School';
 }
 
-// --- Category icon catalog (docs/0909-1411-PLAN-Lessons-Category-Icon-Landing-And-Filtered-Tile-Groups.txt) ---
+// --- Category image: Media Library attachment (docs/0916-Copilot-REQUEST-Category-Media-Library-
+// Images.txt), replacing the legacy plugin-owned category-icons file below as the canonical source.
+// The legacy filename functions are kept only as a fallback for Categories not yet migrated.
+
+function rbm_msch_category_image_attachment_id($term_id) {
+    return (int) get_term_meta($term_id, '_msch_category_image_attachment_id', true);
+}
+
+// Resolves a Category's display image URL: Media Library attachment first, legacy on-disk icon
+// file as a fallback. Used by contexts that just need a URL (e.g. the Edit Category Tile Preview).
+function rbm_msch_category_image_url($term_id, $size = 'medium') {
+    $attachment_id = rbm_msch_category_image_attachment_id($term_id);
+    if ($attachment_id && wp_attachment_is_image($attachment_id)) {
+        $url = wp_get_attachment_image_url($attachment_id, $size);
+        if ($url) {
+            return $url;
+        }
+    }
+    return rbm_msch_category_icon_url(get_term_meta($term_id, '_msch_category_icon_filename', true));
+}
+
+// --- Legacy Category icon catalog (docs/0909-1411-PLAN-Lessons-Category-Icon-Landing-And-Filtered-Tile-Groups.txt) ---
 // One icon per msch_instrument term, stored as term meta pointing at a plugin-owned file (not the Media Library).
+// Superseded by the Media Library attachment above; kept only as a fallback during migration.
 
 function rbm_msch_category_icon_images() {
     $dir = RBM_LESSONS_DIR . '/assets/category-icons/';
@@ -1501,8 +1483,95 @@ function rbm_msch_category_icon_alt($term_id, $term_name) {
     return trim((string) $term_name) . ' music lessons at Red Barn Music School';
 }
 
+// Category tile icon+name inner markup (no wrapping <button>/<a>) — shared by the full Instruments-
+// page category grid and the standalone [rbm_instrument_category] shortcode (docs/0917-1034-
+// Copilot-REQUEST-Implement-Reusable-RBM-Shortcodes-And-Copy-Buttons.txt), so there is exactly one
+// place that resolves a Category's icon (Media Library attachment first, legacy file fallback).
+function rbm_msch_category_tile_inner_html($term, $name) {
+    $icon_alt = $term ? rbm_msch_category_icon_alt($term->term_id, $name) : ($name . ' music lessons at Red Barn Music School');
+    $icon_html = '';
+    $attachment_id = $term ? rbm_msch_category_image_attachment_id($term->term_id) : 0;
+    if ($attachment_id && wp_attachment_is_image($attachment_id)) {
+        $icon_html = wp_get_attachment_image($attachment_id, 'medium', false, [
+            'alt'      => $icon_alt,
+            'loading'  => 'lazy',
+            'decoding' => 'async',
+            'sizes'    => '220px',
+        ]);
+    } elseif ($term) {
+        // Legacy plugin-owned icon file, kept as a fallback until every Category is migrated.
+        $icon_file = get_term_meta($term->term_id, '_msch_category_icon_filename', true);
+        if ($icon_file) {
+            $icon_html = rbm_msch_responsive_tile_image(
+                RBM_LESSONS_DIR . '/assets/category-icons/',
+                RBM_LESSONS_URL . 'assets/category-icons/',
+                $icon_file,
+                $icon_alt,
+                '220px'
+            );
+        }
+    }
+    ob_start();
+    ?>
+    <?php if ($icon_html !== '') : ?>
+        <span class="msch-lesson-category-icon"><?php echo $icon_html; ?></span>
+    <?php else : ?>
+        <span class="msch-lesson-category-icon msch-lesson-category-icon--placeholder" aria-hidden="true"><?php echo esc_html(mb_substr($name, 0, 1)); ?></span>
+    <?php endif; ?>
+    <span class="msch-lesson-category-name"><?php echo esc_html($name); ?></span>
+    <?php
+    return ob_get_clean();
+}
+
+// Front-end asset loader for [msch_lessons] and the standalone [rbm_instrument_category]
+// shortcode (docs/0917-1053-PLAN-Extract-Inline-JS-CSS-From-RBM-Plugins.txt) — enqueued rather
+// than echoed inline, so both shortcodes share one registration regardless of which runs first on
+// a page, and a page with only [rbm_instrument_category] still gets its required CSS/JS.
+function rbm_instruments_enqueue_frontend_assets() {
+    static $enqueued = false;
+    if ($enqueued) {
+        return;
+    }
+    $enqueued = true;
+    $css_path = RBM_LESSONS_DIR . '/assets/css/rbm-instruments.css';
+    $js_path = RBM_LESSONS_DIR . '/assets/js/rbm-instruments.js';
+    wp_enqueue_style('rbm-instruments', RBM_LESSONS_URL . 'assets/css/rbm-instruments.css', [], file_exists($css_path) ? filemtime($css_path) : false);
+    wp_enqueue_script('rbm-instruments', RBM_LESSONS_URL . 'assets/js/rbm-instruments.js', [], file_exists($js_path) ? filemtime($js_path) : false, true);
+}
+
+// docs/0917-1034-Copilot-REQUEST-Implement-Reusable-RBM-Shortcodes-And-Copy-Buttons.txt: single
+// reusable Category tile for manual placement on any Avada page/content area. Does not reproduce
+// the in-page Instruments filtering/grid system (no [msch_lessons] filter/select context to react
+// to) — it is a plain link honoring the existing Category Click Destination setting: Faculty Group
+// Page routes straight to that Category's Faculty group; Show Instrument Tiles (default) deep-
+// links to the canonical Instruments page with ?category=<slug>, which it already parses server-
+// side. Fails silently for a missing Category — no PHP warnings/notices.
+add_shortcode('rbm_instrument_category', 'rbm_instrument_category_shortcode');
+function rbm_instrument_category_shortcode($atts) {
+    $atts = shortcode_atts(['slug' => ''], $atts, 'rbm_instrument_category');
+    $slug = sanitize_title($atts['slug']);
+    $term = ($slug !== '') ? get_term_by('slug', $slug, 'msch_instrument') : false;
+    if (!$term || is_wp_error($term)) {
+        return '';
+    }
+    $url = (rbm_msch_category_click_destination() === 'faculty')
+        ? rbm_msch_faculty_category_url($slug)
+        : add_query_arg('category', $slug, rbm_msch_lessons_base_url());
+    rbm_instruments_enqueue_frontend_assets();
+    ob_start();
+    ?>
+    <div class="msch-lesson-category-grid">
+        <a class="msch-lesson-category-card" href="<?php echo esc_url($url); ?>">
+            <?php echo rbm_msch_category_tile_inner_html($term, $term->name); ?>
+        </a>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
 // --- Responsive tile image delivery (docs/0910-0334-Copilot-REQUEST-Harden-Lessons-Plugin-Image-Delivery.txt) ---
-// Masters stay plugin-local (assets/images/, assets/category-icons/); 320/640/1024px derivatives are
+// Used only for Category icons now (assets/category-icons/); Instrument tile images come from the
+// Media Library instead (rbm_msch_lesson_card_html() above). 320/640/1024px derivatives are
 // pre-generated one time into the same folder as "<base>-<width>.<ext>" and picked up here only if present,
 // so a missing derivative never breaks the tile — it just falls back to the next available source.
 function rbm_msch_responsive_tile_image($dir, $url_dir, $filename, $alt, $sizes_attr, $loading = 'lazy') {
@@ -1546,20 +1615,23 @@ function rbm_msch_responsive_tile_image($dir, $url_dir, $filename, $alt, $sizes_
     return $html;
 }
 
-// Category Icon fields on the native msch_instrument Add/Edit Category screens (edit-tags.php) — no new admin screen.
-add_action('msch_instrument_add_form_fields', 'rbm_msch_category_icon_add_form_field');
-function rbm_msch_category_icon_add_form_field($taxonomy) {
-    $catalog = rbm_msch_category_icon_images();
+// Category Image fields on the native msch_instrument Add/Edit Category screens (edit-tags.php) —
+// no new admin screen. Scoped to the Lessons entry point (post_type=msch_lesson) only, since this
+// taxonomy is shared with Faculty (docs/0916-Copilot-REQUEST-Category-Media-Library-Images.txt);
+// Faculty > Instruments screens never render this field.
+add_action('msch_instrument_add_form_fields', 'rbm_msch_category_image_add_form_field');
+function rbm_msch_category_image_add_form_field($taxonomy) {
+    if (($_GET['post_type'] ?? '') !== 'msch_lesson') {
+        return;
+    }
     ?>
     <div class="form-field">
-        <label for="rbm_category_icon_filename">Category Icon</label>
-        <select name="rbm_category_icon_filename" id="rbm_category_icon_filename">
-            <option value="">No Icon</option>
-            <?php foreach ($catalog as $file) : ?>
-                <option value="<?php echo esc_attr($file); ?>"><?php echo esc_html($file); ?></option>
-            <?php endforeach; ?>
-        </select>
-        <p>Populated from <code>wp-content/plugins/rbm-instruments/assets/category-icons/</code> — add files there to expand this list.</p>
+        <label>Category Image (Media Library)</label>
+        <div id="rbm_category_image_preview"></div>
+        <input type="hidden" id="rbm_category_image_attachment_id" name="rbm_category_image_attachment_id" value="">
+        <button type="button" class="button rbm-media-picker" data-target="rbm_category_image_attachment_id" data-preview="rbm_category_image_preview">Select Image</button>
+        <button type="button" class="button rbm-media-remove" data-target="rbm_category_image_attachment_id" data-preview="rbm_category_image_preview" style="display:none;">Remove Image</button>
+        <p>Selected from the Media Library. Used for the Categories list Icon column and the public Category tile.</p>
     </div>
     <div class="form-field">
         <label for="rbm_category_icon_alt">Icon Alt Text</label>
@@ -1571,25 +1643,24 @@ function rbm_msch_category_icon_add_form_field($taxonomy) {
         <?php rbm_msch_category_tile_preview_markup('', ''); ?>
     </div>
     <?php
-    rbm_msch_category_tile_preview_script($catalog, 'tag-name');
 }
 
-add_action('msch_instrument_edit_form_fields', 'rbm_msch_category_icon_edit_form_field');
-function rbm_msch_category_icon_edit_form_field($term) {
-    $catalog = rbm_msch_category_icon_images();
-    $current_icon = get_term_meta($term->term_id, '_msch_category_icon_filename', true);
+add_action('msch_instrument_edit_form_fields', 'rbm_msch_category_image_edit_form_field');
+function rbm_msch_category_image_edit_form_field($term) {
+    if (($_GET['post_type'] ?? '') !== 'msch_lesson') {
+        return;
+    }
+    $attachment_id = rbm_msch_category_image_attachment_id($term->term_id);
     $current_alt = get_term_meta($term->term_id, '_msch_category_icon_alt', true);
     ?>
     <tr class="form-field">
-        <th scope="row"><label for="rbm_category_icon_filename">Category Icon</label></th>
+        <th scope="row"><label>Category Image (Media Library)</label></th>
         <td>
-            <select name="rbm_category_icon_filename" id="rbm_category_icon_filename">
-                <option value="">No Icon</option>
-                <?php foreach ($catalog as $file) : ?>
-                    <option value="<?php echo esc_attr($file); ?>" <?php selected($current_icon, $file); ?>><?php echo esc_html($file); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <p class="description">Populated from <code>wp-content/plugins/rbm-instruments/assets/category-icons/</code> — add files there to expand this list.</p>
+            <div id="rbm_category_image_preview"><?php echo $attachment_id ? wp_get_attachment_image($attachment_id, 'thumbnail') : ''; ?></div>
+            <input type="hidden" id="rbm_category_image_attachment_id" name="rbm_category_image_attachment_id" value="<?php echo esc_attr($attachment_id); ?>">
+            <button type="button" class="button rbm-media-picker" data-target="rbm_category_image_attachment_id" data-preview="rbm_category_image_preview"><?php echo $attachment_id ? 'Replace Image' : 'Select Image'; ?></button>
+            <button type="button" class="button rbm-media-remove" data-target="rbm_category_image_attachment_id" data-preview="rbm_category_image_preview" <?php echo $attachment_id ? '' : 'style="display:none;"'; ?>>Remove Image</button>
+            <p class="description">Selected from the Media Library. Used for the Categories list Icon column and the public Category tile.</p>
         </td>
     </tr>
     <tr class="form-field">
@@ -1602,11 +1673,28 @@ function rbm_msch_category_icon_edit_form_field($term) {
     <tr class="form-field">
         <th scope="row"><label>Tile Preview</label></th>
         <td>
-            <?php rbm_msch_category_tile_preview_markup(rbm_msch_category_icon_url($current_icon), $term->name); ?>
+            <?php rbm_msch_category_tile_preview_markup(rbm_msch_category_image_url($term->term_id), $term->name); ?>
         </td>
     </tr>
     <?php
-    rbm_msch_category_tile_preview_script($catalog, 'name');
+}
+
+// Read-only Copy Shortcode control (docs/0917-1034-Copilot-REQUEST-Implement-Reusable-RBM-
+// Shortcodes-And-Copy-Buttons.txt), Edit Category only (no real slug yet on the Add form). Same
+// Lessons-entry-point scoping as the other Category fields above.
+add_action('msch_instrument_edit_form_fields', 'rbm_msch_category_shortcode_edit_form_field');
+function rbm_msch_category_shortcode_edit_form_field($term) {
+    if (($_GET['post_type'] ?? '') !== 'msch_lesson') {
+        return;
+    }
+    ?>
+    <tr class="form-field">
+        <th scope="row"><label>Category Shortcode</label></th>
+        <td>
+            <?php rbm_lessons_render_copy_shortcode_field('', '[rbm_instrument_category slug="' . $term->slug . '"]', 'rbm-category-shortcode-field'); ?>
+        </td>
+    </tr>
+    <?php
 }
 
 // Shared markup/JS for the Category-tile live preview on both the Add and Edit Category screens —
@@ -1625,41 +1713,22 @@ function rbm_msch_category_tile_preview_markup($icon_url, $name) {
     <?php
 }
 
-function rbm_msch_category_tile_preview_script($catalog, $name_field_id) {
-    ?>
-    <script>
-    (function(){
-        var urls = <?php echo wp_json_encode(array_combine($catalog, array_map('rbm_msch_category_icon_url', $catalog))); ?>;
-        var select = document.getElementById('rbm_category_icon_filename');
-        var nameField = document.getElementById('<?php echo esc_js($name_field_id); ?>');
-        if (select) {
-            select.addEventListener('change', function (e) {
-                var icon = document.getElementById('rbm_category_tile_preview_icon');
-                var url = urls[e.target.value];
-                icon.innerHTML = url ? '<img src="' + url + '" alt="" style="max-width:120px;height:auto;display:block;">' : '';
-            });
-        }
-        if (nameField) {
-            nameField.addEventListener('input', function (e) {
-                document.getElementById('rbm_category_tile_preview_name').textContent = e.target.value;
-            });
-        }
-    })();
-    </script>
-    <?php
-}
+// The Category Name -> Tile Preview name sync (feature-detecting both the native "tag-name" Add-
+// form field id and the "name" Edit-form field id) now lives in assets/js/rbm-instruments-admin.js
+// (docs/0917-1053-PLAN-Extract-Inline-JS-CSS-From-RBM-Plugins.txt), alongside the Media picker JS
+// that also updates the Tile Preview icon.
 
-add_action('created_msch_instrument', 'rbm_msch_category_icon_save_term_meta');
-add_action('edited_msch_instrument', 'rbm_msch_category_icon_save_term_meta');
-function rbm_msch_category_icon_save_term_meta($term_id) {
-    if (!isset($_POST['rbm_category_icon_filename'])) {
+add_action('created_msch_instrument', 'rbm_msch_category_image_save_term_meta');
+add_action('edited_msch_instrument', 'rbm_msch_category_image_save_term_meta');
+function rbm_msch_category_image_save_term_meta($term_id) {
+    if (!isset($_POST['rbm_category_image_attachment_id'])) {
         return;
     }
-    $filename = basename(sanitize_text_field(wp_unslash($_POST['rbm_category_icon_filename'])));
-    if ($filename !== '' && in_array($filename, rbm_msch_category_icon_images(), true)) {
-        update_term_meta($term_id, '_msch_category_icon_filename', $filename);
+    $attachment_id = (int) $_POST['rbm_category_image_attachment_id'];
+    if ($attachment_id > 0 && wp_attachment_is_image($attachment_id)) {
+        update_term_meta($term_id, '_msch_category_image_attachment_id', $attachment_id);
     } else {
-        delete_term_meta($term_id, '_msch_category_icon_filename');
+        delete_term_meta($term_id, '_msch_category_image_attachment_id');
     }
     update_term_meta($term_id, '_msch_category_icon_alt', sanitize_text_field(wp_unslash($_POST['rbm_category_icon_alt'] ?? '')));
 }
@@ -1898,16 +1967,14 @@ function rbm_msch_lesson_is_instruments_we_teach($post_id) {
 // view; used both by the normal filtered tile grid and by the Direct Display section below, so
 // there is exactly one card implementation.
 function rbm_msch_lesson_card_html($lesson, $hidden = false) {
-    $image_filename = get_post_meta($lesson->ID, '_msch_lesson_image_filename', true);
-    $image_url = rbm_msch_lesson_catalog_image_url($image_filename);
-    $tile_image = ($image_url !== '')
-        ? rbm_msch_responsive_tile_image(
-            RBM_LESSONS_DIR . '/assets/images/',
-            RBM_LESSONS_URL . 'assets/images/',
-            $image_filename,
-            rbm_msch_lesson_image_alt($lesson->ID, get_the_title($lesson)),
-            '(max-width: 260px) 100vw, 260px'
-        )
+    $attachment_id = (int) get_post_meta($lesson->ID, '_msch_lesson_image_attachment_id', true);
+    $tile_image = $attachment_id
+        ? wp_get_attachment_image($attachment_id, 'medium', false, [
+            'alt'      => rbm_msch_lesson_image_alt($lesson->ID, get_the_title($lesson)),
+            'loading'  => 'lazy',
+            'decoding' => 'async',
+            'sizes'    => '(max-width: 260px) 100vw, 260px',
+        ])
         : '';
     $l_terms = get_the_terms($lesson->ID, 'msch_instrument');
     $l_slugs = (is_array($l_terms) && !is_wp_error($l_terms)) ? wp_list_pluck($l_terms, 'slug') : [];
@@ -1921,17 +1988,59 @@ function rbm_msch_lesson_card_html($lesson, $hidden = false) {
     return ob_get_clean();
 }
 
-// Docs/0913-1644-Copilot-REQUEST-Implement-Teacher-By-Instrument-Filtering-And-Tile-Links.txt:
-// resolves the Faculty page URL dynamically (never hardcoded) with ?instrument=<canonical Lesson
-// slug> appended, so rbm-faculty's server-side filter can match this exact Instrument. Also carries
-// the current Lessons page URL as ?return= (docs/0913-1731-...) so rbm-faculty's terminal fallback
-// can send a visitor back to the exact Lessons context they came from, same-site only.
-function rbm_msch_faculty_filter_url($lesson_slug) {
+// Resolves the Faculty page base URL dynamically (never hardcoded) — shared by the per-Instrument
+// and per-Category Faculty links below.
+function rbm_msch_faculty_base_url() {
     $page = get_posts(['post_type' => 'page', 'name' => 'faculty', 'posts_per_page' => 1]);
-    $base = !empty($page) ? get_permalink($page[0]) : home_url('/faculty/');
-    $url = add_query_arg('instrument', $lesson_slug, $base);
+    return !empty($page) ? get_permalink($page[0]) : home_url('/faculty/');
+}
+
+// Docs/0913-1644-Copilot-REQUEST-Implement-Teacher-By-Instrument-Filtering-And-Tile-Links.txt:
+// resolves the Faculty page URL dynamically with ?instrument=<canonical Lesson slug> appended, so
+// rbm-faculty's server-side filter can match this exact Instrument. Also carries the current
+// Lessons page URL as ?return= (docs/0913-1731-...) so rbm-faculty's terminal fallback can send a
+// visitor back to the exact Lessons context they came from, same-site only.
+function rbm_msch_faculty_filter_url($lesson_slug) {
+    $url = add_query_arg('instrument', $lesson_slug, rbm_msch_faculty_base_url());
     $current_url = home_url(add_query_arg(null, null));
-    return add_query_arg('return', rawurlencode($current_url), $url);
+    // #teachers (docs/0918-1532-...): lands the visitor directly at the filtered teacher
+    // results instead of the top of the Faculty page; must be appended last, never passed
+    // through add_query_arg(), since a URL fragment is not a query argument.
+    return add_query_arg('return', rawurlencode($current_url), $url) . '#teachers';
+}
+
+// docs/0917-1005-Copilot-REQUEST-Implement-Category-Click-Destination-Setting.txt: same pattern as
+// above, but ?category=<msch_instrument term slug> for the whole Category's Faculty group (see
+// rbm_faculty_instrument_fallback_redirect()/[msch_teachers] in rbm-faculty for the reader side).
+function rbm_msch_faculty_category_url($category_slug) {
+    $url = add_query_arg('category', $category_slug, rbm_msch_faculty_base_url());
+    $current_url = home_url(add_query_arg(null, null));
+    // #teachers (docs/0918-1532-...): see rbm_msch_faculty_filter_url() above for why this is
+    // appended last, outside add_query_arg().
+    return add_query_arg('return', rawurlencode($current_url), $url) . '#teachers';
+}
+
+// Canonical Instruments/Lessons page URL — same page-slug lookup convention rbm-faculty already
+// uses for its own return-to-Lessons fallback (rbm_msch_faculty_return_url()). Used by the
+// standalone [rbm_instrument_category] shortcode's "Show Instrument Tiles" destination (docs/0917-
+// 1034-Copilot-REQUEST-Implement-Reusable-RBM-Shortcodes-And-Copy-Buttons.txt).
+function rbm_msch_lessons_base_url() {
+    $page = get_posts(['post_type' => 'page', 'name' => 'lessons', 'posts_per_page' => 1]);
+    return !empty($page) ? get_permalink($page[0]) : home_url('/lessons/');
+}
+
+// docs/0917-1034-Copilot-REQUEST-Implement-Reusable-RBM-Shortcodes-And-Copy-Buttons.txt: single
+// reusable Instrument card/tile for manual placement on any Avada page/content area, reusing
+// rbm_msch_lesson_card_html() unchanged (no second Instrument-card template). Fails silently for a
+// missing/unpublished Instrument — no PHP warnings/notices.
+add_shortcode('rbm_instrument', 'rbm_instrument_shortcode');
+function rbm_instrument_shortcode($atts) {
+    $atts = shortcode_atts(['id' => 0], $atts, 'rbm_instrument');
+    $lesson = get_post((int) $atts['id']);
+    if (!$lesson || $lesson->post_type !== 'msch_lesson' || $lesson->post_status !== 'publish') {
+        return '';
+    }
+    return '<div class="thesis-lesson-card-grid">' . rbm_msch_lesson_card_html($lesson) . '</div>';
 }
 
 add_shortcode('msch_lessons', 'rbm_msch_lessons_shortcode');
@@ -1963,10 +2072,12 @@ function rbm_msch_lessons_shortcode($atts) {
     }
     // Single page-level Sign Up button (docs/0914-Copilot-REQUEST-Simplify-Instruments-Page-Tile-
     // Actions.txt): every Instrument already shares the same Sign Up URL, so reuse that existing
-    // data instead of adding a new option/field.
+    // data instead of adding a new option/field. docs/0919-1126-...: each Instrument's own resolved
+    // Global/Custom Sign Up URL (rbm_msch_lesson_resolve_signup_url()) is used instead of its raw
+    // meta value, so this still reflects the Global URL setting for any Instrument left on Global.
     $rbm_page_signup_url = '';
     foreach ($lessons as $l) {
-        $l_signup_url = get_post_meta($l->ID, '_msch_lesson_signup_url', true);
+        $l_signup_url = rbm_msch_lesson_resolve_signup_url($l->ID);
         if (!empty($l_signup_url)) {
             $rbm_page_signup_url = $l_signup_url;
             break;
@@ -2066,406 +2177,10 @@ function rbm_msch_lessons_shortcode($atts) {
     // above. Default 'hide' preserves the prior forced-hidden behavior (category icon grid was
     // the only visible way to choose a category; select stayed in the DOM only to drive
     // Previous/Next and deep-link JS).
-    $rbm_choose_instrument_pill_display = (rbm_instruments_get_choose_instrument_pill_mode() === 'show') ? 'block' : 'none';
+    $rbm_pill_modifier_class = (rbm_instruments_get_choose_instrument_pill_mode() === 'show') ? 'msch-lessons--pill-show' : 'msch-lessons--pill-hide';
 
-    static $rbm_lessons_css_printed = false;
     ob_start();
-    if (!$rbm_lessons_css_printed) {
-        $rbm_lessons_css_printed = true;
-        ?>
-        <style>
-        .msch-lessons-actions-row{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            align-items:stretch;
-            gap:16px;
-            margin:0 0 1.5em;
-        }
-        .msch-lessons-actions-row .msch-lesson-filter{
-            margin:0;
-        }
-        .msch-lessons-actions-row .msch-lesson-filter-select{
-            width:100%;
-            height:50px;
-            box-sizing:border-box;
-            text-align:center;
-        }
-        .msch-lessons-signup-button{
-            height:50px;
-            margin:0;
-            box-sizing:border-box;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            font-size:18px;
-            font-weight:600;
-            font-family:inherit;
-            line-height:1.2;
-            padding:12px 24px;
-            border-radius:999px;
-            text-decoration:none;
-        }
-        @media (max-width:600px){
-            .msch-lessons-actions-row{
-                grid-template-columns:1fr;
-            }
-        }
-        .msch-lesson-filter{display:<?php echo esc_attr($rbm_choose_instrument_pill_display); ?>;margin:0 0 1.5em;}
-        .msch-lesson-filter-select{
-            font-size:18px;
-            font-weight:600;
-            font-family:inherit;
-            line-height:1.2;
-            padding:12px 24px;
-            border:none;
-            border-radius:999px;
-            background:#6cbf3f;
-            color:#ffffff;
-            cursor:pointer;
-            box-shadow:none;
-            max-width:100%;
-            transition:background-color 0.15s ease;
-        }
-        .msch-lesson-filter-select:hover,
-        .msch-lesson-filter-select:focus{
-            background:#5aa932;
-            outline:none;
-        }
-        .msch-lesson-category-grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-            gap:4px;
-            margin:0 0 1.5em;
-        }
-        .msch-lesson-category-card{
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:6px;
-            padding:6px;
-            border:1px solid #ddd;
-            border-radius:8px;
-            background:#fff;
-            cursor:pointer;
-            font:inherit;
-            color:inherit;
-            text-align:center;
-        }
-        .msch-lesson-category-card:hover,
-        .msch-lesson-category-card:focus-visible{
-            border-color:#6cbf3f;
-            outline:none;
-        }
-        .msch-lesson-category-card.is-active{
-            background:#eef7e6;
-            border-color:#6cbf3f;
-        }
-        .msch-lesson-category-card.is-active .msch-lesson-category-name{
-            font-weight:700;
-            text-decoration:underline;
-        }
-        .msch-lesson-category-icon img{
-            max-width:220px;
-            height:auto;
-            display:block;
-        }
-        .msch-lesson-category-icon--placeholder{
-            width:220px;
-            height:220px;
-            border-radius:50%;
-            background:#f0f0f0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:56px;
-            font-weight:700;
-            color:#888;
-        }
-        .msch-lesson-category-name{
-            font-size:20px;
-            font-weight:600;
-        }
-        .msch-lesson-tiles-wrap[hidden]{
-            display:none;
-        }
-        .msch-lesson-category-grid[hidden]{
-            display:none;
-        }
-        .msch-lesson-direct-display-grid[hidden]{
-            display:none;
-        }
-        .msch-lesson-tiles-header{
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:12px;
-            margin:0 0 1em;
-            text-align:center;
-        }
-        .msch-lesson-tiles-category-name{
-            font-size:20px;
-            font-weight:700;
-        }
-        .msch-lesson-tiles-nav{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-wrap:wrap;
-            gap:12px;
-        }
-        .msch-lesson-tiles-nav button{
-            font-size:14px;
-            font-weight:600;
-            font-family:inherit;
-            padding:8px 16px;
-            border:1px solid #6cbf3f;
-            border-radius:999px;
-            background:#fff;
-            color:#5aa932;
-            cursor:pointer;
-        }
-        .msch-lesson-tiles-nav button:hover,
-        .msch-lesson-tiles-nav button:focus-visible{
-            background:#eef7e6;
-            outline:none;
-        }
-        .msch-lesson-tiles-nav button:disabled{
-            opacity:0.45;
-            cursor:not-allowed;
-        }
-        .msch-lesson-tiles-category-name:empty{
-            display:none;
-        }
-        </style>
-        <script>
-        document.addEventListener('change', function (e) {
-            if (!e.target || !e.target.classList || !e.target.classList.contains('msch-lesson-filter-select')) {
-                return;
-            }
-            var container = e.target.closest('.msch-lessons');
-            if (!container) {
-                return;
-            }
-            var value = e.target.value;
-            // Direct Display / Instruments We Teach is a landing-page overview only (docs/0912-1650-
-            // PLAN-Direct-Display-Lessons-Category.txt); once a Category (or All) is chosen, the tiles
-            // wrap below already shows the same Instruments, so it must hide entirely instead of
-            // duplicating them (rather than filtering its cards, which still left matching ones twice).
-            var directGrid = container.querySelector('.msch-lesson-direct-display-grid');
-            if (directGrid) {
-                directGrid.hidden = !!value;
-            }
-            var grid = container.querySelector('.msch-lesson-tiles-wrap .thesis-lesson-card-grid');
-            if (!grid) {
-                return;
-            }
-            var cards = grid.querySelectorAll('[data-msch-lesson-instruments]');
-            cards.forEach(function (card) {
-                if (!value || value === 'all') {
-                    card.style.display = '';
-                    return;
-                }
-                var terms = (card.getAttribute('data-msch-lesson-instruments') || '').split(',');
-                card.style.display = (terms.indexOf(value) !== -1) ? '' : 'none';
-            });
-        }, false);
-        // Top nav (green control + Previous/Back/Next) is persistent above the category grid / tile grid in both
-        // states (docs/0910-0313 menu-bar screenshot request): reveal the lesson tiles and hide the category
-        // grid only once a real category (or All Lessons) is chosen, label the category view, keep the
-        // shareable ?category= URL param in sync, and refresh Previous/Back/Next enabled state (never hidden).
-        // All lookups are scoped to the shortcode's own `.msch-lessons` container so DOM order can change freely.
-        document.addEventListener('change', function (e) {
-            if (!e.target || !e.target.classList || !e.target.classList.contains('msch-lesson-filter-select')) {
-                return;
-            }
-            var container = e.target.closest('.msch-lessons');
-            if (!container) {
-                return;
-            }
-            var tilesWrap = container.querySelector('.msch-lesson-tiles-wrap');
-            if (!tilesWrap) {
-                return;
-            }
-            var grid = container.querySelector('.msch-lesson-category-grid');
-            var nameEl = container.querySelector('.msch-lesson-tiles-category-name');
-            var prevBtn = container.querySelector('.msch-lesson-tiles-prev');
-            var backBtn = container.querySelector('.msch-lesson-tiles-back');
-            var nextBtn = container.querySelector('.msch-lesson-tiles-next');
-            var value = e.target.value;
-            var url = new URL(window.location.href);
-            if (!value) {
-                tilesWrap.hidden = true;
-                if (grid) {
-                    grid.hidden = false;
-                }
-                if (nameEl) {
-                    nameEl.textContent = '';
-                }
-                if (prevBtn) { prevBtn.disabled = true; }
-                if (backBtn) { backBtn.disabled = true; }
-                if (nextBtn) { nextBtn.disabled = true; }
-                url.searchParams.delete('category');
-                window.history.replaceState(null, '', url);
-                return;
-            }
-            tilesWrap.hidden = false;
-            if (grid) {
-                grid.hidden = true;
-            }
-            var selectedOption = e.target.options[e.target.selectedIndex];
-            if (nameEl && selectedOption) {
-                nameEl.textContent = selectedOption.text;
-            }
-            if (backBtn) {
-                backBtn.disabled = false;
-            }
-            // Previous/Next: walk the same alphabetical category list as the select; "All Lessons" doesn't participate
-            // and keeps both buttons disabled (still visible) rather than hidden.
-            var categoryOptions = Array.prototype.filter.call(e.target.options, function (o) { return o.value && o.value !== 'all'; });
-            var categoryIndex = categoryOptions.findIndex(function (o) { return o.value === value; });
-            if (prevBtn) {
-                prevBtn.disabled = !(categoryIndex > 0);
-            }
-            if (nextBtn) {
-                nextBtn.disabled = !(categoryIndex !== -1 && categoryIndex < categoryOptions.length - 1);
-            }
-            if (value === 'all') {
-                url.searchParams.delete('category');
-            } else {
-                url.searchParams.set('category', value);
-            }
-            window.history.replaceState(null, '', url);
-        }, false);
-        // Back to Categories: hide the tile view, reset the select, restore the category grid, clear the active
-        // card, and disable (but keep visible) all three top nav buttons.
-        document.addEventListener('click', function (e) {
-            var backBtn = e.target.closest('.msch-lesson-tiles-back');
-            if (!backBtn || backBtn.disabled) {
-                return;
-            }
-            var container = backBtn.closest('.msch-lessons');
-            if (!container) {
-                return;
-            }
-            var tilesWrap = container.querySelector('.msch-lesson-tiles-wrap');
-            if (tilesWrap) {
-                tilesWrap.hidden = true;
-            }
-            var select = container.querySelector('.msch-lesson-filter-select');
-            if (select) {
-                select.selectedIndex = 0;
-            }
-            // Restore the Direct Display / Instruments We Teach overview, hidden above while a
-            // Category (or All) was selected.
-            var directGrid = container.querySelector('.msch-lesson-direct-display-grid');
-            if (directGrid) {
-                directGrid.hidden = false;
-            }
-            var grid = container.querySelector('.msch-lesson-category-grid');
-            if (grid) {
-                grid.hidden = false;
-                grid.querySelectorAll('.msch-lesson-category-card').forEach(function (card) {
-                    card.classList.remove('is-active');
-                    card.setAttribute('aria-pressed', 'false');
-                });
-            }
-            var nameEl = container.querySelector('.msch-lesson-tiles-category-name');
-            if (nameEl) {
-                nameEl.textContent = '';
-            }
-            var prevBtn = container.querySelector('.msch-lesson-tiles-prev');
-            var nextBtn = container.querySelector('.msch-lesson-tiles-next');
-            if (prevBtn) { prevBtn.disabled = true; }
-            if (nextBtn) { nextBtn.disabled = true; }
-            backBtn.disabled = true;
-            var url = new URL(window.location.href);
-            url.searchParams.delete('category');
-            window.history.replaceState(null, '', url);
-        }, false);
-        // Previous/Next: step through the same alphabetical category list as the Choose Instrument select.
-        // Scoped only to this shortcode's Instrument View; does not touch the legacy per-page category nav.
-        document.addEventListener('click', function (e) {
-            var navBtn = e.target.closest('.msch-lesson-tiles-prev, .msch-lesson-tiles-next');
-            if (!navBtn || navBtn.disabled) {
-                return;
-            }
-            var container = navBtn.closest('.msch-lessons');
-            var select = container ? container.querySelector('.msch-lesson-filter-select') : null;
-            if (!select) {
-                return;
-            }
-            var categoryOptions = Array.prototype.filter.call(select.options, function (o) { return o.value && o.value !== 'all'; });
-            var currentIndex = categoryOptions.findIndex(function (o) { return o.value === select.value; });
-            if (currentIndex === -1) {
-                return;
-            }
-            var nextIndex = currentIndex + (navBtn.classList.contains('msch-lesson-tiles-prev') ? -1 : 1);
-            if (nextIndex < 0 || nextIndex >= categoryOptions.length) {
-                return;
-            }
-            select.value = categoryOptions[nextIndex].value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-        }, false);
-        // Deep link support: ?category=slug pre-selects a category on page load. Server-side rendering
-        // (Stage 1 hardening) already renders the correct initial state, so this only needs to (a) sync any
-        // additional .msch-lessons instances whose select doesn't already match, and (b) strip an invalid
-        // ?category= value from the URL so it doesn't linger next to the visible Category View (Stage 2).
-        document.addEventListener('DOMContentLoaded', function () {
-            var initial = new URLSearchParams(window.location.search).get('category');
-            if (!initial) {
-                return;
-            }
-            var matchedAny = false;
-            document.querySelectorAll('.msch-lesson-filter-select').forEach(function (select) {
-                var hasOption = Array.prototype.some.call(select.options, function (o) { return o.value === initial; });
-                if (!hasOption) {
-                    return;
-                }
-                matchedAny = true;
-                if (select.value !== initial) {
-                    select.value = initial;
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            });
-            if (!matchedAny) {
-                var url = new URL(window.location.href);
-                url.searchParams.delete('category');
-                window.history.replaceState(null, '', url);
-            }
-        }, false);
-        // Category card <-> Choose Instrument select stay synchronized (Stage 4).
-        document.addEventListener('click', function (e) {
-            var card = e.target.closest('.msch-lesson-category-card');
-            if (!card) {
-                return;
-            }
-            var container = card.closest('.msch-lessons');
-            var select = container ? container.querySelector('.msch-lesson-filter-select') : null;
-            if (!select) {
-                return;
-            }
-            select.value = card.getAttribute('data-msch-category');
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-        }, false);
-        document.addEventListener('change', function (e) {
-            if (!e.target || !e.target.classList || !e.target.classList.contains('msch-lesson-filter-select')) {
-                return;
-            }
-            var container = e.target.closest('.msch-lessons');
-            var grid = container ? container.querySelector('.msch-lesson-category-grid') : null;
-            if (!grid) {
-                return;
-            }
-            var value = e.target.value;
-            grid.querySelectorAll('.msch-lesson-category-card').forEach(function (card) {
-                var active = (card.getAttribute('data-msch-category') === value);
-                card.classList.toggle('is-active', active);
-                card.setAttribute('aria-pressed', active ? 'true' : 'false');
-            });
-        }, false);
-        </script>
-        <?php
-    }
+    rbm_instruments_enqueue_frontend_assets();
     // Top nav (green control + Previous/Back/Next) renders first so it always sits above the category grid /
     // tile grid in both states (docs/0910-0313 menu-bar screenshot request); the grid and tile wrap below toggle.
 
@@ -2492,7 +2207,7 @@ function rbm_msch_lessons_shortcode($atts) {
         $initial_category_label = $filter_terms[$initial_category];
     }
     ?>
-    <div class="msch-lessons">
+    <div class="msch-lessons <?php echo esc_attr($rbm_pill_modifier_class); ?>">
     <?php $rbm_show_filter_pill = (!$rbm_hide_categories_section && !empty($filter_terms)); ?>
     <?php if ($rbm_show_filter_pill) : ?>
         <div class="msch-lessons-actions-row">
@@ -2541,23 +2256,9 @@ function rbm_msch_lessons_shortcode($atts) {
         <div class="msch-lesson-category-grid" role="group" aria-label="Choose an instrument category"<?php echo $initial_category !== '' ? ' hidden' : ''; ?>>
             <?php foreach ($filter_terms as $slug => $name) :
                 $term = get_term_by('slug', $slug, 'msch_instrument');
-                $icon_file = $term ? get_term_meta($term->term_id, '_msch_category_icon_filename', true) : '';
-                $icon_url = $icon_file ? rbm_msch_category_icon_url($icon_file) : '';
-                $icon_alt = $term ? rbm_msch_category_icon_alt($term->term_id, $name) : ($name . ' music lessons at Red Barn Music School');
             ?>
-                <button type="button" class="msch-lesson-category-card" data-msch-category="<?php echo esc_attr($slug); ?>" aria-pressed="false">
-                    <?php if ($icon_url !== '') : ?>
-                        <span class="msch-lesson-category-icon"><?php echo rbm_msch_responsive_tile_image(
-                            RBM_LESSONS_DIR . '/assets/category-icons/',
-                            RBM_LESSONS_URL . 'assets/category-icons/',
-                            $icon_file,
-                            $icon_alt,
-                            '220px'
-                        ); ?></span>
-                    <?php else : ?>
-                        <span class="msch-lesson-category-icon msch-lesson-category-icon--placeholder" aria-hidden="true"><?php echo esc_html(mb_substr($name, 0, 1)); ?></span>
-                    <?php endif; ?>
-                    <span class="msch-lesson-category-name"><?php echo esc_html($name); ?></span>
+                <button type="button" class="msch-lesson-category-card" data-msch-category="<?php echo esc_attr($slug); ?>" aria-pressed="false"<?php echo (rbm_msch_category_click_destination() === 'faculty') ? ' data-msch-category-faculty-url="' . esc_attr(rbm_msch_faculty_category_url($slug)) . '"' : ''; ?>>
+                    <?php echo rbm_msch_category_tile_inner_html($term, $name); ?>
                 </button>
             <?php endforeach; ?>
         </div>

@@ -10,6 +10,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+define('RBM_FACULTY_DIR', __DIR__);
+define('RBM_FACULTY_URL', plugin_dir_url(__FILE__));
+
 require_once __DIR__ . '/includes/rbm-teachers.php';
 require_once __DIR__ . '/includes/rbm-teacher-form.php';
 require_once __DIR__ . '/includes/rbm-teachers-avada-element.php';

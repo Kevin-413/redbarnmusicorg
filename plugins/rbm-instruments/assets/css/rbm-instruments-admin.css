@@ -1,0 +1,43 @@
+/* Admin styles for the Instruments (msch_lesson) list and Categories (msch_instrument) taxonomy
+ * screens. Extracted from inline <style> blocks in includes/rbm-lessons.php (docs/0917-1053-PLAN-
+ * Extract-Inline-JS-CSS-From-RBM-Plugins.txt). Rules unchanged from their inline originals.
+ */
+
+/* Instruments admin list (rbm_msch_lesson_hide_tablenav_bar). */
+body.post-type-msch_lesson .tablenav .actions { display: none !important; }
+body.post-type-msch_lesson .wp-list-table .column-date { white-space: nowrap; width: 160px; }
+body.post-type-msch_lesson .wp-list-table .column-rbm_iwt_dot { width: 40px; text-align: center; }
+
+/* Slug/URL Mode column info icons (docs/0919-1441-Copilot-REQUEST-Add-Slug-And-URL-Mode-Columns.txt):
+ * visible on hover/focus via CSS below; JS (rbm-instruments-admin.js) adds click/tap toggling plus
+ * Escape/focus-out dismissal on top of this. */
+.rbm-info-icon-wrap { position: relative; display: inline-block; margin-left: 4px; vertical-align: middle; }
+.rbm-info-icon {
+    width: 16px; height: 16px; padding: 0; margin: 0; border-radius: 50%;
+    border: 1px solid #787c82; background: #f0f0f1; color: #50575e;
+    font-size: 11px; font-style: italic; font-weight: 600; line-height: 1; cursor: help;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+.rbm-info-icon:hover, .rbm-info-icon:focus { border-color: #2271b1; color: #2271b1; }
+.rbm-info-tip {
+    display: none; position: absolute; z-index: 10; top: 100%; left: 0; margin-top: 4px;
+    width: 260px; padding: 8px 10px; background: #1d2327; color: #fff; font-size: 12px;
+    line-height: 1.4; font-weight: normal; text-transform: none; border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+}
+.rbm-info-icon:hover + .rbm-info-tip,
+.rbm-info-icon:focus + .rbm-info-tip,
+.rbm-info-tip.is-visible { display: block; }
+
+/* Categories (msch_instrument) taxonomy list: move the native Add form to the bottom
+ * (rbm_instrument_page_move_add_form_to_bottom). */
+body.taxonomy-msch_instrument #col-container { display: flex; flex-direction: column; }
+body.taxonomy-msch_instrument #col-container #col-left,
+body.taxonomy-msch_instrument #col-container #col-right { float: none; width: 100%; }
+body.taxonomy-msch_instrument #col-container #col-left { order: 2; margin-top: 20px; }
+body.taxonomy-msch_instrument #col-container #col-right { order: 1; }
+/* Add Instrument isn't ready yet on the Lessons entry point only (Faculty's own Add Instrument is
+ * unaffected); rbm_instrument_page_move_add_form_to_bottom() adds this body class only there. */
+body.rbm-add-instrument-disabled #col-left form#addtag { opacity: 0.5; pointer-events: none; }
+/* Bulk Actions is disabled on this list; hide the now-empty tablenav bar. */
+body.taxonomy-msch_instrument .tablenav .actions { display: none !important; }
