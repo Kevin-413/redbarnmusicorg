@@ -1,0 +1,125 @@
+0926-1743-Copilot-REQUEST-Add-Self-Updating-Avada-Library-Demo-Page.txt
+
+# REQUEST — Add Self-Updating Avada Library DEMO Page
+
+## Goal
+
+Add a private/admin-use DEMO page to `redbarnmusicorg-avada` that automatically shows **all current Avada Library containers**.
+
+The DEMO page should update automatically whenever a Library container is added, edited, renamed, or removed.
+
+Do not manually insert each container into the DEMO page.
+
+## Page
+
+Create a normal WordPress page:
+
+- Title: `Avada Library Demo`
+- Suggested slug: `/demo-library/`
+
+Keep it out of public navigation.
+
+Set it to noindex if appropriate.
+
+This is a maintenance/reference page, not public website content.
+
+## Dynamic Library Listing
+
+Create a small custom shortcode or equivalent site-safe function, for example:
+
+`[rbm_avada_library_demo]`
+
+The shortcode should dynamically query the Avada Library each time the page loads.
+
+Use the Avada Library post type:
+
+`fusion_element`
+
+Include **all saved Avada Library containers/sections**.
+
+Do not maintain a manual allowlist of container IDs.
+
+Do not omit containers simply because they contain forms, dynamic content, shortcodes, or interactive elements.
+
+## Display
+
+For every Library container:
+
+1. Show the Library item title as a simple heading.
+2. Render the actual Avada Library container directly below it.
+3. Add clear spacing or a divider before the next container.
+
+Sort alphabetically by title unless there is a strong technical reason not to.
+
+The page should function as a complete visual catalog of the current Avada Library containers.
+
+## Automatic Updating
+
+The DEMO page must not store a static list of container IDs.
+
+It should query the Avada Library at render time so that:
+
+- new containers appear automatically
+- renamed containers show the new name
+- edited containers display their current content
+- deleted containers disappear automatically
+
+No manual page editing or rebuilding should be required.
+
+## Safety
+
+Do not:
+
+- modify existing Library containers
+- duplicate containers
+- change existing page content
+- change public navigation
+- change global Avada settings
+- add another plugin unless absolutely necessary
+- hardcode container IDs
+
+Prefer a small custom function/shortcode in the existing RBM custom-code structure.
+
+## Render All Containers
+
+The DEMO page is specifically intended to show **all containers**.
+
+If a container contains:
+
+- forms
+- dynamic shortcodes
+- buttons
+- galleries
+- maps
+- interactive elements
+- scripts
+- other embedded content
+
+render it normally if technically possible.
+
+If a specific container causes a recursion loop, fatal error, or other genuine technical failure, protect the page from breaking and report that container clearly.
+
+Do not silently skip it.
+
+## Editing / Admin Use
+
+The DEMO page should be easy to open while logged into WordPress and should reflect the current Library without needing to edit or resave the page.
+
+The page body itself should contain only the shortcode or minimal dynamic implementation needed.
+
+## Completion Report
+
+Report:
+
+- DEMO page ID and URL
+- shortcode/function name
+- files changed
+- how Avada Library containers are queried
+- total number of containers rendered
+- sorting method
+- any container that could not be rendered and the exact reason
+- whether the page is excluded from navigation
+- whether noindex was applied
+- confirmation that adding/editing/removing a Library container updates the DEMO page automatically
+
+Keep the implementation small and self-contained.

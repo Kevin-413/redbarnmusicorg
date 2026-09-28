@@ -1,0 +1,17 @@
+Pages and Blocks/Shortcodes Used
+
+About (2): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text
+Calendars (18136): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text
+Community Links (20632): custom HTML
+Contact us (126): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text
+Directions (91): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_button, fusion_imageframe, fusion_openstreetmap, fusion_openstreetmap_marker
+Faculty (20414): fusion_builder_container, fusion_builder_row, fusion_builder_column
+Gallery (934): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text, fusion_gallery, fusion_gallery_image
+Home (20046): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text, fusion_global
+Instruments (280): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_title, fusion_text, fusion_button
+Lessons Inquiry (19278): wp:html, wp:forminator/forms, fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text
+Online Privacy Policy (20264): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text
+Policies (13197): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text
+Rentals (117): fusion_builder_container, fusion_builder_row, fusion_builder_column, fusion_text
+Reviews (20856): fusion_global
+Welcome to the Red Barn - you were redirected (255): wp:block

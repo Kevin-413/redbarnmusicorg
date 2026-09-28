@@ -1,0 +1,73 @@
+<div class="thesis-page-header"><h1 class="thesis-page-title">Lessons Inquiry</h1></div>
+
+<!-- wp:paragraph -->
+<p>If you are interested in signing up for weekly in-person lessons, please fill out our registration form and one of our staff members will call you to confirm your lesson time and teacher information. Start by selecting one of the options below.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<style>
+.forminator-custom-form .forminator-button-submit { display: none !important; }
+.forminator-custom-form:has(input[name="radio-1"]:checked) .forminator-button-submit { display: inline-block !important; }
+.forminator-custom-form,
+.forminator-custom-form label,
+.forminator-custom-form .forminator-label,
+.forminator-custom-form .forminator-radio--label,
+.forminator-custom-form .forminator-field-option label,
+.forminator-custom-form input,
+.forminator-custom-form select,
+.forminator-custom-form textarea { font-size: inherit !important; }
+/* Hide asterisk on Best Days and Best Times */
+[aria-labelledby*="checkbox-1"] .forminator-required,
+[aria-labelledby*="checkbox-2"] .forminator-required { display: none !important; }
+/* Hide reCAPTCHA until radio is selected */
+.forminator-custom-form .forminator-g-recaptcha,
+.forminator-custom-form [class*="forminator-recaptcha"],
+.forminator-custom-form .forminator-row:has(.g-recaptcha) { display: none !important; }
+.forminator-custom-form:has(input[name="radio-1"]:checked) .forminator-g-recaptcha,
+.forminator-custom-form:has(input[name="radio-1"]:checked) [class*="forminator-recaptcha"],
+.forminator-custom-form:has(input[name="radio-1"]:checked) .forminator-row:has(.g-recaptcha) { display: block !important; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function setAutocomplete() {
+    var map = {
+      'name-2[first-name]': 'given-name',
+      'name-2[last-name]':  'family-name',
+      'name-1[first-name]': 'off',
+      'name-1[last-name]':  'off',
+      'email-1':            'email',
+      'phone-1':            'tel'
+    };
+    Object.keys(map).forEach(function(name) {
+      var el = document.querySelector('[name="' + name + '"]');
+      if (el) el.setAttribute('autocomplete', map[name]);
+    });
+  }
+  setAutocomplete();
+  var observer = new MutationObserver(setAutocomplete);
+  var form = document.querySelector('.forminator-custom-form');
+  if (form) observer.observe(form, { childList: true, subtree: true });
+});
+
+document.addEventListener('input', function(e) {
+  if (!e.target.matches('input[name="phone-1"]')) return;
+  var v = e.target.value.replace(/D/g, '');
+  if (v.length === 11 && v.charAt(0) === '1') v = v.substring(1);
+  v = v.substring(0, 10);
+  var area   = v.substring(0, 3);
+  var prefix = v.substring(3, 6);
+  var line   = v.substring(6, 10);
+  if (v.length >= 7)      e.target.value = '(' + area + ') ' + prefix + '-' + line;
+  else if (v.length >= 4) e.target.value = '(' + area + ') ' + prefix;
+  else if (v.length >= 1) e.target.value = '(' + area;
+});
+</script>
+<!-- /wp:html -->
+
+<!-- wp:forminator/forms {"module_id":"20709"} -->
+<div class="forminator-guttenberg">[forminator_form id="20709"]</div>
+<!-- /wp:forminator/forms -->
+
+<!-- wp:paragraph -->
+<p><a href="/online-privacy-policy/">PRIVACY POLICY</a></p>
+<!-- /wp:paragraph -->

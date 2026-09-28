@@ -1,0 +1,59 @@
+<!-- wp:paragraph -->
+<p>Have a question? Fill out the form below and we'll get back to you using your preferred contact method.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<style>
+.forminator-custom-form,
+.forminator-custom-form label,
+.forminator-custom-form .forminator-label,
+.forminator-custom-form .forminator-radio--label,
+.forminator-custom-form .forminator-field-option label,
+.forminator-custom-form input,
+.forminator-custom-form select,
+.forminator-custom-form textarea { font-size: inherit !important; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function setAutocomplete() {
+    var map = {
+      'name-2[first-name]': 'given-name',
+      'name-2[last-name]':  'family-name',
+      'name-1[first-name]': 'off',
+      'name-1[last-name]':  'off',
+      'email-1':            'email',
+      'phone-1':            'tel'
+    };
+    Object.keys(map).forEach(function(name) {
+      var el = document.querySelector('[name="' + name + '"]');
+      if (el) el.setAttribute('autocomplete', map[name]);
+    });
+  }
+  setAutocomplete();
+  var observer = new MutationObserver(setAutocomplete);
+  var form = document.querySelector('.forminator-custom-form');
+  if (form) observer.observe(form, { childList: true, subtree: true });
+});
+
+document.addEventListener('input', function(e) {
+  if (!e.target.matches('input[name="phone-1"]')) return;
+  var v = e.target.value.replace(/D/g, '');
+  if (v.length === 11 && v.charAt(0) === '1') v = v.substring(1);
+  v = v.substring(0, 10);
+  var p1 = v.substring(0, 3);
+  var p2 = v.substring(3, 6);
+  var p3 = v.substring(6, 10);
+  if (v.length >= 7)      e.target.value = '(' + p1 + ') ' + p2 + '-' + p3;
+  else if (v.length >= 4) e.target.value = '(' + p1 + ') ' + p2;
+  else if (v.length >= 1) e.target.value = '(' + p1;
+});
+</script>
+<!-- /wp:html -->
+
+<!-- wp:forminator/forms {"module_id":"20334"} -->
+<div class="forminator-guttenberg">[forminator_form id="20334"]</div>
+<!-- /wp:forminator/forms -->
+
+<!-- wp:paragraph -->
+<p><a href="/online-privacy-policy/">PRIVACY POLICY</a></p>
+<!-- /wp:paragraph -->

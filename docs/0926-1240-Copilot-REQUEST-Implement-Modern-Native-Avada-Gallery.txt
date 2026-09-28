@@ -1,0 +1,136 @@
+0926-1240-Copilot-REQUEST-Implement-Modern-Native-Avada-Gallery.txt
+
+# REQUEST — Implement Modern Native Avada Gallery
+
+## Goal
+
+Finish the Gallery implementation on `redbarnmusicorg-avada` using the completed native Avada Library Container and the final 18 recital images.
+
+The Gallery page and reusable container are already built and tested.
+
+## Existing Gallery Setup
+
+Use the existing:
+
+- Gallery page ID: 934
+- URL: `/gallery/`
+- Avada Library Container: `Standard Container - Gallery`
+- Container ID: 20890
+- Page embed: `[fusion_global id="20890"]`
+- Rollback revision: 20889
+
+Do not create a new page or new Gallery container.
+
+Preserve:
+
+- page ID
+- title
+- slug
+- template
+- SEO metadata
+- navigation
+- photographer credit
+
+## Current Gallery Configuration
+
+Keep the tested settings:
+
+- Layout: Masonry
+- Desktop: 3 columns
+- Tablet: 2 columns
+- Mobile: 1 column
+- Image spacing: 20 px
+- Lightbox: enabled
+- Captions: off
+- Borders: none
+- Corner radius: 4 px
+- Hover effect: none
+
+Do not redesign the gallery unless a clear technical problem appears.
+
+## Replace Temporary Images
+
+The six current images are temporary test images.
+
+Remove those six selections from the Gallery Element and replace them with:
+
+- `recital-rachel-01.webp`
+- `recital-rachel-02.webp`
+- `recital-rachel-03.webp`
+- `recital-rachel-04.webp`
+- `recital-rachel-05.webp`
+- `recital-rachel-06.webp`
+- `recital-rachel-07.webp`
+- `recital-rachel-08.webp`
+- `recital-rachel-09.webp`
+- `recital-rachel-10.webp`
+- `recital-rachel-11.webp`
+- `recital-rachel-12.webp`
+- `recital-rachel-13.webp`
+- `recital-rachel-14.webp`
+- `recital-rachel-15.webp`
+- `recital-rachel-16.webp`
+- `recital-rachel-17.webp`
+- `recital-rachel-18.webp`
+
+Use the existing Media Library attachments for these files after they are uploaded.
+
+Do not rename, duplicate, regenerate, or delete Media Library files.
+
+## Photographer Credit
+
+Keep the existing Rachel Bellenoit Photography credit in the Gallery container.
+
+## Verification
+
+After replacing the image set, verify:
+
+- all 18 images render
+- no broken images
+- Masonry layout remains correct
+- 3 columns desktop
+- 2 columns tablet
+- 1 column mobile
+- 20 px spacing remains consistent
+- lightbox opens
+- next/previous lightbox navigation works
+- Escape/close works
+- no horizontal overflow
+- page ID 934 remains unchanged
+- `/gallery/` remains unchanged
+- SEO metadata remains unchanged
+- photographer credit remains visible
+
+## Avada Library Export
+
+After Local verification:
+
+1. Export the `Standard Container - Gallery` Avada Library Container.
+2. Do not export or modify unrelated Library content.
+3. Save the export file for transfer to the live site.
+4. Report the export filename and location.
+
+Do not import anything to the live site yet.
+
+## Live Transfer Plan
+
+The live site will use the same 18 filenames, but attachment IDs will differ.
+
+When the Library Container is later imported into `redbarnmusic.com`, the live Gallery Element will be opened and the 18 live Media Library images will be manually re-selected.
+
+Do not assume Local attachment IDs will work on live.
+
+## Completion Report
+
+Report:
+
+- confirmation that all 18 images were selected
+- attachment IDs and filenames used on Local
+- final Gallery settings
+- responsive test results
+- lightbox test results
+- confirmation that page ID 934 and `/gallery/` were preserved
+- Avada Library export filename/location
+- any issues encountered
+
+Do not make changes to either live site in this task.

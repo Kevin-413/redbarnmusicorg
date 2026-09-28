@@ -1,5 +1,353 @@
 # Changelog
 
+## 2026-09-28 (Three new pages: Studio Tour, Recitals & Events, Student & Parent Resources)
+- Created three new native Avada pages, each as page header + one
+  `[fusion_global]` Library reference (same pattern as prior conversions):
+  - **Studio Tour** (page 20978, `/studio-tour/`) → Library item "Studio Tour"
+    (20975): embeds the existing studio-tour video (`https://youtu.be/Qzsbsh0dyIA`)
+    via `fusion_youtube`, plus buttons to Directions, Faculty, and Lessons
+    Inquiry. Added to the nav menu under **About**.
+  - **Recitals & Events** (page 20979, `/recitals-events/`) → blank
+    placeholder Library item "Recitals & Events (Placeholder)" (20976),
+    "Content coming soon." No event content invented.
+  - **Student & Parent Resources** (page 20980, `/student-parent-resources/`)
+    → blank placeholder Library item "Student & Parent Resources
+    (Placeholder)" (20977), "Content coming soon." No resource content
+    invented.
+- Verified all three pages return HTTP 200 and render as expected (video ID,
+  buttons, and placeholder text confirmed on live pages).
+- No other pages, menus, or global settings were changed.
+
+## 2026-09-27 (Three new pages created from docs, as native Avada Library content)
+- Created three new native Avada pages from source docs in `docs/`, each as
+  page header + `[fusion_global]` reference to a matching new Library item
+  (native `fusion_builder_container`/`fusion_text`, same pattern as Reviews):
+  - **Start Here / How Lessons Work** (page 20972, `/start-here-how-lessons-work/`)
+    → Library item "Start Here - How Lessons Work" (20969), from
+    `docs/0927-2152-0927-Start Here : How Lessons Work.txt`.
+  - **Tuition & Financial Aid** (page 20973, `/tuition-financial-aid/`)
+    → Library item "Tuition and Financial Aid" (20970), from
+    `docs/0927-2152-Tuition & Financial Aid.txt`.
+  - **Frequently Asked Questions** (page 20974, `/frequently-asked-questions/`)
+    → Library item "Frequently Asked Questions" (20971), from
+    `docs/0927-2152-Frequently Asked Questions.txt`.
+- Internal references (Instruments, Faculty, Lessons Inquiry, Rentals,
+  Contact us) were linked to their existing page URLs.
+- All three pages use the same page template as other native pages
+  (`templates/rbm-standard-page-no-sidebar.php`) and verified HTTP 200 with
+  expected headings rendering.
+- Not yet added to site navigation menus — pages exist and are published
+  but are not linked from the menu yet.
+
+## 2026-09-27 (Reviews page: moved to Avada Library element)
+- Moved the Reviews page's self-contained CSS/HTML/JS widget (star ratings,
+  review cards, More/Less toggle script) unchanged into a new Avada Library
+  item, "Reviews - Display" (post 20962), using a `[fusion_code]` element so
+  the `<style>`/`<script>` blocks are stored base64-encoded and bypass
+  `wpautop`/`wptexturize` corruption that blocked an earlier attempt to wrap
+  this content in `fusion_text`.
+- The Reviews page (20856) content is now just the page header plus
+  `[fusion_global id="20962"]` — the CSS/HTML/JS itself was not rewritten,
+  only relocated, per the "move unchanged first" request.
+- Verified equivalence by rendering the real page object (matching its actual
+  post author, since Avada's code-block sanitizer behavior depends on
+  author capability) through the full `the_content` pipeline before and
+  after: `<style>`/`<script>` blocks are byte-identical, visible text matches
+  exactly (post-`wptexturize`), and review-card/toggle counts match (4 cards,
+  10 toggle references).
+- Backed up the pre-change page content to
+  `docs/0927-1710-Reviews-20856-Backup.txt`. No other pages, navigation, or
+  global Avada settings were changed.
+
+## 2026-09-27 (Home page: extract embedded sections to the Avada Library)
+- Replaced the six raw `fusion_builder_container` blocks embedded directly in
+  Gutenberg reusable block 20440 ("Home Body (Synced)", used by Home 20046 and
+  Home - LEGACY 20947) with `[fusion_global id="…"]` references to their
+  matching existing Library items: Lessons Starting Now (20865), Open House
+  (20866), Block Party (20867), Gallery Spring Recital (20868), Scholarships
+  (20869), and What Families Say (20870).
+- Five of the six sections already matched their Library item byte-for-byte;
+  only Lessons Starting Now was missing a scoped layout `<style>` fix present
+  on the live page, so Library item 20865 was updated to include it before
+  the swap, keeping the visible layout unchanged.
+- Verified equivalence by rendering the reusable block's content through the
+  full `the_content` filter pipeline (including `wptexturize`) before and
+  after the change: output is visually identical, all six section headings
+  render, and no leftover `[fusion_global]` shortcode tags remain unprocessed.
+- Backed up the pre-edit content to
+  `docs/0927-1611-Home-Reusable-Block-20440-Backup.txt` and
+  `docs/0927-1611-Library-20865-Lessons-Starting-Now-Backup.txt` for rollback.
+  No public page content, navigation, or global Avada settings were changed.
+
+## 2026-09-26 (Gallery import package prepared)
+- Created `docs/0926-1257-Gallery-Library-Container-Import.xml`, a single-item
+  WXR import file for the existing Gallery Library Container. Cleared only the
+  Local `image_ids` selection in this import copy so live-site image IDs can be
+  selected manually after import; the populated Local container and original
+  export remain unchanged.
+- Validated the XML and confirmed it contains one `fusion_element` with the
+  Masonry settings, intro, and photographer credit. No live upload or content
+  changes were made.
+- Details: `docs/0926-1257-Copilot-REPLY-Transfer-Gallery-To-Live.txt`.
+
+## 2026-09-26 (native Avada Gallery finalized and exported)
+- Replaced the temporary image selections in Avada Library Container 20890
+  with the 18 uploaded `recital-rachel-01.webp` through
+  `recital-rachel-18.webp` attachments. Kept its existing Masonry layout,
+  responsive columns, spacing, lightbox, and Rachel Bellenoit Photography
+  credit.
+- Verified 18 images with no broken assets or horizontal overflow at desktop,
+  tablet, and mobile widths; checked native lightbox open, next/previous, and
+  close behavior.
+- Exported only Library Container 20890 to
+  `docs/0926-1240-Gallery-Library-Container.2026-09-26.xml` (one WXR item).
+  No live-site content or Media Library files were changed.
+- Full attachment ID list, final settings, tests, and transfer notes:
+  `docs/0926-1240-Copilot-REPLY-Implement-Modern-Native-Avada-Gallery.txt`.
+
+## 2026-09-23 (Baritone Horn image selection)
+- Restored the requested non-`-1` Baritone Horn image as attachment 20839,
+  updated Instrument 20547 to use it, and removed the former `-1` attachment
+  and file. Verified the restored file against the untouched source hash.
+
+## 2026-09-23 (Baritone Horn media consolidation)
+- Retained the active Baritone Horn attachment (20760), normalized the
+  Instrument filename metadata, and removed unused attachment 20761 and its
+  file. Verified the Instrument has one remaining image URL.
+
+## 2026-09-23 (legacy attachment metadata cleanup)
+- Cleaned contaminated metadata on four legacy Media Library records:
+  `eyewink`, `Tristan Sullivan`, `Tom Williams`, and `Susan Altabet`.
+  Removed concatenated teacher text, restored record-specific descriptions and
+  alt text where appropriate, cleared copied captions/excerpts, and verified
+  the image files were unchanged.
+
+## 2026-09-23 (upright-piano media duplicate consolidation)
+- Assigned the existing upright-piano attachment (20818) to the `upright-piano`
+  Instrument (20570), assigned the intended Piano image (20804) to the `piano`
+  Instrument (20564), and removed the newly uploaded exact duplicate attachment
+  (20838). Verified both intended files remain present and no reference remains
+  to the deleted record.
+
+## 2026-09-21 (Avada presentation-layer check on redbarnmusic-live: already in parity, CSS cache regenerated)
+- Per docs/0921-2346-Copilot-REQUEST-FINAL-Complete-Avada-Website-Transfer-To-Live-Clone.txt:
+  compared the complete Avada presentation layer (child theme files, Avada Theme Options,
+  Additional CSS, widgets/sidebars, nav menus) between `redbarnmusicorg-avada` (source) and
+  `redbarnmusic-live` (destination). LOCAL-TO-LOCAL only; redbarnmusic.com production was never
+  accessed or touched.
+- Findings: the two sites' presentation layer was already effectively in parity, not missing -
+  Avada Child Theme files were byte-identical except line-endings (CRLF vs LF, no functional
+  difference); Avada Theme Options (`fusion_options`, 1,052 keys) differed only in the logo URL's
+  domain (already correctly self-referential on each site) and one unrelated cache-clear flag;
+  both Additional CSS posts (20363, 19713) were identical; the main nav menu was identical
+  (12 items); sidebar/footer widget positions matched, with destination's own widget content
+  already more current than source's (real Fusion shortcodes/images vs. source's older plain
+  HTML) - left untouched.
+- The one real, concrete difference found: Avada's compiled dynamic CSS/JS cache
+  (`wp-content/uploads/fusion-styles/`, `fusion-scripts/`) on `redbarnmusic-live` was stale from
+  before the backup restore. Backed up the existing compiled files, cleared the cache and the
+  `fusion_dynamic_css_posts` option, then triggered regeneration by loading pages. Flushed rewrite
+  rules and object cache afterward.
+- Confirmed via side-by-side browser screenshots that Home renders pixel-identical between the
+  two sites, and Directions (previously rebuilt) renders its full header/nav/footer/mobile-bar
+  chrome correctly on the destination.
+- No theme files, database records, menus, or widgets were changed - only the regenerable Avada
+  CSS/JS cache. Full findings in
+  docs/0921-2346-Copilot-REPLY-FINAL-Complete-Avada-Website-Transfer-To-Live-Clone.txt.
+
+## 2026-09-21 (selective Local-to-Local page transfer: redbarnmusicorg-avada -> redbarnmusic-live)
+- Per docs/0921-2315-Copilot-REQUEST-Implement-Avada-Pages-In-Live-Clone.txt: after the site
+  owner restored `redbarnmusic-live` from the Sept 21, 2026 production backup, selectively
+  transferred completed page work into that clone (LOCAL-TO-LOCAL only; redbarnmusic.com
+  production was never accessed or touched).
+- Fixed `redbarnmusic-live/app/public/wp-config.php` DB_HOST (was missing its Local MySQL socket
+  path, so wp-cli could not connect) to match the working convention already used by
+  `redbarnmusicorg-avada`'s wp-config.php.
+- Backed up `redbarnmusic-live`'s full database before any change (see reply doc for path).
+- Compared all 11 in-scope pages against their `redbarnmusic-live` counterparts (matched 1:1 by
+  identical post ID/slug - both sites share the same lineage) before changing anything. Found
+  `redbarnmusic-live` already had its own current, authoritative content for the Home page
+  (newer Open House/Block Party dates, native-block Gallery/Scholarships sections) and for
+  Community Links and Policies - left all three untouched.
+- Updated 8 `redbarnmusic-live` pages that were missing only the standard page-title header
+  banner or had a real, documented gap: About (2), Calendars (18136), Gallery (934), Rentals
+  (117), Lessons Inquiry (19278) - added the header banner only, kept each page's own existing
+  Forminator form ID/content unchanged; Online Privacy Policy (20264) - replaced its ad-hoc bold
+  text title with the standard header banner; Contact us (126) - added header banner, replaced
+  the exposed plain-text phone number with the `[rbm_phone]` scrambler shortcode (verified
+  `rbm-contact-scrambler` already active there with the matching number), and fixed a pre-existing
+  malformed `href` (missing closing quote); Directions (91) - was effectively empty
+  (whitespace-only), replaced with the completed Local version (map, CTA button/image, no
+  domain-specific IDs to remap).
+- Verified via HTTP smoke test: all 11 pages return 200, each updated page shows exactly one page
+  title banner, the Contact page's phone renders through the scrambler markup (not plain text),
+  and the Directions map element renders. No PHP fatal errors observed. Flushed rewrite rules and
+  object cache afterward.
+- Full manifest, before/after checksums, and rollback instructions are in
+  docs/0921-2315-Copilot-REPLY-Implement-Avada-Pages-In-Live-Clone.txt.
+
+## 2026-09-21 (set up secure, allowlisted LIVE deployment tooling)
+- Per the site owner's explicit authorization (docs/0921-1418-Copilot-REQUEST-Set-Up-Secure-
+  Direct-Live-Deployment.txt), added a new "Live Deployment (redbarnmusic.org)" section to
+  .github/copilot-instructions.md: LIVE access stays off by default, permitted only per explicit
+  request, and only through deploy-tools/rbm-deploy.sh - never ad hoc FTP/SSH.
+- New deploy-tools/rbm-deploy.sh: SSH/SFTP-based tool with test-connection, inventory (read-only),
+  diff (checksum compare), deploy (dry run unless --apply), verify, and rollback commands. Only
+  paths listed in deploy-tools/allowlist.txt (starting with just mu-plugins/rbm-site-settings.php)
+  can ever be deployed or rolled back; every applied deploy backs up the current live file first
+  and verifies the upload by checksum before reporting success; missing config fails closed;
+  logs are timestamped under deploy-tools/logs/ with credential-like values redacted.
+- New deploy-tools/.env.example (blank credential template) and deploy-tools/OPERATOR-GUIDE.txt
+  (copy/paste commands for setup, test, inventory, dry-run, apply, verify, rollback).
+- .gitignore: added deploy-tools/.env, deploy-tools/backups/, deploy-tools/logs/ so no credentials,
+  backups, or logs can be committed.
+- Tested against a local mock "live" directory (no real credentials used): confirmed dry-run
+  deploy makes no changes, --apply backs up the old file then uploads and verifies by checksum,
+  rollback restores the pre-deploy backup, a non-allowlisted path is refused, missing .env fails
+  closed with a clear message, and the redaction pattern masks KEY/TOKEN/SECRET/PASS-like values.
+  No real live connection was attempted or configured; per the request, no pending changes were
+  deployed during this setup.
+
+## 2026-09-21 (fix RBM Site Settings URL fields rejecting relative paths)
+- `mu-plugins/rbm-site-settings.php`: URL-type fields (Contact-Page URL, Directions/Map URL,
+  Lessons Inquiry/Registration/Contact Form/Student Login/Teacher Login URLs, Donation URL,
+  Scholarship URL, all social URLs) rendered as `<input type="url">`, which browsers refuse to
+  submit unless the value is an absolute URL with a scheme - silently blocking Save for the
+  intentionally relative values (e.g. `/contact/`) with a "Please enter a URL" tooltip and no
+  server-side error. Changed to `type="text"`; server-side sanitization (`esc_url_raw`) is
+  unchanged and already accepts both relative and absolute values correctly.
+- Verified via `rbm_site_settings_render_field()` directly: field now renders `type="text"`.
+
+## 2026-09-21 (link the embedded map's marker to Google Maps)
+- Directions (91): the embedded OpenStreetMap marker's popup content now includes a "Get
+  Directions on Google Maps" link (same destination as the button/image above it), so clicking
+  the pin on the bottom map also links out to Google Maps, not just the static image above it.
+
+## 2026-09-21 (add linked map image to Directions)
+- Directions (91): added the requested image (hotlinked from
+  `https://redbarnmusic.com/wp-content/uploads/2026/09/409-main-st-amherst-ma-google-maps.png`,
+  not imported into the local Media Library) between the CTA button and the embedded map, linked
+  to the same Google Maps destination as the button (`https://maps.app.goo.gl/Nobei4zRn79uue4G7`).
+
+## 2026-09-21 (embed a working map on Directions)
+- Tried embedding Google's free no-API-key iframe (`maps.google.com/maps?q=...&output=embed`,
+  then the underlying `google.com/maps/embed?...&pb=...` endpoint directly) - both requests were
+  aborted by the browser (`net::ERR_ABORTED`) and never rendered; no Google Maps API key is
+  configured anywhere in this install (checked Avada's own native Google Map option, `gmap_api`,
+  which is also blank), so a reliable Google embed isn't available without one.
+- Used Avada's own native, no-API-key map element instead: `[fusion_openstreetmap]` /
+  `[fusion_openstreetmap_marker]` (Leaflet + OpenStreetMap tiles, already bundled with this Avada
+  install). Looked up real coordinates for 409 Main St, Amherst, MA 01002 via OpenStreetMap
+  Nominatim (42.3753245, -72.5120998) and passed them directly as `latitude`/`longitude` - the
+  shortcode's own `address` attribute silently geocoded to the wrong place (fell back to the
+  plugin's hardcoded NYC-area default coordinates) so explicit coordinates were used instead.
+- Kept the existing "Get Directions on Google Maps" button (still links out to the real Google
+  Maps app/site) above the new embedded map.
+- Verified at 1440px and 375px: map renders centered on the correct Amherst, MA location with
+  working zoom controls, no PHP/debug-log errors, no browser console errors.
+
+## 2026-09-21 (fix Directions page; investigate Gallery/Scholarships blockers)
+- Directions (91): was empty content relying on a dead `_thesis_redirect` postmeta (Thesis theme
+  removed, nothing reads that meta anymore, page returned 200 with a blank body). Added the
+  standard header/title wrapper plus one "Get Directions on Google Maps" button linking to the
+  saved RBM Site Settings `directions_url` (`https://maps.app.goo.gl/Nobei4zRn79uue4G7`), and
+  deleted the now-unused `_thesis_redirect` meta. Verified live at 1440px and 375px, link opens
+  the correct Maps destination, no PHP/debug-log/console errors beyond pre-existing benign font-
+  preload warnings.
+- Gallery (934) investigated, not changed: `[envira-gallery id="20120"]` is registered and
+  executing correctly, but the gallery's own `_eg_gallery_data` postmeta has zero images in its
+  `gallery` array (confirmed via direct shortcode invocation and gallery data dump) — it is
+  configured (title, slug, display settings) but was never populated with photos. This is a
+  content gap, not a code/shortcode bug. Only one loosely-related image exists in the Media
+  Library (ID 20637, the same single collage graphic already used elsewhere as a teaser), not a
+  set of individual recital photos suitable for populating the gallery grid. Left unchanged and
+  reporting the blocker rather than guessing at real gallery content.
+- Scholarships image investigated, not changed: searched the Media Library for a clean
+  replacement for the current photo (ID 20639, `fotrb-banner-pic-CROP-1.jpg`); the only other
+  candidate found (ID 481, `fotrb-banner-pic-CROP.jpg`) is the same collage with the same baked-in
+  "PayPal donate now" graphic. No clean replacement exists. Left unchanged and reporting.
+
+## 2026-09-20 (convert remaining Legacy/Mixed pages to the standard Avada page header)
+- Prepended the site's standard `<div class="thesis-page-header"><h1 class="thesis-page-title">`
+  wrapper to 8 pages that previously had no page-title banner: Contact us (126), About (2), Online
+  Privacy Policy (20264), Rentals (117), Calendars (18136), Community Links (20632), Gallery (934),
+  Lessons Inquiry (19278). IDs, slugs, published status, and all existing text/links/shortcodes/
+  forms preserved unchanged below the new banner.
+  - Online Privacy Policy: removed one redundant `<strong>Online Privacy Policy</strong>` line
+    that duplicated the new banner text; no other wording changed.
+  - Community Links: reused the page's own existing `<h1>Community Music Links in Western
+    Massachusetts</h1>` text as the new banner title (preserves the visible headline exactly)
+    and removed the now-redundant original `<h1>` tag.
+- Home Body (Synced Pattern, post 20440, shared by Home 20046 and its redirect twin 255):
+  converted the still-Gutenberg "Gallery" and "Scholarships" sections to the same Avada Builder
+  structure (fusion_builder_container/row/column, fusion_title, fusion_imageframe, fusion_text,
+  fusion_button) already used for the Lessons/Open House/Block Party sections above them. Text,
+  links, and displayed images preserved exactly. Corrected two stale attachment-ID references in
+  the original wp:image blocks (20152 and 19649, both pointing at the wrong media item) to the
+  real attachment IDs for the images actually shown (20637 gallery photo, 20639 scholarships
+  photo). No button was added to Scholarships since none existed in the original content.
+- Directions (91): left unchanged. Its content is empty; the only related data is a dead
+  `_thesis_redirect` postmeta (Thesis theme removed, meta no longer honored by any current code)
+  pointing to `https://goo.gl/maps/hnj4GT5hRjk`. There is no existing copy to move into the
+  standard template, so no mechanical conversion was possible without inventing new content.
+- Orphaned pages (duplicate Contact Us 20335, Student Registration "reg" 6069, draft Thank You
+  pages 6336/13185): left unchanged, per request, status-only.
+- Verified: all 8 converted pages return HTTP 200 with exactly one `<h1>`, forms/shortcodes still
+  render (Contact form 20710, Lessons Inquiry form 20709, Community Links content, Calendars PDF
+  links), Home and its twin both show the new Gallery/Scholarships sections correctly on desktop
+  (1440px) and mobile (375px) with no leaked shortcode text, and no PHP/debug-log errors.
+- Found, not fixed (pre-existing, out of scope for this mechanical pass): the Gallery page's
+  `[envira-gallery id="20120"]` shortcode renders no output even though the gallery post exists;
+  the Scholarships section's photo has an outdated "PayPal donate now" graphic baked into the
+  static image itself.
+
+## 2026-09-20 (fix broken Contact form)
+- Contact page (ID 126): replaced the broken `[forminator_form id="20334"]` shortcode (form 20334
+  does not exist) with `[forminator_form id="20710"]`, the existing "Contact Us form" (Parent/
+  Adult Name, Student Name, Email, Phone, Preferred Contact Method, Message, captcha; notifies
+  `{admin_email}`). Verified /contact/ renders all fields, submitted a real test entry (confirmed
+  in `wp_frmt_form_entry`, then deleted), and confirmed [rbm_phone] still renders correctly next
+  to the form. No PHP or debug-log errors.
+
+## 2026-09-20 (finish RBM Site Settings for live: verified values, Contact page phone, Global Sign Up URL)
+- Populated `rbm_site_settings` with verified real values only: school_name, street_address,
+  city, state, zip, contact_page_url (/contact/), directions_url (existing Google Maps link),
+  lessons_inquiry_url (/lessons-inquiry/), registration_url (/reg/, an existing published
+  Student Registration page not otherwise linked from any menu), contact_form_url (/contact/),
+  and facebook_url. donation_url/donation_button_label/donation_new_tab left untouched.
+  student_login_url, teacher_login_url, scholarship_url, and the other social fields remain
+  blank \u2014 no verified destination exists for them.
+- Contact us page (ID 126): replaced the hardcoded plain-text phone number with the [rbm_phone]
+  shortcode. Verified the page now renders the scrambler's protected markup instead of raw text.
+- Set RBM Instruments' Global Sign Up URL (`rbm_msch_global_signup_url`, previously blank) to the
+  Lessons Inquiry URL. This was a real, live bug: all 13 published Teacher records have no custom
+  Sign Up URL of their own and were rendering an empty `href=""` Sign Up button (the Teacher
+  template has no empty-URL guard, unlike the Instrument template). Verified a Teacher profile
+  page now renders a working Sign Up button that still preserves `?instrument=`/`&teacher=`
+  context; verified an Instrument page's own custom Sign Up URL is unaffected.
+- Found and did not fix (out of scope, reported to site owner): the Contact page's own embedded
+  Forminator form shortcode references form ID 20334, which does not exist as a post \u2014 the
+  contact form on the live Contact page is currently broken independently of this work.
+
+## 2026-09-20 (add RBM Site Settings page)
+- New `mu-plugins/rbm-site-settings.php`: Settings > RBM Site Settings, storing one namespaced
+  option (`rbm_site_settings`) via the Settings API, with a `rbm_site_setting( $key, $default )`
+  helper for reading values elsewhere. Four sections: Contact Information (school name/address/
+  contact-page/directions URLs — no phone/email fields, links to RBM Contact Scrambler instead),
+  Registration Links (Lessons Inquiry/Registration/Contact Form/Student Login/Teacher Login URLs —
+  no general Sign Up URL field, links to RBM Instruments' existing Global Sign Up URL instead),
+  Donations and Scholarships (Donation URL, button label, scholarship URL, open-in-new-tab), and
+  Social Media (Facebook/Instagram/YouTube/TikTok/LinkedIn).
+- Saved the approved Zeffy campaign as the Donation URL and added a `widget_text` filter that
+  swaps the hardcoded `friendsoftheredbarn.org` donate.gif link in Text widgets 2 and 6 for the
+  saved Donation URL (widget 4 "Connect" has no donation link, only Facebook/Contact links, so it
+  is untouched). Verified live on the homepage: the sidebar donate link now opens the Zeffy
+  campaign and the old `friendsoftheredbarn.org` href no longer appears in the rendered page.
+- All fields sanitize on save (`esc_url_raw` for URLs, `sanitize_text_field` for text, boolean for
+  the checkbox) and escape on output; empty fields render as empty inputs, not broken links.
+- Access requires `manage_options`; verified anonymous requests to the new admin page redirect to
+  `wp-login.php`, and the Settings API form saves and reloads correctly when logged in.
+
 ## 2026-09-19 (fix #page-title anchor slide-then-bounce)
 - Root cause found via instrumented click testing: Avada's own `fusion-scroll-to-anchor.js`
   intercepts every link click, rewrites the URL hash to a non-existent `#_<id>` (so the browser's

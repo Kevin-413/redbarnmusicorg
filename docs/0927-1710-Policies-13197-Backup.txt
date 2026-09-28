@@ -1,0 +1,26 @@
+<div class="thesis-page-header"><h1 class="thesis-page-title">Policies</h1></div>
+
+<!-- wp:tadv/classic-paragraph -->
+<div class="thesis-text-section">
+<p><strong>Welcome to the Red Barn</strong></p>
+<p><a href="http://redbarnmusicorg-avada.local/wp-content/uploads/2026/09/policies-2026.pdf">CLICK HERE</a> to download pdf</p>
+<p><strong>POLICIES</strong></p>
+<h2 class="thesis-text-title">Calendar and Make-ups</h2>
+<p>Commitment and consistency are important parts of learning music, and we want every student to have a happy and successful experience. If you ever have a question or concern, please let us know.</p>
+<p>The Red Barn Music School teaches two 17-week semesters, and students may begin anytime. Our calendar generally follows Amherst Schools. Up to two make-up lessons may be offered each semester for snow days, illness, or absences with at least 24 hours&rsquo; notice.</p>
+<h2 class="thesis-text-title">Tuition</h2>
+<p>Students are charged for all registered lessons, including absences. Up to two make-ups may be offered each semester so students can receive the lessons they have paid for.</p>
+<p>Make-ups cannot be carried into another semester, and missed make-ups are not rescheduled. Lessons are often held when schools are closed, so please put all lesson dates on your calendar.</p>
+<p>Payment is due at the first lesson. If you decide not to continue after your first lesson, that lesson is free.</p>
+<p>Students may begin with a trial month or register for the semester. After the fourth week, students who continue are asked to commit to finishing the semester. Tuition may be paid by the semester or through an installment plan. A $20 registration fee helps support recitals and student materials.</p>
+<h2 class="thesis-text-title">Scholarships and Recitals</h2>
+<p>Scholarships are available on the honor system&mdash;please let us know what you need, and we will do our best to help.</p>
+<p>Scholarship students are expected to attend and pay their share for all their lessons including missed lessons, use make-ups when needed, and participate in the semester recital. If more than two lessons are missed, the scholarship may be reviewed.</p>
+<h2 class="thesis-text-title">Withdrawals, Refunds, and Weather</h2>
+<p>Withdrawals must be made in writing to the Director. After the fourth week, refunds are generally unavailable except in serious circumstances at the Director&rsquo;s discretion. Cancelled classes or ensembles will be refunded.</p>
+<p>We generally follow Amherst Schools for weather closings. During bad weather or emergencies, please check with your teacher.</p>
+<p><em>Thank you for your cooperation and support. We&rsquo;re glad you&rsquo;re here&mdash;welcome to the Red Barn!</em></p>
+<p><em>Updated 0907</em></p>
+</div>
+<!-- /wp:tadv/classic-paragraph -->
+

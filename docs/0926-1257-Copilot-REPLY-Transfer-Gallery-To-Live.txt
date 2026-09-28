@@ -1,0 +1,9 @@
+# REPLY — Transfer Gallery To Live
+
+Date: 2026-09-26
+
+- Prepared import file: `docs/0926-1257-Gallery-Library-Container-Import.xml`.
+- The valid WXR contains only the existing **Standard Container - Gallery** Avada Library item. Its gallery image selection is empty in this import copy, while the Masonry settings, “Spring Recitals 2024” intro, and Rachel Bellenoit Photography credit are preserved.
+- After importing, manually select the 18 live Media Library images `recital-rachel-01.webp` through `recital-rachel-18.webp`.
+- The Local Gallery Container remains populated with all 18 Local attachments. The original Local export is unchanged.
+- No live upload, import, page update, or other live-site change was performed.

@@ -1,0 +1,36 @@
+0927-1722-Copilot-REQUEST-Verify-Completed-Avada-Conversion.txt
+
+Please verify the completed Avada conversion on `redbarnmusicorg-avada`.
+
+Current status reported:
+- Policies — native Avada
+- Online Privacy Policy — native Avada
+- Calendars — native Avada
+- Lessons Inquiry — native Avada
+- Home — native Avada
+- Contact Us (20335) — trashed, reversible
+- Home - LEGACY (20947) — trashed, reversible
+- Reviews (20856) — intentionally left as custom CSS/HTML/JS
+- Community Links (255) — intentionally left as-is
+
+Please do not convert or redesign anything else.
+
+Verify:
+- converted pages render correctly on desktop/mobile
+- forms and custom JS/CSS still work
+- links, buttons, images, anchors, and RBM shortcodes work
+- page IDs, slugs, SEO metadata, canonical/index settings, and navigation are unchanged
+- Home no longer depends on Gutenberg reusable block 20440
+- no raw Gutenberg/Fusion shortcode appears publicly
+- no unintended `.local` or obsolete links remain
+- trashed pages are not referenced by navigation or active internal links
+- Reviews and Community Links remain intentionally unchanged
+
+Report only:
+1. Pass/fail for each page
+2. Any remaining legacy dependency or broken reference
+3. Any cleanup you recommend
+
+Do not make changes unless needed to correct a clear conversion error.
+
+Thank you.

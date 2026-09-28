@@ -1,0 +1,4 @@
+<div class="thesis-page-header">
+<h1 class="thesis-page-title">Home</h1>
+</div>
+<!-- wp:block {"ref":20440} /-->

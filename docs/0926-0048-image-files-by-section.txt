@@ -1,0 +1,71 @@
+IMAGE FILES BY SECTION
+Source: 11 Standard Container Library elements (posts 20878-20888)
+Exported alongside: 0926-0046-page-rebuild-containers-export.xml
+
+======================================================================
+
+Section: Standard Container - Rentals  (post 20878)
+  Images: None (text only)
+
+Section: Standard Container - Faculty  (post 20879)
+  Images: None (dynamic teacher photos via [rbm_msch_teachers_element], not hardcoded in this container)
+
+Section: Standard Container - Instruments - Tiles  (post 20880)
+  Images: None (dynamic instrument tiles via [msch_lessons], not hardcoded in this container)
+
+Section: Standard Container - Instruments - CTA  (post 20881)
+  Images: None (text/button only)
+
+Section: Standard Container - Directions  (post 20882)
+  Image file: 409-main-st-amherst-ma-google-maps.png
+    Attachment ID: 20752
+    Title: Google Map
+    Source URL (dev/local): http://redbarnmusicorg-avada.local/wp-content/uploads/2026/09/409-main-st-amherst-ma-google-maps.png
+
+Section: Standard Container - Contact Us - Form  (post 20883)
+  Images: None (Forminator form only, no images)
+
+Section: Standard Container - Contact Us - Address  (post 20884)
+  Image file: eyewink.jpg
+    Attachment ID: 133
+    Title: eyewink
+    Source URL (dev/local): http://redbarnmusicorg-avada.local/wp-content/uploads/2026/09/eyewink.jpg
+
+Section: Standard Container - About - Intro  (post 20885)
+  Images: None (text only)
+
+Section: Standard Container - About - Kevin Collins  (post 20886)
+  Image file: kevin_building_2000.jpg
+    Attachment ID: 20643
+    Title: Kevin Collins building the Red Barn in 2000
+    Source URL (dev/local): http://redbarnmusicorg-avada.local/wp-content/uploads/2026/09/kevin_building_2000.jpg
+
+Section: Standard Container - About - Mary Azarian Logo  (post 20887)
+  Image file: mary-azarian1.jpg / mary-azarian1-172x300.jpg
+    Attachment ID: 20614
+    Title: Mary Azarian Red Barn Music School logo
+    Source URL (dev/local): http://redbarnmusicorg-avada.local/wp-content/uploads/2026/09/mary-azarian1.jpg
+
+Section: Standard Container - About - In Loving Memory  (post 20888)
+  Image file: pat-tompkins.jpg
+    Attachment ID: 20615
+    Title: Patricia Tompkins Red Barn Music School
+    Source URL (dev/local): http://redbarnmusicorg-avada.local/wp-content/uploads/2026/09/pat-tompkins.jpg
+
+======================================================================
+
+NOTES FOR LIVE SITE IMPORT:
+- Source URLs above point to the local dev site (redbarnmusicorg-avada.local).
+- On import to a live/production site, these image FILES will NOT transfer
+  automatically via WXR import - only the attachment post records may import.
+- Each image file must be manually re-uploaded to the live site's Media Library,
+  and the resulting new attachment URL/ID substituted into the container's
+  fusion_imageframe / img src / href references before the container will
+  display correctly.
+- Sections not listed with an image file use only dynamic shortcodes (teacher/
+  instrument tiles) or text/button content, and require no image upload.
+- One pre-existing inconsistency found (unrelated to this rebuild): the 
+  'About - Kevin Collins' container's <img> tag carries a leftover CSS class
+  'wp-image-22', but the actual attachment record for kevin_building_2000.jpg
+  is ID 20643. This class mismatch was already present in the original page
+  content before conversion and was preserved as-is (not modified).

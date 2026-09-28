@@ -1,0 +1,9 @@
+<div class="thesis-page-header"><h1 class="thesis-page-title">Calendars</h1></div>
+
+<!-- wp:html -->
+<p>Commitment is the secret to success. To help you succeed, then, we teach a 17-week semester that runs along with the Amherst Schools calendar, plus two free makeups. Adults may pay by the month.</p>
+<p>If you have any questions, please <a href="http://redbarnmusicorg-avada.local/contact/" target="_blank" rel="noopener noreferrer">CONTACT US</a></p>
+<h4>Download Calendars</h4>
+<p><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-01.pdf">MONDAY</a><br /><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-02.pdf">TUESDAY</a><br /><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-03.pdf">WEDNESDAY</a><br /><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-04.pdf">THURSDAY</a><br /><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-05.pdf">FRIDAY</a><br /><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-06.pdf">SATURDAY</a><br /><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-07.pdf">TBA</a></p>
+<p><a href="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-07.jpg"><img class="alignleft wp-image-19272 size-full" src="http://redbarnmusicorg-avada.local/wp-content/cals/Music-Calendar-07.jpg" alt="" width="512" height="726" /></a></p>
+<!-- /wp:html -->

@@ -1,0 +1,222 @@
+0926-0930-Copilot-REQUEST-Build-Modern-Native-Avada-Gallery.txt
+
+# REQUEST — Build Modern Native Avada Gallery
+
+## Goal
+
+Build a fresh Gallery page for Red Barn Music School using only native Avada components.
+
+The old gallery plugin is gone. Do not recover, migrate, inspect, or reproduce the old plugin gallery.
+
+The previous gallery was simple and informal, with a mix of portrait and landscape images. Keep that warm, mixed-photo character, but give the new page a cleaner and more modern visual presentation.
+
+## Overall Look
+
+The gallery should feel:
+
+- modern
+- warm
+- photographic
+- uncluttered
+- informal rather than corporate
+- consistent with the Red Barn Music School site
+- easy to maintain
+
+Modernize the page through spacing, image rhythm, and restrained interaction rather than elaborate effects.
+
+Do not make it look like a luxury portfolio, commercial photography site, or highly stylized showcase.
+
+## Native Avada Build
+
+Use the native Avada Gallery Element.
+
+Do not add another gallery plugin.
+
+Use the existing Gallery page and existing `/gallery/` URL.
+
+Preserve:
+
+- existing page ID
+- page title
+- slug
+- SEO settings
+- navigation links
+- standard Red Barn interior-page layout
+
+Do not create a replacement page unless technically necessary.
+
+## Recommended Gallery Style
+
+Use a Masonry layout so portrait and landscape images can remain mixed naturally.
+
+Initial target settings:
+
+- Layout: Masonry
+- Desktop: 3 columns
+- Tablet: 2 columns
+- Mobile: 1 or 2 columns depending on actual image size and readability
+- Image spacing/gap: approximately 18–20 px
+- Lightbox: enabled
+- Captions: off initially
+- Borders: none
+- Border radius: subtle, approximately 6–10 px
+- Hover effect: very restrained, such as a slight zoom or fade
+- Animation: none beyond the subtle hover behavior
+- Background/overlays: no heavy overlays or text-on-image treatment
+
+Use Avada responsive controls where appropriate rather than custom CSS unless native controls cannot achieve the desired result.
+
+## Image Character
+
+Use a varied mix of existing Media Library photographs where appropriate, including examples such as:
+
+- students
+- teachers
+- recitals
+- performances
+- instruments
+- community events
+- Red Barn building/interior
+- historical images
+
+Do not require every category to be represented.
+
+Do not force all images into square or identical crops.
+
+Portrait photographs should remain recognizably portrait-oriented and landscape photographs should remain landscape-oriented wherever the Gallery Element allows.
+
+The visual rhythm should come from the mix of image shapes rather than from uniform thumbnail boxes.
+
+## Page Composition
+
+Keep the page simple:
+
+1. Existing standard page title/header
+2. Optional very short introductory sentence
+3. Native Avada Masonry Gallery
+4. Existing standard footer
+
+Do not add category navigation, tabs, filters, sliders, or decorative sections at this stage.
+
+The photographs should remain the focus.
+
+## Modernization Details
+
+The main differences from the old basic gallery should be:
+
+- larger, more confident image presentation
+- more whitespace between images
+- a cleaner masonry rhythm
+- subtle corner rounding
+- restrained hover feedback
+- native lightbox viewing
+- responsive spacing and columns
+- no crowded thumbnail-grid appearance
+
+Keep the visual treatment understated.
+
+## Lightbox
+
+Use Avada's native lightbox.
+
+Verify:
+
+- each image opens correctly
+- previous/next navigation works
+- close control works
+- portrait and landscape images display properly
+- mobile interaction works
+- no duplicate or broken images appear
+
+## Media Library
+
+Use existing images from the WordPress Media Library.
+
+Do not:
+
+- duplicate images unnecessarily
+- rename existing attachments without reason
+- delete images
+- regenerate the Media Library as part of this task
+- introduce a new image-management plugin
+
+Use the site's existing image optimization and generated image sizes.
+
+Avoid unnecessarily loading original full-resolution files when an appropriate WordPress/Avada size can be used.
+
+## Responsive Testing
+
+Review the completed page on:
+
+- desktop
+- tablet
+- mobile
+
+Verify:
+
+- columns reduce appropriately
+- image spacing remains balanced
+- portrait images do not become awkwardly narrow
+- images do not overlap
+- no horizontal scrolling occurs
+- gallery remains easy to browse
+- lightbox remains usable
+- page does not feel overly dense on a phone
+
+Adjust the mobile column count based on actual photographs rather than forcing two columns if one column looks better.
+
+## Avoid
+
+Do not add:
+
+- another gallery plugin
+- category filters
+- tabs
+- elaborate captions
+- dark image overlays
+- text over photographs
+- dramatic animation
+- full-screen hero photography
+- excessive rounded-card styling
+- decorative borders
+- sliders as the main gallery
+- artificial uniform cropping
+
+## Future Options — Not Part of This Build
+
+Leave room to consider later:
+
+- Gallery categories
+- Load More if the gallery becomes very large
+- Recent Photos carousel on the homepage
+- selected captions
+- separate historical or recital collections
+
+Do not implement these now.
+
+## Review and Implementation
+
+Please inspect the current Gallery page and available Media Library images.
+
+Then:
+
+1. Confirm that the native Avada Gallery Element can provide the proposed Masonry layout.
+2. Select a sensible initial mix of existing Media Library images.
+3. Build the fresh Gallery page using the modern settings above.
+4. Make small adjustments to spacing, corner radius, responsive columns, and hover behavior if the actual photographs require them.
+5. Test desktop, tablet, mobile, and lightbox behavior.
+6. Report the final Avada settings used and any issues encountered.
+
+Keep the build simple.
+
+The target is a modern version of the old mixed-photo gallery — cleaner and more spacious, but still recognizably Red Barn rather than a polished commercial portfolio.
+
+## Copilot Review Comments — 2026-09-26
+
+- **Clarify “fresh Gallery page”:** The live `/gallery/` page already exists (page ID 934). Treat “fresh” as replacing only its body content with the native Avada build; do not create a new page or change the title, slug, template, SEO metadata, or navigation.
+- **Preserve existing attribution/content:** The current page includes “Spring Recitals 2024” and a Rachel Bellenoit Photography credit. Decide whether these remain above/below the gallery before replacing the body; retain the photographer credit if those photographs are used.
+- **Make image selection auditable:** Select attachments from the existing Media Library and record the chosen attachment IDs or filenames in the completion report. An initial search surfaced `gallery-spring2024-recital.webp` (attachment ID 20637); confirm it is an appropriate gallery image before including it. Do not treat that search result as a complete Media Library inventory.
+- **Keep optional styling restrained:** The radius and hover suggestions are ranges/options, not requirements. Start with minimal rounding and no hover animation unless the actual images and Avada controls show a clear benefit; avoid custom CSS unless native controls cannot meet the responsive requirements.
+- **Validate before replacing:** Save a recoverable copy of the current page body, then verify the gallery and lightbox on desktop, tablet, and mobile before considering the replacement complete. No Media Library changes are needed for this build.
+
+**Review scope:** Comments only. The Gallery page and Media Library have not been modified.

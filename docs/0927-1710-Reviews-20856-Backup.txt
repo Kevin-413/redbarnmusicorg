@@ -1,0 +1,390 @@
+<div class="thesis-page-header"><h1 class="thesis-page-title">Reviews</h1></div>
+
+<!-- wp:html -->
+<div class="rbm-google-reviews-page">
+<style>
+.rbm-google-reviews-page {
+  --rbmgr-text: #3c4043;
+  --rbmgr-muted: #5f6368;
+  --rbmgr-border: #dadce0;
+  --rbmgr-star: #f9ab00;
+  --rbmgr-green: #4f6f52;
+  --rbmgr-green-dark: #3d5840;
+  --rbmgr-card: #ffffff;
+  --rbmgr-max: 980px;
+  color: var(--rbmgr-text);
+}
+
+.rbm-google-reviews-page * {
+  box-sizing: border-box;
+}
+
+.rbm-google-reviews-page .rbmgr-wrap {
+  max-width: var(--rbmgr-max);
+  margin: 0 auto;
+  padding: 24px 0 24px;
+}
+
+.rbm-google-reviews-page .rbmgr-intro {
+  background: var(--rbmgr-card);
+  border: 1px solid var(--rbmgr-border);
+  border-radius: 18px;
+  padding: 34px;
+  margin-bottom: 24px;
+}
+
+.rbm-google-reviews-page .rbmgr-eyebrow {
+  margin: 0 0 8px;
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--rbmgr-muted);
+}
+
+.rbm-google-reviews-page .rbmgr-heading {
+  margin: 0 0 18px;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.08;
+  font-weight: 600;
+  color: #303134;
+}
+
+.rbm-google-reviews-page .rbmgr-rating-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin: 8px 0 18px;
+}
+
+.rbm-google-reviews-page .rbmgr-rating-number {
+  font-size: 3.1rem;
+  line-height: 1;
+  font-weight: 500;
+  color: var(--rbmgr-muted);
+}
+
+.rbm-google-reviews-page .rbmgr-stars {
+  color: var(--rbmgr-star);
+  font-size: 2.15rem;
+  line-height: 1;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.rbm-google-reviews-page .rbmgr-review-count {
+  font-size: 1.15rem;
+  color: var(--rbmgr-muted);
+}
+
+.rbm-google-reviews-page .rbmgr-intro-copy {
+  max-width: 760px;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.rbm-google-reviews-page .rbmgr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.rbm-google-reviews-page .rbmgr-card {
+  background: var(--rbmgr-card);
+  border: 1px solid var(--rbmgr-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(60,64,67,.08);
+  align-self: start;
+}
+
+.rbm-google-reviews-page .rbmgr-card.rbmgr-featured {
+  grid-column: 1 / -1;
+}
+
+.rbm-google-reviews-page .rbmgr-reviewer {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #202124;
+}
+
+.rbm-google-reviews-page .rbmgr-card-stars {
+  margin: 7px 0 13px;
+  color: var(--rbmgr-star);
+  font-size: 1.35rem;
+  letter-spacing: .04em;
+}
+
+.rbm-google-reviews-page .rbmgr-review-text {
+  margin: 0;
+  font-size: 1.04rem;
+}
+
+.rbm-google-reviews-page .rbmgr-full-text[hidden] {
+  display: none;
+}
+
+.rbm-google-reviews-page .rbmgr-more-toggle {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-top: 10px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--rbmgr-green-dark);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rbm-google-reviews-page .rbmgr-more-toggle:hover,
+.rbm-google-reviews-page .rbmgr-more-toggle:focus-visible {
+  color: #243b27;
+}
+
+.rbm-google-reviews-page .rbmgr-more-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.rbm-google-reviews-page .rbmgr-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.rbm-google-reviews-page .rbmgr-button {
+  display: inline-block;
+  padding: 13px 22px;
+  border-radius: 999px;
+  background: var(--rbmgr-green);
+  color: #fff !important;
+  text-decoration: none;
+  font-weight: 700;
+  border: 2px solid var(--rbmgr-green);
+  transition: .15s ease;
+}
+
+.rbm-google-reviews-page .rbmgr-button:hover,
+.rbm-google-reviews-page .rbmgr-button:focus {
+  background: var(--rbmgr-green-dark);
+  border-color: var(--rbmgr-green-dark);
+  color: #fff !important;
+}
+
+.rbm-google-reviews-page .rbmgr-button.rbmgr-secondary {
+  background: transparent;
+  color: var(--rbmgr-green-dark) !important;
+}
+
+.rbm-google-reviews-page .rbmgr-button.rbmgr-secondary:hover,
+.rbm-google-reviews-page .rbmgr-button.rbmgr-secondary:focus {
+  background: #eef3ee;
+}
+
+.rbm-google-reviews-page .rbmgr-source-note {
+  margin-top: 18px;
+  text-align: center;
+  font-size: .9rem;
+  color: var(--rbmgr-muted);
+}
+
+@media (max-width: 700px) {
+  .rbm-google-reviews-page .rbmgr-intro {
+    padding: 24px 20px;
+  }
+
+  .rbm-google-reviews-page .rbmgr-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rbm-google-reviews-page .rbmgr-card.rbmgr-featured {
+    grid-column: auto;
+  }
+
+  .rbm-google-reviews-page .rbmgr-rating-number {
+    font-size: 2.7rem;
+  }
+
+  .rbm-google-reviews-page .rbmgr-stars {
+    font-size: 1.8rem;
+  }
+
+  .rbm-google-reviews-page .rbmgr-buttons {
+    flex-direction: column;
+  }
+
+  .rbm-google-reviews-page .rbmgr-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+</style>
+
+<div class="rbmgr-wrap">
+  <section class="rbmgr-intro">
+    <p class="rbmgr-eyebrow">Google Reviews</p>
+    <h2 class="rbmgr-heading">What Families Say</h2>
+
+    <div class="rbmgr-rating-row" aria-label="5 out of 5 stars from 7 Google reviews">
+      <span class="rbmgr-rating-number">5.0</span>
+      <span class="rbmgr-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+      <span class="rbmgr-review-count">7 Google reviews</span>
+    </div>
+
+    <p class="rbmgr-intro-copy">
+      Music lessons are personal. Here&#8217;s what students and families have said
+      about their experience at Amherst Red Barn Music School.
+    </p>
+  </section>
+
+  <section class="rbmgr-grid" aria-label="Selected Google reviews">
+
+    <article class="rbmgr-card rbmgr-featured">
+      <h3 class="rbmgr-reviewer">Ginny Hamilton</h3>
+      <div class="rbmgr-card-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+
+      <p class="rbmgr-review-text rbmgr-short-text">
+        &#8220;Love this place! My now 17-year-old has taken lessons with Tom since first grade.
+        He's provided the right amount of support, encouragement, and challenge appropriate
+        at each age and stage.&#8221;
+      </p>
+
+      <p class="rbmgr-review-text rbmgr-full-text" hidden>
+        &#8220;Love this place! My now 17-year-old has taken lessons with Tom since first grade.
+        He's provided the right amount of support, encouragement, and challenge appropriate
+        at each age and stage.<br><br>
+        The studio itself is easy to reach, with free parking and a waiting area for parents.
+        Plus its a short walk from shops and restaurants if you want to wander. My kid now
+        walks from the HS for his lessons after school.<br><br>
+        The recitals 2x/year are adorable and enjoyable. The older kids encourage the younger
+        and everyone's efforts are celebrated. Each year, I'm particularly impressed by the
+        adults brave enough to perform.<br><br>
+        If you're looking for a music teacher who is right for you/your child, I encourage you
+        to consider Red Barn. Their trial lesson policy is fair and useful.&#8221;
+      </p>
+
+      <button class="rbmgr-more-toggle" type="button" aria-expanded="false">More</button>
+    </article>
+
+    <article class="rbmgr-card">
+      <h3 class="rbmgr-reviewer">Johanna Neumann</h3>
+      <div class="rbmgr-card-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+
+      <p class="rbmgr-review-text rbmgr-short-text">
+        &#8220;Great teacher! Develops technique, and when you stick with it, it pays off &#8212;
+        a lot, a lot, A LOT!&#8221;
+      </p>
+
+      <p class="rbmgr-review-text rbmgr-full-text" hidden>
+        &#8220;My child has taken guitar classes here since Fall 2021. When I asked him what he
+        would write in a review he said: &#8216;Great teacher! Develops technique, which may not
+        be fun when you're first learning it, but when you stick with it it pays off -
+        a lot a lot A LOT!&#8217;&#8221;
+      </p>
+
+      <button class="rbmgr-more-toggle" type="button" aria-expanded="false">More</button>
+    </article>
+
+    <article class="rbmgr-card">
+      <h3 class="rbmgr-reviewer">Ben Schaeffer</h3>
+      <div class="rbmgr-card-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+
+      <p class="rbmgr-review-text rbmgr-short-text">
+        &#8220;Red Barn was friendly, welcoming, and accessible from the moment I arrived.
+        It was a wonderful place to continue developing as a musician and performer.&#8221;
+      </p>
+
+      <p class="rbmgr-review-text rbmgr-full-text" hidden>
+        &#8220;I studied voice and piano at Red Barn Music School for about five years while
+        attending Hampshire College as a Theater major. Red Barn was friendly, welcoming,
+        and accessible from the moment I arrived. I had vocal training with Anne Kearns and
+        studied piano with Tom Williams, who was a teacher I especially enjoyed working with.
+        Having previously trained in New York and London, the Red Barn was recommended to me
+        by my former vocal coach and piano teacher in New York. Red Barn proved to be a
+        wonderful place to continue developing as a musician and performer. Thank you,
+        Red Barn.&#8221;
+      </p>
+
+      <button class="rbmgr-more-toggle" type="button" aria-expanded="false">More</button>
+    </article>
+
+    <article class="rbmgr-card">
+      <h3 class="rbmgr-reviewer">Tania Linares</h3>
+      <div class="rbmgr-card-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+
+      <p class="rbmgr-review-text rbmgr-short-text">
+        &#8220;Kevin is a wonderful teacher &#8212; kind, encouraging, and incredibly patient.
+        My son always looks forward to his next lesson.&#8221;
+      </p>
+
+      <p class="rbmgr-review-text rbmgr-full-text" hidden>
+        &#8220;Kevin is a wonderful teacher. My son is only four years old, and Kevin is always
+        kind, encouraging, and incredibly patient with him. He knows how to make each lesson
+        fun while helping my son feel comfortable and excited about learning music. My son
+        loves Kevin and always looks forward to his next lesson. I wish there were more
+        teachers like him!&#8221;
+      </p>
+
+      <button class="rbmgr-more-toggle" type="button" aria-expanded="false">More</button>
+    </article>
+
+    <article class="rbmgr-card">
+      <h3 class="rbmgr-reviewer">Troens Spring</h3>
+      <div class="rbmgr-card-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+
+      <p class="rbmgr-review-text rbmgr-short-text">
+        &#8220;An excellent group of teachers and a lovely school. The instructors genuinely
+        care about their students.&#8221;
+      </p>
+
+      <p class="rbmgr-review-text rbmgr-full-text" hidden>
+        &#8220;Red Barn Music School is an excellent group of teachers and a lovely school.
+        The instructors genuinely care about their students. It is a wonderful school
+        for anyone interested in learning music.&#8221;
+      </p>
+
+      <button class="rbmgr-more-toggle" type="button" aria-expanded="false">More</button>
+    </article>
+
+  </section>
+
+  <div class="rbmgr-buttons">
+    <a class="rbmgr-button rbmgr-secondary"
+       href="https://maps.app.goo.gl/3iUEfPBaUmL1Eftz8"
+       target="_blank"
+       rel="noopener">
+      Write a Review
+    </a>
+  </div>
+
+  <p class="rbmgr-source-note">
+    Selected excerpts from Google reviews. Use More to read the complete review text.
+  </p>
+</div>
+</div>
+
+<script>
+document.querySelectorAll('.rbm-google-reviews-page .rbmgr-more-toggle').forEach(function(button) {
+  button.addEventListener('click', function() {
+    var card = button.closest('.rbmgr-card');
+    var shortText = card.querySelector('.rbmgr-short-text');
+    var fullText = card.querySelector('.rbmgr-full-text');
+    var expanded = button.getAttribute('aria-expanded') === 'true';
+
+    button.setAttribute('aria-expanded', String(!expanded));
+    shortText.hidden = !expanded;
+    fullText.hidden = expanded;
+    button.textContent = expanded ? 'More' : 'Less';
+  });
+});
+</script>
+<!-- /wp:html -->
+
+

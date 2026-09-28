@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ns0="http://wordpress.org/export/1.2/" xmlns:ns2="http://purl.org/rss/1.0/modules/content/" xmlns:ns3="http://wordpress.org/export/1.2/excerpt/" version="2.0">
+  <channel>
+<title>Amherst Red Barn Music School</title>
+<link>http://redbarnmusicorg-avada.local</link>
+<description>Welcome to the Red Barn</description>
+<pubDate>Sat, 26 Sep 2026 16:46:27 +0000</pubDate>
+<language>en</language>
+<ns0:wxr_version>1.2</ns0:wxr_version>
+<ns0:base_site_url>http://redbarnmusicorg-avada.local</ns0:base_site_url>
+<ns0:base_blog_url>http://redbarnmusicorg-avada.local</ns0:base_blog_url>
+<ns0:author>
+  <ns0:author_id>1</ns0:author_id>
+  <ns0:author_login>admin</ns0:author_login>
+  <ns0:author_email>kevin@redbarnmusic.com</ns0:author_email>
+  <ns0:author_display_name>admin</ns0:author_display_name>
+  <ns0:author_first_name />
+  <ns0:author_last_name />
+</ns0:author>
+<ns0:term>
+  <ns0:term_id>19</ns0:term_id>
+  <ns0:term_taxonomy>nav_menu</ns0:term_taxonomy>
+  <ns0:term_slug>menu</ns0:term_slug>
+  <ns0:term_name>menu</ns0:term_name>
+</ns0:term>
+<generator>https://wordpress.org/?v=7.1.2</generator>
+<item>
+  <title>Standard Container - Gallery</title>
+  <link>http://redbarnmusicorg-avada.local/fusion_element/standard-container-gallery/</link>
+  <pubDate>Sat, 26 Sep 2026 13:44:14 +0000</pubDate>
+  <dc:creator />
+  <guid isPermaLink="false">http://redbarnmusicorg-avada.local/fusion_element/standard-container-gallery/</guid>
+  <description />
+  <ns2:encoded>[fusion_builder_container hundred_percent="no" hundred_percent_height="no" padding_top="0px" padding_bottom="0px"][fusion_builder_row][fusion_builder_column type="1_1" layout="1_1" align_self="auto" spacing="" center_content="no" link="" target="_self" min_height="" hover_type="none" border_position="all" first="true" last="true"][fusion_text]&lt;p&gt;Spring Recitals 2024&lt;/p&gt;[/fusion_text][fusion_gallery image_ids="" columns="3" columns_medium="2" columns_small="1" layout="grid" aspect_ratio="" column_spacing="20" lightbox="yes" lightbox_content="none" caption_style="off" bordersize="0" border_radius="4px" hover_type="none" picture_size="auto"][/fusion_gallery][fusion_text]&lt;p&gt;&lt;em&gt;&lt;a href="https://www.rachelbellenoit.com/"&gt;Rachel Bellenoit Photography&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;[/fusion_text][/fusion_builder_column][/fusion_builder_row][/fusion_builder_container]</ns2:encoded>
+  <ns3:encoded />
+  <ns0:post_id>20890</ns0:post_id>
+  <ns0:post_date>2026-09-26 09:44:14</ns0:post_date>
+  <ns0:post_date_gmt>2026-09-26 13:44:14</ns0:post_date_gmt>
+  <ns0:post_modified>2026-09-26 12:46:04</ns0:post_modified>
+  <ns0:post_modified_gmt>2026-09-26 16:46:04</ns0:post_modified_gmt>
+  <ns0:comment_status>closed</ns0:comment_status>
+  <ns0:ping_status>closed</ns0:ping_status>
+  <ns0:post_name>standard-container-gallery</ns0:post_name>
+  <ns0:status>publish</ns0:status>
+  <ns0:post_parent>0</ns0:post_parent>
+  <ns0:menu_order>0</ns0:menu_order>
+  <ns0:post_type>fusion_element</ns0:post_type>
+  <ns0:post_password />
+  <ns0:is_sticky>0</ns0:is_sticky>
+  <category domain="element_category" nicename="sections">sections</category>
+</item>
+  </channel>
+</rss>

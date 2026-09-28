@@ -1,0 +1,50 @@
+# REPLY — Implement Modern Native Avada Gallery
+
+Date: 2026-09-26
+
+## Completed
+
+- Updated existing Avada Library Container **Standard Container - Gallery** (ID 20890); no new page or container was created.
+- Replaced the six temporary image selections with all 18 requested Local Media Library attachments.
+- Kept the existing “Spring Recitals 2024” intro and Rachel Bellenoit Photography credit.
+- Exported only container 20890 as a WordPress WXR file:
+  `docs/0926-1240-Gallery-Library-Container.2026-09-26.xml`
+- Did not import or change anything on the live site.
+
+## Selected Local Images
+
+| Attachment ID | Filename |
+|---:|---|
+| 20909 | `recital-rachel-01.webp` |
+| 20908 | `recital-rachel-02.webp` |
+| 20907 | `recital-rachel-03.webp` |
+| 20906 | `recital-rachel-04.webp` |
+| 20905 | `recital-rachel-05.webp` |
+| 20904 | `recital-rachel-06.webp` |
+| 20903 | `recital-rachel-07.webp` |
+| 20902 | `recital-rachel-08.webp` |
+| 20901 | `recital-rachel-09.webp` |
+| 20900 | `recital-rachel-10.webp` |
+| 20899 | `recital-rachel-11.webp` |
+| 20898 | `recital-rachel-12.webp` |
+| 20897 | `recital-rachel-13.webp` |
+| 20896 | `recital-rachel-14.webp` |
+| 20895 | `recital-rachel-15.webp` |
+| 20894 | `recital-rachel-16.webp` |
+| 20893 | `recital-rachel-17.webp` |
+| 20892 | `recital-rachel-18.webp` |
+
+## Final Settings and Verification
+
+- Masonry layout; 3 desktop / 2 tablet / 1 mobile column.
+- 20 px image spacing; native lightbox on; captions off; no borders; 4 px corner radius; no hover effect.
+- At 1440, 768, and 390 px widths: all 18 images rendered, no broken images, no horizontal overflow, and columns measured 3 / 2 / 1.
+- Native lightbox opened, next/previous navigation changed the displayed photo, and Escape closed it.
+- Gallery page ID 934 remains published at `/gallery/`; page title and SEO metadata are unchanged. Photographer credit is visible.
+- The export XML parses successfully and contains exactly one `fusion_element` item titled **Standard Container - Gallery**. No unrelated Library items were included.
+
+## Live Transfer
+
+Import the container into the live site, then manually select the live Media Library attachments for `recital-rachel-01.webp` through `recital-rachel-18.webp`. Local attachment IDs will differ from live IDs. Verify the gallery after reselecting the live images.
+
+The prior Gallery page body remains available as revision 20889. Container revision 20913 preserves the finalized container state.

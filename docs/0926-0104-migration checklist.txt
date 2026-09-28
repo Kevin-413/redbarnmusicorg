@@ -1,0 +1,28 @@
+That gives you a very clean migration checklist.
+
+The 11 saved sections break down into just 4 sections that need actual image files moved manually:
+
+Directions → 409-main-st-amherst-ma-google-maps.png
+Contact Us - Address → eyewink.jpg
+About - Kevin Collins → kevin_building_2000.jpg
+About - Mary Azarian Logo → mary-azarian1.jpg
+About - In Loving Memory → pat-tompkins.jpg
+
+So actually 5 image-bearing sections, with the other 6 depending only on text, buttons, forms, or dynamic shortcodes.
+
+The wp-image-22 mismatch on Kevin’s image is worth fixing separately, because after migration that stale class could become confusing or accidentally target the wrong attachment if ID 22 exists on another site. I’d treat that as a small cleanup task after the import, not part of the export itself.
+
+For the live migration, the safest sequence is:
+
+Import the 11 Avada Library sections.
+Manually upload those 5 image files to the destination site.
+Open each imported section and re-select the correct Media Library image.
+Verify dynamic sections:
+Faculty shortcode
+Instruments shortcode
+Forminator form
+Verify the Directions image/button block.
+Fix the stale wp-image-22 class on the Kevin image.
+Only then start inserting the saved sections into live pages.
+
+That keeps the Library import separate from media repair and makes it much easier to catch anything that broke.

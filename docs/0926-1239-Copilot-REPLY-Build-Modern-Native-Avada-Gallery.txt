@@ -1,0 +1,60 @@
+# REPLY — Build Modern Native Avada Gallery
+
+Date: 2026-09-26
+
+## Summary
+
+Built a native Avada Gallery on the existing Gallery page and placed the page content in a reusable Avada Library Container.
+
+## Work Completed
+
+- Preserved the existing Gallery page (ID 934), title, `/gallery/` slug, template, SEO metadata, and navigation.
+- Saved the prior page body as revision 20889 before replacing its body content.
+- Created and published the Avada Library Container **Standard Container - Gallery** (ID 20890), categorized as a Library section.
+- Structured the container as one full-width column containing the “Spring Recitals 2024” intro, native Avada Masonry Gallery, and Rachel Bellenoit Photography credit.
+- Embedded the container on page 934 using `[fusion_global id="20890"]`.
+- Did not change or delete any Media Library attachments.
+
+## Local Gallery Configuration
+
+- Layout: Masonry
+- Columns: 3 desktop, 2 tablet, 1 mobile
+- Image spacing: 20 px
+- Lightbox: enabled
+- Captions: off
+- Borders: none
+- Corner radius: 4 px
+- Hover effect: none
+
+The six images currently selected in the local container are:
+
+| Attachment ID | Filename |
+|---:|---|
+| 20637 | `gallery-spring2024-recital.webp` |
+| 20166 | `block-party-2023-collage.webp` |
+| 20119 | `lessons-collage-2-jpg.webp` |
+| 19649 | `openhouse-collage-fall2023.webp` |
+| 20270 | `Jim-Snedeker-Winds.webp` |
+| 19565 | `Claudia-Phillips-pic.webp` |
+
+## Verification
+
+- Confirmed the container shortcode renders with six Masonry gallery images and the photographer credit.
+- Checked the live local `/gallery/` page at 1440 px, 768 px, and 390 px widths. It displayed 3, 2, and 1 columns respectively, with no broken images or horizontal overflow.
+- Opened the native lightbox, verified next-image navigation, and closed it with Escape.
+- Confirmed the existing page identity and SEO metadata remained unchanged.
+- Preserved the original body in revision 20889 for rollback.
+
+## Live Import Notes
+
+The live site will use a different image set. After importing the Library Container, select the following existing live Media Library files in the Avada Gallery Element:
+
+`recital-rachel-01.webp` through `recital-rachel-18.webp`
+
+The local attachment IDs above are not the live-site image selection and should not be relied on after import. The photographer credit is already included in the container. After selecting the live images, verify the lightbox and responsive layout on the live page.
+
+## Not Yet Done
+
+- No Avada export file has been created or tested.
+- No content has been imported to the live site.
+- No local or live Media Library files have been added, renamed, deleted, or regenerated.

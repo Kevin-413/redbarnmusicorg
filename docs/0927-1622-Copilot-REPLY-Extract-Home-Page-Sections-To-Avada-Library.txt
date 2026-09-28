@@ -1,0 +1,56 @@
+0927-1622-Copilot-REPLY-Extract-Home-Page-Sections-To-Avada-Library.txt
+
+# REPLY — Extract Home Page Sections To Avada Library
+
+## What Was Done
+
+Replaced six raw fusion_builder_container blocks embedded directly in
+Gutenberg reusable block 20440 ("Home Body (Synced)", used by Home page
+20046 and Home - LEGACY 20947) with [fusion_global id="..."] references to
+their matching existing Avada Library items:
+
+- Lessons Starting Now -> Library 20865
+- Open House -> Library 20866
+- Amherst Block Party -> Library 20867
+- Gallery - Spring Recital pics -> Library 20868
+- Scholarships -> Library 20869
+- What Families Say -> Library 20870
+
+## Findings
+
+Five of the six embedded sections already matched their Library item
+byte-for-byte. Only "Lessons Starting Now" differed: the live homepage had
+a scoped layout <style> fix not yet saved in Library item 20865. That
+Library item was updated to include the fix before the swap, so the
+visible layout did not change.
+
+## Verification
+
+Rendered reusable block 20440's content through the full the_content
+filter pipeline (including wptexturize) before and after the edit and
+compared output. Result: visually identical after normalizing Avada's
+internal auto-increment CSS counters (e.g. fusion-builder-row-1 vs
+fusion-builder-row-7). All six section headings render on the Home page
+and no leftover [fusion_global] shortcode tags remain unprocessed.
+
+## Safety / Rollback
+
+No public page content, navigation, or global Avada settings were changed.
+Pre-edit content was backed up before editing:
+
+- docs/0927-1611-Home-Reusable-Block-20440-Backup.txt
+- docs/0927-1611-Library-20865-Lessons-Starting-Now-Backup.txt
+
+## Do Not Touch
+
+The other five Library items' content, the Reviews page, Contact Us pages,
+Community Links, and Policies were not modified.
+
+## Still Pending (Separate Requests)
+
+- Reviews page (Gutenberg wp:html widget) not yet converted.
+- Two Contact Us pages exist (ID 126 native Avada vs ID 20335 Gutenberg +
+  Forminator); needs a decision on which is canonical before converting.
+- Community Links and Policies pages are plain content, not yet converted.
+
+0927-1622-Copilot-REPLY-Extract-Home-Page-Sections-To-Avada-Library.txt

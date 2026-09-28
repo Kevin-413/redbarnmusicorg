@@ -1,0 +1,41 @@
+<div class="thesis-page-header"><h1 class="thesis-page-title">Online Privacy Policy</h1></div>
+
+<strong>Your Privacy is Important to Us</strong>
+
+Amherst Red Barn Music School is committed to protecting your privacy. This Privacy Policy outlines how we collect, use, and disclose your personal information.
+
+<strong>Information We Collect</strong>
+
+We may collect personal information from you when you interact with us through text messaging. This information may include:
+
+Your phone number
+Your responses to text messages
+<p><strong>How We Use Your Information</strong></p>
+<p>We use your mobile number to send you text messages about your lessons and classes, recitals and upcoming events.</p>
+<p><strong>Message Frequency</strong> You may receive 1 message month.</p>
+<p><strong>Message and Data Rates</strong> Message and data rates may apply.</p>
+<p><strong>Opt-in and Opt-out</strong>  You must opt-in to receive text messages. To opt-in, reply “YES” to the message you receive.</p>
+<p>To opt-out, reply “STOP” to any message you receive.</p>
+<p><strong>Help</strong> To get help, text “HELP” to [rbm_phone] or visit our full privacy policy at <a href="http://redbarnmusicorg-avada.local/online_privacy_policy/" target="_blank" rel="noopener">Online Privacy Policy</a>.</p>
+Sharing Your Information
+
+We do not share your personal information, including your opt-in data and consent, with any third parties.
+
+<strong>Protecting Your Information</strong>
+
+We implement reasonable security measures to protect your personal information from unauthorized access, use, or disclosure.
+
+<strong>Changes to This Privacy Policy</strong>
+
+We may update this Privacy Policy from time to time. We will notify you of any significant changes.
+
+<strong>Contact Us</strong>
+
+If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
+
+Email: [rbm_email]
+Call or text: [rbm_phone]
+
+By using our text messaging services, you consent to the collection and use of your information as described in this Privacy Policy.
+
+
